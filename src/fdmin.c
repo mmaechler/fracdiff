@@ -1,25 +1,14 @@
-/* Produced by
- * $Id: f2c-clean,v 1.10 2002/03/28 16:37:27 maechler Exp $
- */
 /* fdmin.f -- translated by f2c (version 20031025).
-   You must link the resulting object file with libf2c:
-	on Microsoft Windows system, link with libf2c.lib;
-	on Linux or Unix systems, link with .../path/to/libf2c.a -lm
-	or, if you install libf2c.a in a standard place, with -lf2c -lm
-	-- in that order, at the end of the command line, as in
-		cc *.o -lf2c -lm
-	Source for libf2c is in /netlib/f2c/libf2c.zip, e.g.,
-
-		http://www.netlib.org/f2c/libf2c.zip
-
-
--- be brave, try without >>>
- * #include "f2c.h"  <<<<< ------*/
-/* but need this */
-typedef /* Subroutine */ int (*S_fp)();
+ *
+ * and produced by
+ * $Id: f2c-clean,v 1.10 2002/03/28 16:37:27 maechler Exp $
+ *
+ * and manually pretty edited by Martin Maechler, 2004-10-01
+ */
 
 #include <Rmath.h>
 
+#include "fracdiff.h"
 
 #ifndef max
 # define	max(a, b) 		((a) < (b) ? (b) : (a))
@@ -35,12 +24,8 @@ typedef /* Subroutine */ int (*S_fp)();
 /* Common Block Declarations */
 
 union {
-    struct {
-	double fltmin, fltmax, epsmin, epsmch;
-    } _1;
-    struct {
-	double fltmin, fltmax, epsmin, epsmax;
-    } _2;
+    struct { double fltmin, fltmax, epsmin, epsmch; } _1;
+    struct { double fltmin, fltmax, epsmin, epsmax; } _2;
 } machfd_;
 
 #define machfd_1 (machfd_._1)
@@ -68,18 +53,11 @@ double enorm_(int *, double *);
 /* Subroutine */
 int lmpar_(int *, double *, int *, int *, double *, double *, double *,
 	   double *, double *, double *, double *, double *);
-int qrfac_(int *, int *, double *, int *,
-	   /*logical*/int *, int *, int *,
-	   double *, double *, double *);
-int qrsolv_(int *, double *, int *, int *,
-	    double *, double *, double *, double *, double *);
-
-int lmder1_(S_fp fcn, int *m, int *n, double *x,
-	    double *fvec, double *fjac, int *ldfjac, double *ftol,
-	    double *xtol, double *gtol, int *maxfev, double *diag,
-	    int *mode, double *factor, int *info,
-	    int *nfev, int *njev, int *ipvt, double *qtf,
-	    double *wa1, double *wa2, double *wa3, double *wa4, double *y);
+static void qrfac_(int *, int *, double *, int *,
+		   /*logical*/int *, int *, int *,
+		   double *, double *, double *);
+static void qrsolv_(int *, double *, int *, int *,
+		    double *, double *, double *, double *, double *);
 
 /* ------------------------------- */
 
@@ -379,7 +357,7 @@ L40:
 /*        compute the qr factorization of the jacobian. */
 
     qrfac_(m, n, &fjac[fjac_offset], ldfjac, &c_true, &ipvt[1], n, &wa1[1], &
-	    wa2[1], &wa3[1]);
+	   wa2[1], &wa3[1]);
 
 /*        on the first iteration and if mode is 1, scale according
         to the norms of the columns of the initial jacobian. */
@@ -723,62 +701,47 @@ double enorm_(int *n, double *x)
     x3max = zero;
     floatn = (double) (*n);
     agiant = rgiant / floatn;
+
     for (i__ = 1; i__ <= *n; ++i__) {
 	xabs = fabs(x[i__]);
-	if (xabs > rdwarf && xabs < agiant) {
-	    goto L70;
+	if (xabs > rdwarf && xabs < agiant) {/* sum for intermediate components.*/
+
+	    s2 += xabs * xabs;
+
+	} else if (xabs > rdwarf) { /*		sum for large components. */
+
+	    if (xabs <= x1max) {
+
+		/* Computing 2nd power */
+		d__1 = xabs / x1max;
+		s1 += d__1 * d__1;
+
+	    } else {
+		/* Computing 2nd power */
+		d__1 = x1max / xabs;
+		s1 = one + s1 * (d__1 * d__1);
+		x1max = xabs;
+	    }
+
+	} else { /*				sum for small components. */
+
+	    if (xabs <= x3max) {
+
+		if (xabs != zero) {
+		    /* Computing 2nd power */
+		    d__1 = xabs / x3max;
+		    s3 += d__1 * d__1;
+		}
+
+	    } else {
+		/* Computing 2nd power */
+		d__1 = x3max / xabs;
+		s3 = one + s3 * (d__1 * d__1);
+		x3max = xabs;
+	    }
 	}
-	if (xabs <= rdwarf) {
-	    goto L30;
-	}
 
-/*              sum for large components. */
-
-	if (xabs <= x1max) {
-	    goto L10;
-	}
-/* Computing 2nd power */
-	d__1 = x1max / xabs;
-	s1 = one + s1 * (d__1 * d__1);
-	x1max = xabs;
-	goto L20;
-L10:
-/* Computing 2nd power */
-	d__1 = xabs / x1max;
-	s1 += d__1 * d__1;
-L20:
-	goto L60;
-L30:
-
-/*              sum for small components. */
-
-	if (xabs <= x3max) {
-	    goto L40;
-	}
-/* Computing 2nd power */
-	d__1 = x3max / xabs;
-	s3 = one + s3 * (d__1 * d__1);
-	x3max = xabs;
-	goto L50;
-L40:
-	if (xabs != zero) {
-/* Computing 2nd power */
-	    d__1 = xabs / x3max;
-	    s3 += d__1 * d__1;
-	}
-L50:
-L60:
-	goto L80;
-L70:
-
-/*           sum for intermediate components.
-
- Computing 2nd power */
-	d__1 = xabs;
-	s2 += d__1 * d__1;
-L80:
-	;
-    }
+    } /* for(i ) */
 
 /*     calculation of norm. */
 
@@ -802,10 +765,10 @@ L80:
 } /* enorm_ */
 
 
-/* Subroutine */ int
-qrfac_(int *m, int *n, double *a, int *lda,
-       /*logical*/int *pivot, int *ipvt, int *lipvt, double *rdiag,
-       double *acnorm, double *wa)
+static
+void qrfac_(int *m, int *n, double *a, int *lda,
+	    /*logical*/int *pivot, int *ipvt, int *lipvt, double *rdiag,
+	    double *acnorm, double *wa)
 {
     /* Initialized data */
 
@@ -1009,7 +972,7 @@ L80:
 L100:
 	rdiag[j] = -ajnorm;
     }
-    return 0;
+    return;
 } /* qrfac_ */
 
 /* Subroutine */
@@ -1339,9 +1302,10 @@ L220:
 } /* lmpar_ */
 
 /* Subroutine */
-int qrsolv_(int *n, double *r__, int *ldr,
-	    int *ipvt, double *diag, double *qtb, double *x,
-	    double *sdiag, double *wa)
+static
+void qrsolv_(int *n, double *r__, int *ldr,
+	     int *ipvt, double *diag, double *qtb, double *x,
+	     double *sdiag, double *wa)
 {
     /* Initialized data */
 
@@ -1575,6 +1539,6 @@ L150:
 	l = ipvt[j];
 	x[l] = wa[j];
     }
-    return 0;
+    return;
 } /* qrsolv_ */
 
