@@ -27,7 +27,7 @@ fracdiff(x, nar = 0, nma = 0,
     maximized as a function of \eqn{d}.}
   \item{h}{size of finite difference interval for numerical derivatives.
     By default (or if negative),
-%% Only found the following in src/fdhess.f :
+%% Only found the following by reading ../src/fdhess.f :
     \code{h = min(0.1, eps.5 * (1+ abs(cllf)))}, where
     \code{clff := log. max.likelihood} (as returned) and
     \code{eps.5 := sqrt(.Machine$double.neg.eps)} (typically 1.05e-8).
