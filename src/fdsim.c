@@ -5,6 +5,11 @@
  */
 #include <Rmath.h>
 
+#include "fracdiff.h"
+
+extern double dgamr_(double *);
+extern double dgamma_(double *);
+
 /* Common Block Declarations --- used in  ./fdgam.c */
 
 struct { double fltmin, fltmax, epsmin, epsmax;
@@ -14,10 +19,10 @@ struct { int igamma, jgamma;
 } gammfd_;
 
 
-/* Subroutine */ int
-fdsim_(int *n, int *ip, int *iq, double *ar, double *ma,
-       double *d__, double *rmu, double *y, double *s,
-       double *flmin, double *flmax, double *epmin, double *epmax)
+/* Subroutine */
+void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
+	   double *d__, double *rmu, double *y, double *s,
+	   double *flmin, double *flmax, double *epmin, double *epmax)
 {
 /*  generates a random time series for use with fracdf
 
@@ -54,8 +59,6 @@ fdsim_(int *n, int *ip, int *iq, double *ar, double *ma,
     int i, j, k;
     double dj, vk, dk1, amk, sum, dk1d, temp;
 
-    extern double dgamr_(double *), dgamma_(double *);
-
     /*	   Parameter adjustments */
     --y;
     --s;
@@ -74,7 +77,7 @@ fdsim_(int *n, int *ip, int *iq, double *ar, double *ma,
     if (gammfd_.igamma != 0) {
 	for (i = 1; i <= *n; ++i)
 	    s[i] = 0.;
-	return 0;
+	return;
     }
     /* else : */
     d__1 = 1. - *d__ * 2.;
@@ -83,7 +86,7 @@ fdsim_(int *n, int *ip, int *iq, double *ar, double *ma,
 	for (i = 1; i <= *n; ++i) {
 	    s[i] = 0.;
 	}
-	return 0;
+	return;
     }
     /* else -- Gamma values ok, compute	 : */
 
@@ -146,6 +149,6 @@ fdsim_(int *n, int *ip, int *iq, double *ar, double *ma,
 	for (i = 1; i <= *n; ++i)
 	    s[i] += *rmu;
     }
-    return 0;
-} /* fdsim_ */
+    return;
+} /* fdsim */
 
