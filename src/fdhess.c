@@ -85,17 +85,15 @@ static int c__0 = 0;
 static int c__2 = 2;
 static double c_b78 = -1.;
 
-/* ****************************************************************************
- ******************************************************************************/
-/*
+/* ******************************************************************************
+ ******************************************************************************
  Fill "parameter"s into global variables (Common blocks) called later:
- Subroutine */ int
-fdcom_(int *n, int *m, int *nar, int *nma,
-       double *hood, double *flmin, double *flmax,
-       double *epmin, double *epmax)
+ Subroutine */ int fdcom_(int *n, int *m, int *nar, int *
+	nma, double *hood, double *flmin, double *flmax,
+	double *epmin, double *epmax)
 {
     /* Builtin functions */
-    double pow_dd(double *, double *);
+    double sqrt(double), pow_dd(double *, double *);
 
 /*  copyright 1991 Department of Statistics, University of Washington
   written by Chris Fraley
@@ -143,28 +141,28 @@ fdcom_(int *n, int *m, int *nar, int *nma,
     woptfd_1.lwa4 = woptfd_1.lwa3 + dimsfd_1.npq;
 /*      lfree  = lwa4   +  n - minpq */
     return 0;
-} /* fdcom_ */
+} /* fdcom_
 
-/******************************************************************************
  ******************************************************************************
- Subroutine */ int
-fdhpq_(double *x, double *h__, int *lh, double *w)
+ ******************************************************************************
+ Subroutine */ int fdhpq_(double *x, double *h__, int *lh,
+
+	double *w)
 {
-/*     float		x(n)
-     double precision	H(lH, npq1)
-  copyright 1991 Department of Statistics, University of Washington
-  written by Chris Fraley
-  -----------------------------------------------------------------------------
-*/
     /* System generated locals */
     int h_dim1, h_offset;
 
     /* Local variables */
-    extern /* Subroutine */
-      int hesspq_(double *, double *, double *, int *,
-		  double *, int *, double *, double *);
+    extern /* Subroutine */ int hesspq_(double *, double *,
+	    double *, int *, double *, int *, double *,
+	    double *);
 
-    /* Parameter adjustments */
+/*     float		x(n)
+     double precision	H(lH, npq1)
+  copyright 1991 Department of Statistics, University of Washington
+  written by Chris Fraley
+ -----------------------------------------------------------------------------
+     Parameter adjustments */
     --x;
     h_dim1 = *lh;
     h_offset = 1 + h_dim1;
@@ -191,13 +189,17 @@ fdhpq_(double *x, double *h__, int *lh, double *w)
     int cov_dim1, cov_offset, cor_dim1, cor_offset, i__1, i__2;
     double d__1, d__2;
 
-    /* Local variables */
-    static int i__, j, k, le, ls, lu, lv, lwork;
-    static double temp;
+    /* Builtin functions */
+    double sqrt(double);
 
-    extern /* Subroutine */
-      int hesdpq_(double *, double *, double *, double *, double *),
-          invsvd_(double *, double *, int *, double *, int *, double *, int *);
+    /* Local variables */
+    static int i__, j, k, le, ls, lu, lv;
+    static int lwork;
+    static double temp;
+    extern /* Subroutine */ int hesdpq_(double *, double *,
+	    double *, double *, double *), invsvd_(double *,
+	    double *, int *, double *, int *, double *,
+	    int *);
 
 /*     float               x(n)
      double precision   d, hh, hd(npq1), cov(lcov,npq1),
@@ -240,9 +242,9 @@ fdhpq_(double *x, double *h__, int *lh, double *w)
     le = lv + dimsfd_2.npq1 * dimsfd_2.npq1;
     lwork = le + dimsfd_2.npq1;
 /*      lfree = lwork + npq1 */
-    F77_CALL(dsvdc)(&cov[cov_offset], lcov, &dimsfd_2.npq1, &dimsfd_2.npq1,
-		    &w[ls], &w[le], &w[lu], &dimsfd_2.npq1,
-		    &w[lv], &dimsfd_2.npq1, &w[lwork], &c__11, info);
+    F77_CALL(dsvdc)(&cov[cov_offset], lcov, &dimsfd_2.npq1, &dimsfd_2.npq1, &w[ls], &w[
+	    le], &w[lu], &dimsfd_2.npq1, &w[lv], &dimsfd_2.npq1, &w[lwork], &
+	    c__11, info);
     if (*info != 0) {
 	F77_CALL(dcopy)(&dimsfd_2.npq1, &c_b8, &c__0, &se[1], &c__1);
 	i__1 = dimsfd_2.npq1;
@@ -307,23 +309,33 @@ fdhpq_(double *x, double *h__, int *lh, double *w)
 	    cor[j + i__ * cor_dim1] = cor[i__ + j * cor_dim1];
 	}
     }
-    if (gammfd_1.igamma != 0) *info = 4;
-    if (gammfd_1.jgamma != 0) *info = 1;
-    if (hessfd_1.ksvd != 0)   *info = 3;
-    if (hessfd_1.kcov != 0)   *info = 2;
-    if (hessfd_1.kcor != 0)   *info = 3;
-
+    if (gammfd_1.igamma != 0) {
+	*info = 4;
+    }
+    if (gammfd_1.jgamma != 0) {
+	*info = 1;
+    }
+    if (hessfd_1.ksvd != 0) {
+	*info = 3;
+    }
+    if (hessfd_1.kcov != 0) {
+	*info = 2;
+    }
+    if (hessfd_1.kcor != 0) {
+	*info = 3;
+    }
     return 0;
-} /* fdcov_ */
+} /* fdcov_
 
-/******************************************************************************
  ******************************************************************************
- Subroutine */ int
-invsvd_(double *s, double *u, int *lu,
+ ******************************************************************************
+ Subroutine */ int invsvd_(double *s, double *u, int *lu,
+
 	double *v, int *lv, double *cov, int *lcov)
 {
     /* System generated locals */
-    int u_dim1, u_offset, v_dim1, v_offset, cov_dim1, cov_offset, i__1, i__2;
+    int u_dim1, u_offset, v_dim1, v_offset, cov_dim1, cov_offset, i__1,
+	    i__2;
     double d__1;
 
     /* Local variables */
@@ -396,13 +408,14 @@ L100:
 	}
     }
     return 0;
-} /* invsvd_ */
+} /* invsvd_
 
-/*******************************************************************************
  ******************************************************************************
- Subroutine */ int
-hesspq_(double *qp, double *a, double *ajac,
-	int *lajac, double *h__, int *lh, double *aij, double *g)
+ ******************************************************************************
+ Subroutine */ int hesspq_(double *qp, double *a, double *ajac,
+
+	int *lajac, double *h__, int *lh, double *aij,
+	double *g)
 {
     /* System generated locals */
     int ajac_dim1, ajac_offset, h_dim1, h_offset, i__1, i__2, i__3, i__4;
@@ -412,6 +425,7 @@ hesspq_(double *qp, double *a, double *ajac,
     static double s, t, u;
     static int km;
     static double fac;
+
 
 /*     double precision	qp(npq), a(nm), ajac(nm,npq)
      double precision	H(lH,npq1), aij(nm), g(npq)
@@ -539,26 +553,31 @@ L302:
 	}
     }
     return 0;
-  } /* hesspq_ */
+} /* hesspq_
 
-/******************************************************************************
+     hesspq
  ******************************************************************************
- Subroutine */ int
-hesdpq_(double *x, double *d__, double *hh, double *hd, double *w)
+ ******************************************************************************
+ Subroutine */ int hesdpq_(double *x, double *d__, double *hh,
+
+	double *hd, double *w)
 {
     /* System generated locals */
     double d__1;
 
+    /* Builtin functions */
+    double log(double);
+
     /* Local variables */
     static double fa, fb;
 
+    extern /* Subroutine */ int ajqp_(double *, double *, double *
+	    , int *, int *, double *),
+    fdfilt_(double *, double *, double *, double *,
+	    double *, double *, double *, double *,
+	    double *),
+    gradpq_(double *, double *, double *, int *);
     static double slogvk;
-
-    extern /* Subroutine */
-      int ajqp_(double *, double *, double *, int *, int *, double *),
-      fdfilt_(double *, double *, double *, double *,
-	    double *, double *, double *, double *, double *),
-      gradpq_(double *, double *, double *, int *);
 
 /*     float		 x(n)
      double precision	 d, hh, hd(npq1), w(*)
@@ -703,13 +722,14 @@ hesdpq_(double *x, double *d__, double *hh, double *hd, double *w)
     F77_CALL(dscal)(&dimsfd_2.npq, &d__1, &w[woptfd_1.lwa1], &c__1);
     F77_CALL(dcopy)(&dimsfd_2.npq, &w[woptfd_1.lwa1], &c__1, &hd[2], &c__1);
     return 0;
-} /* hesdpq_ */
+} /* hesdpq_
 
-
-/******************************************************************************
+     hesdpq
  ******************************************************************************
- Subroutine */ int
-gradpq_(double *g, double *a, double *ajac, int *ljac)
+ ******************************************************************************
+ Subroutine */ int gradpq_(double *g, double *a, double *ajac,
+
+	int *ljac)
 {
     /* System generated locals */
     int ajac_dim1, ajac_offset, i__1;
