@@ -1,16 +1,19 @@
 /* fdcore.f -- translated by f2c (version 20031025).
-   You must link the resulting object file with libf2c:
-	on Microsoft Windows system, link with libf2c.lib;
-	on Linux or Unix systems, link with .../path/to/libf2c.a -lm
-	or, if you install libf2c.a in a standard place, with -lf2c -lm
-	-- in that order, at the end of the command line, as in
-		cc *.o -lf2c -lm
-	Source for libf2c is in /netlib/f2c/libf2c.zip, e.g.,
+ *
+ * and produced by
+ * $Id: f2c-clean,v 1.10 2002/03/28 16:37:27 maechler Exp $
+ *
+-- be brave, try without >>>
+ * #include "f2c.h"  <<<<< ------*/
+/* but use this: */
 
-		http://www.netlib.org/f2c/libf2c.zip
-*/
+#include <Rmath.h>
 
-#include "f2c.h"
+/* dcopy() and ddot() only:*/
+#include <R_ext/BLAS.h>
+
+typedef int /* Unknown procedure type */ (*U_fp)();
+
 
 /* Common Block Declarations */
 
@@ -111,30 +114,27 @@ static int c__1 = 1;
 static int c__0 = 0;
 static double c_b21 = 1.;
 
-/* ******************************************************************************
- ******************************************************************************
- Subroutine */ int fracdf_(double *x, int *n, int *m, int *
-	nar, int *nma, double *dtol, double *drange, double *
-	hood, double *d__, double *ar, double *ma, double *w,
-	int *lenw, int *inform__, double *flmin, double *
-	flmax, double *epmin, double *epmax)
+/*****************************************************************************
+ ******************************************************************************/
+/* Subroutine */ int
+fracdf_(double *x, int *n, int *m, int *nar, int *nma,
+	double *dtol, double *drange, double *hood,
+	double *d__, double *ar, double *ma, double *w,
+	int *lenw, int *inform__,
+	double *flmin, double *flmax, double *epmin, double *epmax)
 {
     /* System generated locals */
-    int i__1;
     double d__1;
 
     /* Local variables */
     extern double dopt_(double *, double *, double *,
-	    double *, double *, double *);
-    extern /* Subroutine */ int fdcom_(int *, int *, int *,
+			double *, double *, double *);
+    extern /* Subroutine */ int
+      fdcom_(int *, int *, int *, int *,
+	     float *, double *, double *, double *, double *);
 
-	    int *, float *, double *, double *, double *,
-
-	    double *);
     static double delta;
     static int lfree;
-    extern /* Subroutine */ int dcopy_(int *, double *, int *,
-	    double *, int *);
     static int lwfree, lenthw;
 
 /*     float               x(n)
@@ -194,9 +194,8 @@ static double c_b21 = 1.;
  	= 2+ 6.5*npq + 3*n - 2*minpq + (n-maxpq)*npq
  and               lvk+M = 1 + npq + 2(n + M)
  */
-/* Computing MAX */
-    i__1 = wfilfd_1.lvk + *m, i__1 = max(i__1,lfree);
-    lwfree = max(i__1,372);
+
+    lwfree = imax2(372, imax2(wfilfd_1.lvk + *m, lfree));
 /*                                 ^^^^^^^ MM: where is this needed? */
     if (lwfree > *lenw + 1) {
 	limsfd_1.ilimit = lwfree - *lenw;
@@ -225,10 +224,10 @@ static double c_b21 = 1.;
 	tolsfd_1.told = mauxfd_1.epsp25;
 	tolsfd_1.tolf = mauxfd_1.epspt3;
     } else {
-	tolsfd_1.told = max(*dtol,mauxfd_1.epspt5);
+	tolsfd_1.told = fmax2(*dtol,mauxfd_1.epspt5);
 /* Computing MAX */
 	d__1 = *dtol / 10.;
-	tolsfd_1.tolf = max(d__1,mauxfd_1.epsp75);
+	tolsfd_1.tolf = fmax2(d__1,mauxfd_1.epsp75);
     }
     tolsfd_1.tolg = tolsfd_1.tolf;
     tolsfd_1.tolx = tolsfd_1.told;
@@ -298,9 +297,6 @@ double dopt_(double *x, double *dinit, double *drange,
     /* System generated locals */
     double ret_val, d__1;
 
-    /* Builtin functions */
-    double sqrt(double);
-
     /* Local variables */
     static double d__, aa, bb, fa, dd, fb, ee, hh, fu, fv, fw, fx, rr, ss,
 	     tt, uu, vv, ww, xx, eps, tol, tol1, tol2, tol3;
@@ -347,7 +343,7 @@ double dopt_(double *x, double *dinit, double *drange,
 /*             ===== */
     fv = fx;
     fw = fx;
-    tol = max(tolsfd_2.dtol,0.);
+    tol = fmax2(tolsfd_2.dtol,0.);
     tol3 = tol / 3.;
 
 /*  main loop starts here */
@@ -359,12 +355,12 @@ L10:
 	return ret_val;
     }
     hh = (aa + bb) * .5;
-    tol1 = eps * (abs(xx) + 1.) + tol3;
+    tol1 = eps * (fabs(xx) + 1.) + tol3;
     tol2 = tol1 * 2.;
 
 /*  check stopping criterion */
 
-    *delta = (d__1 = xx - hh, abs(d__1)) + (bb - aa) * .5;
+    *delta = (d__1 = xx - hh, fabs(d__1)) + (bb - aa) * .5;
 /*     if (abs(xx-hh) .le. (tol2-half*(bb-aa))) goto 100 */
     if (*delta <= tol2) {
 	goto L100;
@@ -376,7 +372,7 @@ L10:
     rr = 0.;
     ss = 0.;
     tt = 0.;
-    if (abs(ee) > tol1) {
+    if (fabs(ee) > tol1) {
 
 /*  fit parabola */
 
@@ -392,7 +388,7 @@ L10:
 	rr = ee;
 	ee = dd;
     }
-    if (abs(tt) >= (d__1 = ss * .5 * rr, abs(d__1)) || tt <= ss * (aa - xx) ||
+    if (fabs(tt) >= (d__1 = ss * .5 * rr, fabs(d__1)) || tt <= ss * (aa - xx) ||
 	     tt >= ss * (bb - xx)) {
 
 /*  a golden-section step */
@@ -422,7 +418,7 @@ L10:
 
 /*  f must not be evaluated too close to xx */
 
-    if (abs(dd) >= tol1) {
+    if (fabs(dd) >= tol1) {
 	uu = xx + dd;
     } else {
 	if (dd <= 0.) {
@@ -497,28 +493,20 @@ double pqopt_(double *x, double *d__, double *w)
     int i__1, i__2;
     double ret_val;
 
-    /* Builtin functions */
-    double log(double);
-
     /* Local variables */
-    static double t, u, bic;
-    extern /* Subroutine */ int ajp_(), ajq_();
-    extern double ddot_(int *, double *, int *, double *, int *);
-    extern /* Subroutine */ int ajqp_();
-    extern /* Subroutine */ int dcopy_(int *, double *, int *,
-	    double *, int *),
+    static double t, u, bic, slogvk;
 
+    extern /* Subroutine */ int ajp_(), ajq_(), ajqp_(),
     lmder1_(U_fp, int *, int *,
 	    double *, double *, double *, int *, double *,
-	     double *, double *, int *, double *, int *,
+	    double *, double *, int *, double *, int *,
 	    double *, int *, int *, int *, double *,
 	    double *, double *, double *, double *,
 	    double *, double *),
-
     fdfilt_(double *, double *,
 	    double *, double *, double *, double *,
 	    double *, double *, double *);
-    static double slogvk;
+
 
 /*     float              x(n)
      work array exactly as in main  fracdf() :
@@ -638,8 +626,7 @@ fdfilt_(double *x, double *d__, double *y,
     double d__1;
 
     /* Builtin functions */
-    double pow_dd(double *, double *), log(double), sqrt(
-	    double);
+    double pow_dd(double *, double *);
 
     /* Local variables */
     static int j, k;
@@ -681,7 +668,7 @@ fdfilt_(double *x, double *d__, double *y,
     --x;
 
     /* Function Body */
-    mcap = min(dimsfd_2.m,dimsfd_2.n);
+    mcap = imin2(dimsfd_2.m,dimsfd_2.n);
     mcap1 = mcap + 1;
 
 /* calculate amk(k), vk(k), and ak(k) for k=1,n (see W522-4 for notation). */
@@ -834,9 +821,6 @@ fdfilt_(double *x, double *d__, double *y,
     /* System generated locals */
     int ajac_dim1, ajac_offset;
 
-    /* Builtin functions */
-    double d_sign(double *, double *);
-
     /* Local variables */
     static int i__, k, l;
     static double s, t;
@@ -883,10 +867,10 @@ fdfilt_(double *x, double *d__, double *y,
 	}
 L101:
 	s = y[k] + (t + s);
-	if (abs(s) <= mauxfd_1.bignum) {
+	if (fabs(s) <= mauxfd_1.bignum) {
 	    a[km] = s;
 	} else {
-	    a[km] = d_sign(&c_b21, &s) * mauxfd_1.bignum;
+	    a[km] = sign(s) * mauxfd_1.bignum;
 	}
     }
     ++cntrfd_1.nfun;
@@ -917,11 +901,10 @@ L201:
 	    } else {
 		s = -y[k - (i__ - dimsfd_2.nq)] + t;
 	    }
-	    if (abs(s) <= mauxfd_1.bignum) {
+	    if (fabs(s) <= mauxfd_1.bignum) {
 		ajac[km + i__ * ajac_dim1] = s;
 	    } else {
-		ajac[km + i__ * ajac_dim1] = d_sign(&c_b21, &s) *
-			mauxfd_1.bignum;
+		ajac[km + i__ * ajac_dim1] = sign(s) * mauxfd_1.bignum;
 	    }
 	}
     }
