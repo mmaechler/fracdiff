@@ -39,7 +39,8 @@ fracdiff <- function(x, nar = 0, nma = 0,
     npq1 <- npq + 1
     lenw <- max(npq + 2*(n + M),
                 3*n + (n+6)*npq + npq %/% 2 + 1,
-                (3 + 2*npq1) * npq1 + 1)
+                31 * 12, ## << added because checked in ../src/fdcore.f
+                (3 + 2*npq1) * npq1 + 1)## << this is *not* checked (there)
     lenw <- as.integer(lenw)
     ar[is.na(ar)] <- 0
     ma[is.na(ma)] <- 0
