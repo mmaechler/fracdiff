@@ -1,18 +1,17 @@
 ### Original file:
 ### copyright 1991 Department of Statistics, Univeristy of Washington
 
-### Patched by Friedrich.Leisch
-### for use with R, 22.1.1997
-
+### Patched by Friedrich.Leisch, for use with R, 22.1.1997
+### fixed & changed by Martin Maechler, since Dec 2003
 
 ".First.lib" <- function(lib, pkg) library.dynam("fracdiff", pkg, lib)
 
 
 fracdiff <- function(x, nar = 0, nma = 0,
                      ar = rep(NA, max(nar, 1)), ma = rep(NA, max(nma, 1)),
-                     dtol, drange = c(0, 0.5), h, M = 100)
+                     dtol = NULL, drange = c(0, 0.5), h, M = 100)
 {
-    ## ##########################################################################
+    ## #########################################################################
     ##
     ##   x      - time series for the ARIMA model
     ##   nar    - number of autoregressive parameters
@@ -20,9 +19,8 @@ fracdiff <- function(x, nar = 0, nma = 0,
     ##   ar     - initial autoregressive parameters
     ##   ma     - initial moving average parameters
     ##   dtol   - desired accurcay for d
-    ##            if dtol is negative, then the default
-    ##              (4th root of machine precision) is used
-    ##               dtol will be changed internally if necessary
+    ##            by default (and if negative), (4th root of machine precision)
+    ##		  is used.  dtol will be changed internally if necessary
     ##   drange - interval over which the likelihood function is to be maximized
     ##            as a function of d
     ##   h      - finite difference interval
@@ -30,7 +28,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
     ##
     ##           (see Haslett and Raftery 1989)
     ##
-    ## ##########################################################################
+    ## ########################################################################
 
     if(any(is.na(x)))
         stop("missing values not allowed in time series")
@@ -44,8 +42,9 @@ fracdiff <- function(x, nar = 0, nma = 0,
                  (3 + 2 * npq1) * npq1 + 1)
     ar[is.na(ar)] <- 0
     ma[is.na(ma)] <- 0
-    if(missing(dtol))
-        dtol <- .Machine$double.eps^0.25
+    if(is.null(dtol))
+        dtol <- .Machine$double.eps^0.25 # ~ 1.22e-4
+    ## if dtol < 0: the fortran code will choose defaults
     result <- .Fortran("fracdf",
                        as.double(x),
                        as.integer(n),
