@@ -233,9 +233,9 @@ fracdf_(double *x, int *n, int *m, int *nar, int *nma,
     *dtol = tolsfd_1.told;
 /*     if (npq != 0) call dcopy( npq, zero, 0, w(lqp), 1) */
     if (dimsfd_1.npq != 0) {
-	dcopy_(&dimsfd_1.np, &ar[1], &ic__1, &w[woptfd_1.lqp + dimsfd_1.nq], &
+	F77_CALL(dcopy)(&dimsfd_1.np, &ar[1], &ic__1, &w[woptfd_1.lqp + dimsfd_1.nq], &
 		ic__1);
-	dcopy_(&dimsfd_1.nq, &ma[1], &ic__1, &w[woptfd_1.lqp], &ic__1);
+	F77_CALL(dcopy)(&dimsfd_1.nq, &ma[1], &ic__1, &w[woptfd_1.lqp], &ic__1);
     }
     cntrfd_1.nopt = 0;
     cntrfd_1.nfun = 0;
@@ -252,8 +252,8 @@ fracdf_(double *x, int *n, int *m, int *nar, int *nma,
     if (gammfd_1.igamma != 0 || mnpkfd_1.iminpk != 0) {
 	*d__ = machfd_1.fltmax;
 	*hood = machfd_1.fltmax;
-	dcopy_(&dimsfd_1.np, &machfd_1.fltmax, &ic__0, &ar[1], &ic__1);
-	dcopy_(&dimsfd_1.nq, &machfd_1.fltmax, &ic__0, &ma[1], &ic__1);
+	F77_CALL(dcopy)(&dimsfd_1.np, &machfd_1.fltmax, &ic__0, &ar[1], &ic__1);
+	F77_CALL(dcopy)(&dimsfd_1.nq, &machfd_1.fltmax, &ic__0, &ma[1], &ic__1);
 	if (gammfd_1.igamma != 0) {
 	    *inform__ = 2;
 	}
@@ -262,9 +262,9 @@ fracdf_(double *x, int *n, int *m, int *nar, int *nma,
 	}
 	return 0;
     }
-    dcopy_(&dimsfd_1.np, &w[woptfd_1.lqp + dimsfd_1.nq], &ic__1, &ar[1], &ic__1)
+    F77_CALL(dcopy)(&dimsfd_1.np, &w[woptfd_1.lqp + dimsfd_1.nq], &ic__1, &ar[1], &ic__1)
 	    ;
-    dcopy_(&dimsfd_1.nq, &w[woptfd_1.lqp], &ic__1, &ma[1], &ic__1);
+    F77_CALL(dcopy)(&dimsfd_1.nq, &w[woptfd_1.lqp], &ic__1, &ma[1], &ic__1);
     if (gammfd_1.jgamma != 0) {
 	*inform__ = 4;
     }
@@ -532,7 +532,7 @@ double pqopt_(double *x, double *d__, double *w)
     t = (double) dimsfd_2.n;
     if (dimsfd_2.npq == 0) {
 /* 	trivial case  p = q = 0 : */
-	filtfd_2.wnv = ddot_(&dimsfd_2.n, &w[wfilfd_1.ly], &ic__1, &w[
+	filtfd_2.wnv = F77_CALL(ddot)(&dimsfd_2.n, &w[wfilfd_1.ly], &ic__1, &w[
 		wfilfd_1.ly], &ic__1) / t;
 	cntrfd_1.ifun = 0;
 	cntrfd_1.igrd = 0;
@@ -542,7 +542,7 @@ double pqopt_(double *x, double *d__, double *w)
 /*     optimize as an unconstrained optimization problem */
 
 	if (modelm == 2) {
-	    dcopy_(&dimsfd_2.npq, &c__1, &ic__0, &w[woptfd_1.ldiag], &ic__1);
+	    F77_CALL(dcopy)(&dimsfd_2.npq, &c__1, &ic__0, &w[woptfd_1.ldiag], &ic__1);
 	}
 	if (cntrfd_1.nopt < 0) {
 	    if (dimsfd_2.np != 0) {
