@@ -1,3 +1,5 @@
+####-*- mode: R; kept-old-versions: 12;  kept-new-versions: 20; -*-
+
 ### Original file:
 ### copyright 1991 Department of Statistics, Univeristy of Washington
 
