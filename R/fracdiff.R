@@ -66,7 +66,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
                        ma = as.double(ma),
                        w = double(lenw),
                        lenw = lenw,
-                       iw = ingeger(npq),## <<< new int-work array
+                       iw = integer(npq),## <<< new int-work array
                        info = integer(1),
                        .Machine$double.xmin,
                        .Machine$double.xmax,
