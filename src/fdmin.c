@@ -14,11 +14,13 @@
 
 
 -- be brave, try without >>>
- * #include "f2c.h" /* <<<<< ------*/
+ * #include "f2c.h"  <<<<< ------*/
 /* but need this */
 typedef /* Subroutine */ int (*S_fp)();
 
-#include <math.h>
+#include <Rmath.h>
+
+
 #ifndef max
 # define	max(a, b) 		((a) < (b) ? (b) : (a))
 #endif
@@ -60,14 +62,35 @@ struct {
 
 static /*logical*/int c_true = (1);
 
-/* Subroutine */ int lmder1_(S_fp fcn, int *m, int *n, double *x,
+/* --------- EXPORTS (need all ??) ------------------- */
 
-	double *fvec, double *fjac, int *ldfjac, double *ftol,
-	 double *xtol, double *gtol, int *maxfev, double *
-	diag, int *mode, double *factor, int *info, int *nfev,
-	 int *njev, int *ipvt, double *qtf, double *wa1,
+double enorm_(int *, double *);
+/* Subroutine */
+int lmpar_(int *, double *, int *, int *, double *, double *, double *,
+	   double *, double *, double *, double *, double *);
+int qrfac_(int *, int *, double *, int *,
+	   /*logical*/int *, int *, int *,
+	   double *, double *, double *);
+int qrsolv_(int *, double *, int *, int *,
+	    double *, double *, double *, double *, double *);
 
-	double *wa2, double *wa3, double *wa4, double *y)
+int lmder1_(S_fp fcn, int *m, int *n, double *x,
+	    double *fvec, double *fjac, int *ldfjac, double *ftol,
+	    double *xtol, double *gtol, int *maxfev, double *diag,
+	    int *mode, double *factor, int *info,
+	    int *nfev, int *njev, int *ipvt, double *qtf,
+	    double *wa1, double *wa2, double *wa3, double *wa4, double *y);
+
+/* ------------------------------- */
+
+
+/* Subroutine */
+int lmder1_(S_fp fcn, int *m, int *n, double *x,
+	    double *fvec, double *fjac, int *ldfjac, double *ftol,
+	    double *xtol, double *gtol, int *maxfev, double *diag,
+	    int *mode, double *factor, int *info,
+	    int *nfev, int *njev, int *ipvt, double *qtf,
+	    double *wa1, double *wa2, double *wa3, double *wa4, double *y)
 {
     /* Initialized data */
 
@@ -80,33 +103,13 @@ static /*logical*/int c_true = (1);
     static double zero = 0.;
 
     /* System generated locals */
-    int fjac_dim1, fjac_offset, i__1, i__2;
-    double d__1, d__2, d__3;
-
-    /* Builtin functions */
-    double sqrt(double);
+    int fjac_dim1, fjac_offset;
+    double d__1, d__2;
 
     /* Local variables */
-    static int i__, j, l;
-    static double par, sum;
-    static int iter;
-    static double temp, temp1, temp2;
-    static int iflag;
-    extern /* Subroutine */ int qrfac_(int *, int *, double *,
-
-	    int *, /*logical*/int *, int *, int *, double *,
-
-	    double *, double *), lmpar_(int *, double *,
-
-	    int *, int *, double *, double *, double *,
-
-	    double *, double *, double *, double *,
-
-	    double *);
-    static double ratio;
-    extern double enorm_(int *, double *);
-    static double pnorm, xnorm, fnorm1, actred, dirder, prered;
-    static int nprint;
+    int i__, j, l, iter, iflag, nprint;
+    double par, sum, temp, temp1, temp2;
+    double ratio, enorm_n, xnorm, fnorm1, actred, dirder, prered;
 
 /*     **********
 
@@ -322,7 +325,7 @@ static /*logical*/int c_true = (1);
     if (*mode != 2) {
 	goto L20;
     }
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	if (diag[j] <= zero) {
 	    goto L300;
 	}
@@ -338,9 +341,8 @@ L20:
     if (iflag < 0) {
 	goto L300;
     }
-/* Computing MIN */
-    d__1 = enorm_(m, &fvec[1]);
-    tolsfd_1.fnorm = min(d__1,mauxfd_1.bignum);
+
+    tolsfd_1.fnorm = fmin2(enorm_(m, &fvec[1]), mauxfd_1.bignum);
 
 /*     initialize levenberg-marquardt parameter and iteration counter. */
 
@@ -388,7 +390,7 @@ L40:
     if (*mode == 2) {
 	goto L60;
     }
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	diag[j] = wa2[j];
 	if (wa2[j] == zero) {
 	    diag[j] = one;
@@ -399,7 +401,7 @@ L60:
 /*        on the first iteration, calculate the norm of the scaled x
         and initialize the step bound delta. */
 
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	wa3[j] = diag[j] * x[j];
     }
     xnorm = enorm_(n, &wa3[1]);
@@ -412,19 +414,19 @@ L80:
 /*        form (q transpose)*fvec and store the first n components in
         qtf. */
 
-    for (i__ = 1; i__ <= *m; ++i__) { /* f2c-clean: s {i__1} {*m} */
+    for (i__ = 1; i__ <= *m; ++i__) {
 	wa4[i__] = fvec[i__];
     }
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	if (fjac[j + j * fjac_dim1] == zero) {
 	    goto L120;
 	}
 	sum = zero;
-	for (i__ = j; i__ <= *m; ++i__) { /* f2c-clean: s {i__2} {*m} */
+	for (i__ = j; i__ <= *m; ++i__) {
 	    sum += fjac[i__ + j * fjac_dim1] * wa4[i__];
 	}
 	temp = -sum / fjac[j + j * fjac_dim1];
-	for (i__ = j; i__ <= *m; ++i__) { /* f2c-clean: s {i__2} {*m} */
+	for (i__ = j; i__ <= *m; ++i__) {
 	    wa4[i__] += fjac[i__ + j * fjac_dim1] * temp;
 	}
 L120:
@@ -438,20 +440,15 @@ L120:
     if (tolsfd_1.fnorm == zero) {
 	goto L170;
     }
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	l = ipvt[j];
-	if (wa2[l] == zero) {
-	    goto L150;
+	if (wa2[l] != zero) {
+	    sum = zero;
+	    for (i__ = 1; i__ <= j; ++i__) {
+		sum += fjac[i__ + j * fjac_dim1] * (qtf[i__] / tolsfd_1.fnorm);
+	    }
+	    tolsfd_1.gnorm = fmax2(tolsfd_1.gnorm, fabs(sum / wa2[l]));
 	}
-	sum = zero;
-	for (i__ = 1; i__ <= j; ++i__) { /* f2c-clean: s {i__2} {j} */
-	    sum += fjac[i__ + j * fjac_dim1] * (qtf[i__] / tolsfd_1.fnorm);
-	}
-/* Computing MAX */
-	d__2 = tolsfd_1.gnorm, d__3 = fabs(sum / wa2[l]);
-	tolsfd_1.gnorm = max(d__2,d__3);
-L150:
-	;
     }
 L170:
 
@@ -469,11 +466,9 @@ L170:
     if (*mode == 2) {
 	goto L190;
     }
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n}
- Computing MAX */
-	d__1 = diag[j], d__2 = wa2[j];
-	diag[j] = max(d__1,d__2);
-    }
+    for (j = 1; j <= *n; ++j)
+	diag[j] = fmax2(diag[j], wa2[j]);
+
 L190:
 
 /*        beginning of the inner loop. */
@@ -486,17 +481,17 @@ L200:
 
 /*           store the direction p and x + p. calculate the norm of p. */
 
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	wa1[j] = -wa1[j];
 	wa2[j] = x[j] + wa1[j];
 	wa3[j] = diag[j] * wa1[j];
     }
-    pnorm = enorm_(n, &wa3[1]);
+    enorm_n = enorm_(n, &wa3[1]);
 
 /*           on the first iteration, adjust the initial step bound. */
 
     if (iter == 1) {
-	tolsfd_1.delta = min(tolsfd_1.delta,pnorm);
+	tolsfd_1.delta = min(tolsfd_1.delta,enorm_n);
     }
 
 /*           evaluate the function at x + p and calculate its norm. */
@@ -507,9 +502,7 @@ L200:
     if (iflag < 0) {
 	goto L300;
     }
-/* Computing MIN */
-    d__1 = enorm_(m, &wa4[1]);
-    fnorm1 = min(d__1,mauxfd_1.bignum);
+    fnorm1 = fmin2(enorm_(m, &wa4[1]), mauxfd_1.bignum);
 
 /*           compute the scaled actual reduction. */
 
@@ -524,23 +517,23 @@ L200:
            compute the scaled predicted reduction and
            the scaled directional derivative. */
 
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	wa3[j] = zero;
 	l = ipvt[j];
 	temp = wa1[l];
-	for (i__ = 1; i__ <= j; ++i__) { /* f2c-clean: s {i__2} {j} */
+	for (i__ = 1; i__ <= j; ++i__) {
 	    wa3[i__] += fjac[i__ + j * fjac_dim1] * temp;
 	}
     }
     temp1 = enorm_(n, &wa3[1]) / tolsfd_1.fnorm;
-    temp2 = sqrt(par) * pnorm / tolsfd_1.fnorm;
+    temp2 = sqrt(par) * enorm_n / tolsfd_1.fnorm;
 /* Computing 2nd power */
     d__1 = temp1;
 /* Computing 2nd power */
     d__2 = temp2;
     prered = d__1 * d__1 + d__2 * d__2 / p5;
 /*           temp1  = enorm(n,wa3)
-           temp2  = (dsqrt(par)*pnorm)
+           temp2  = (dsqrt(par)*enorm_n)
            prered = (temp1**2 + 2.d0*temp2**2)
  Computing 2nd power */
     d__1 = temp1;
@@ -570,16 +563,14 @@ L200:
     if (p1 * fnorm1 >= tolsfd_1.fnorm || temp < p1) {
 	temp = p1;
     }
-/* Computing MIN */
-    d__1 = tolsfd_1.delta, d__2 = pnorm / p1;
-    tolsfd_1.delta = temp * min(d__1,d__2);
+    tolsfd_1.delta = temp * fmin2(tolsfd_1.delta, enorm_n / p1);
     par /= temp;
     goto L260;
 L240:
     if (par != zero && ratio < p75) {
 	goto L250;
     }
-    tolsfd_1.delta = pnorm / p5;
+    tolsfd_1.delta = enorm_n / p5;
     par = p5 * par;
 L250:
 L260:
@@ -593,18 +584,18 @@ L260:
 /*           successful iteration. update x, fvec, and their norms. */
 
 
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	x[j] = wa2[j];
 	wa2[j] = diag[j] * x[j];
     }
-    for (i__ = 1; i__ <= *m; ++i__) { /* f2c-clean: s {i__1} {*m} */
+    for (i__ = 1; i__ <= *m; ++i__) {
 	fvec[i__] = wa4[i__];
     }
     xnorm = enorm_(n, &wa2[1]);
     tolsfd_1.fnorm = fnorm1;
     ++iter;
-L290:
 
+L290:
 /*           tests for convergence. */
 
     if (abs(actred) <= *ftol && prered <= *ftol && p5 * ratio <= one) {
@@ -616,9 +607,8 @@ L290:
     if (tolsfd_1.delta <= *xtol) {
 	*info = 2;
     }
-    if (abs(actred) <= *ftol && prered <= *ftol && p5 * ratio <= one && *info
-
-	    == 2) {
+    if (abs(actred) <= *ftol && prered <= *ftol && p5 * ratio <= one &&
+	*info == 2) {
 	*info = 3;
     }
     if (*info != 0) {
@@ -630,9 +620,8 @@ L290:
     if (*nfev >= *maxfev) {
 	*info = 5;
     }
-    if (abs(actred) <= machfd_1.epsmch && prered <= machfd_1.epsmch && p5 *
-
-	    ratio <= one) {
+    if (fabs(actred) <= machfd_1.epsmch && prered <= machfd_1.epsmch &&
+	p5 * ratio <= one) {
 	*info = 6;
     }
     if (tolsfd_1.delta <= machfd_1.epsmch) {
@@ -666,9 +655,9 @@ L300:
 	(*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], ldfjac, &iflag, &y[1]);
     }
     return 0;
-} /* lmder1_
+} /* lmder1_ */
 
-     	subroutine lmder1 */
+
 double enorm_(int *n, double *x)
 {
     /* Initialized data */
@@ -679,11 +668,7 @@ double enorm_(int *n, double *x)
     static double rgiant = 1.304e19;
 
     /* System generated locals */
-    int i__1;
     double ret_val, d__1;
-
-    /* Builtin functions */
-    double sqrt(double);
 
     /* Local variables */
     static int i__;
@@ -738,7 +723,7 @@ double enorm_(int *n, double *x)
     x3max = zero;
     floatn = (double) (*n);
     agiant = rgiant / floatn;
-    for (i__ = 1; i__ <= *n; ++i__) { /* f2c-clean: s {i__1} {*n} */
+    for (i__ = 1; i__ <= *n; ++i__) {
 	xabs = fabs(x[i__]);
 	if (xabs > rdwarf && xabs < agiant) {
 	    goto L70;
@@ -798,32 +783,29 @@ L80:
 /*     calculation of norm. */
 
     if (s1 == zero) {
-	goto L100;
-    }
-    ret_val = x1max * sqrt(s1 + s2 / x1max / x1max);
-    goto L130;
-L100:
-    if (s2 == zero) {
-	goto L110;
-    }
-    if (s2 >= x3max) {
-	ret_val = sqrt(s2 * (one + x3max / s2 * (x3max * s3)));
-    }
-    if (s2 < x3max) {
-	ret_val = sqrt(x3max * (s2 / x3max + x3max * s3));
-    }
-    goto L120;
-L110:
-    ret_val = x3max * sqrt(s3);
-L120:
-L130:
-    return ret_val;
-} /* enorm_
 
- 	function enorm
- Subroutine */ int qrfac_(int *m, int *n, double *a, int *
-	lda, /*logical*/int *pivot, int *ipvt, int *lipvt, double *rdiag,
-	 double *acnorm, double *wa)
+	if (s2 == zero) {
+	    ret_val = x3max * sqrt(s3);
+	}
+	else {
+	    if (s2 >= x3max)
+		ret_val = sqrt(s2 * (one + x3max / s2 * (x3max * s3)));
+	    else /* (s2 < x3max) */
+		ret_val = sqrt(x3max * (s2 / x3max + x3max * s3));
+	}
+    }
+    else {
+	ret_val = x1max * sqrt(s1 + s2 / x1max / x1max);
+    }
+
+    return ret_val;
+} /* enorm_ */
+
+
+/* Subroutine */ int
+qrfac_(int *m, int *n, double *a, int *lda,
+       /*logical*/int *pivot, int *ipvt, int *lipvt, double *rdiag,
+       double *acnorm, double *wa)
 {
     /* Initialized data */
 
@@ -832,20 +814,12 @@ L130:
     static double zero = 0.;
 
     /* System generated locals */
-    int a_dim1, a_offset, i__1, i__2, i__3;
+    int a_dim1, a_offset, i__2, i__3;
     double d__1, d__2, d__3;
 
-    /* Builtin functions */
-    double sqrt(double);
-
     /* Local variables */
-    static int i__, j, k, jp1;
-    static double sum;
-    static int kmax;
-    static double temp;
-    static int minmn;
-    extern double enorm_(int *, double *);
-    static double ajnorm;
+    int i__, j, k, kmax, jp1, minmn;
+    double sum, temp, ajnorm;
 
 /*     **********
 
@@ -939,7 +913,7 @@ L130:
 
      compute the initial column norms and initialize several arrays. */
 
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	acnorm[j] = enorm_(m, &a[j * a_dim1 + 1]);
 	rdiag[j] = acnorm[j];
 	wa[j] = rdiag[j];
@@ -951,7 +925,7 @@ L130:
 /*     reduce a to r with householder transformations. */
 
     minmn = min(*m,*n);
-    for (j = 1; j <= minmn; ++j) { /* f2c-clean: s {i__1} {minmn} */
+    for (j = 1; j <= minmn; ++j) {
 	if (! (*pivot)) {
 	    goto L40;
 	}
@@ -959,7 +933,7 @@ L130:
 /*        bring the column of largest norm into the pivot position. */
 
 	kmax = j;
-	for (k = j; k <= *n; ++k) { /* f2c-clean: s {i__2} {*n} */
+	for (k = j; k <= *n; ++k) {
 	    if (rdiag[k] > rdiag[kmax]) {
 		kmax = k;
 	    }
@@ -967,7 +941,7 @@ L130:
 	if (kmax == j) {
 	    goto L40;
 	}
-	for (i__ = 1; i__ <= *m; ++i__) { /* f2c-clean: s {i__2} {*m} */
+	for (i__ = 1; i__ <= *m; ++i__) {
 	    temp = a[i__ + j * a_dim1];
 	    a[i__ + j * a_dim1] = a[i__ + kmax * a_dim1];
 	    a[i__ + kmax * a_dim1] = temp;
@@ -991,7 +965,7 @@ L40:
 	if (a[j + j * a_dim1] < zero) {
 	    ajnorm = -ajnorm;
 	}
-	for (i__ = j; i__ <= *m; ++i__) { /* f2c-clean: s {i__2} {*m} */
+	for (i__ = j; i__ <= *m; ++i__) {
 	    a[i__ + j * a_dim1] /= ajnorm;
 	}
 	a[j + j * a_dim1] += one;
@@ -1003,13 +977,13 @@ L40:
 	if (*n < jp1) {
 	    goto L100;
 	}
-	for (k = jp1; k <= *n; ++k) { /* f2c-clean: s {i__2} {*n} */
+	for (k = jp1; k <= *n; ++k) {
 	    sum = zero;
-	    for (i__ = j; i__ <= *m; ++i__) { /* f2c-clean: s {i__3} {*m} */
+	    for (i__ = j; i__ <= *m; ++i__) {
 		sum += a[i__ + j * a_dim1] * a[i__ + k * a_dim1];
 	    }
 	    temp = sum / a[j + j * a_dim1];
-	    for (i__ = j; i__ <= *m; ++i__) { /* f2c-clean: s {i__3} {*m} */
+	    for (i__ = j; i__ <= *m; ++i__) {
 		a[i__ + k * a_dim1] -= temp * a[i__ + j * a_dim1];
 	    }
 	    if (! (*pivot) || rdiag[k] == zero) {
@@ -1036,16 +1010,13 @@ L100:
 	rdiag[j] = -ajnorm;
     }
     return 0;
-} /* qrfac_
+} /* qrfac_ */
 
- 	subroutine qrfac
- Subroutine */ int lmpar_(int *n, double *r__, int *ldr,
-
-	int *ipvt, double *diag, double *qtb, double *delta,
-
-	double *par, double *x, double *sdiag, double *wa1,
-
-	double *wa2)
+/* Subroutine */
+int lmpar_(int *n, double *r__, int *ldr,
+	   int *ipvt, double *diag, double *qtb, double *delta,
+	   double *par, double *x, double *sdiag,
+	   double *wa1, double *wa2)
 {
     /* Initialized data */
 
@@ -1054,11 +1025,8 @@ L100:
     static double zero = 0.;
 
     /* System generated locals */
-    int r_dim1, r_offset, i__1, i__2;
+    int r_dim1, r_offset;
     double d__1, d__2;
-
-    /* Builtin functions */
-    double sqrt(double);
 
     /* Local variables */
     static int i__, j, k, l;
@@ -1068,12 +1036,7 @@ L100:
     static int iter;
     static double temp, paru, dwarf;
     static int nsing;
-    extern double enorm_(int *, double *);
     static double gnorm, dxnorm;
-    extern /* Subroutine */ int qrsolv_(int *, double *, int *,
-
-	    int *, double *, double *, double *, double *,
-	     double *);
 
 /*     **********
 
@@ -1192,7 +1155,7 @@ L100:
      jacobian is rank-deficient, obtain a least squares solution. */
 
     nsing = *n;
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	wa1[j] = qtb[j];
 	if (r__[j + j * r_dim1] == zero && nsing == *n) {
 	    nsing = j - 1;
@@ -1204,7 +1167,7 @@ L100:
     if (nsing < 1) {
 	goto L50;
     }
-    for (k = 1; k <= nsing; ++k) { /* f2c-clean: s {i__1} {nsing} */
+    for (k = 1; k <= nsing; ++k) {
 	j = nsing - k + 1;
 	wa1[j] /= r__[j + j * r_dim1];
 	temp = wa1[j];
@@ -1212,14 +1175,14 @@ L100:
 	if (jm1 < 1) {
 	    goto L30;
 	}
-	for (i__ = 1; i__ <= jm1; ++i__) { /* f2c-clean: s {i__2} {jm1} */
+	for (i__ = 1; i__ <= jm1; ++i__) {
 	    wa1[i__] -= r__[i__ + j * r_dim1] * temp;
 	}
 L30:
 	;
     }
 L50:
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	l = ipvt[j];
 	x[l] = wa1[j];
     }
@@ -1229,7 +1192,7 @@ L50:
      for acceptance of the gauss-newton direction. */
 
     iter = 0;
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	wa2[j] = diag[j] * x[j];
     }
     dxnorm = enorm_(n, &wa2[1]);
@@ -1246,17 +1209,17 @@ L50:
     if (nsing < *n) {
 	goto L120;
     }
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	l = ipvt[j];
 	wa1[j] = diag[l] * (wa2[l] / dxnorm);
     }
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	sum = zero;
 	jm1 = j - 1;
 	if (jm1 < 1) {
 	    goto L100;
 	}
-	for (i__ = 1; i__ <= jm1; ++i__) { /* f2c-clean: s {i__2} {jm1} */
+	for (i__ = 1; i__ <= jm1; ++i__) {
 	    sum += r__[i__ + j * r_dim1] * wa1[i__];
 	}
 L100:
@@ -1268,9 +1231,9 @@ L120:
 
 /*     calculate an upper bound, paru, for the zero of the function. */
 
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	sum = zero;
-	for (i__ = 1; i__ <= j; ++i__) { /* f2c-clean: s {i__2} {j} */
+	for (i__ = 1; i__ <= j; ++i__) {
 	    sum += r__[i__ + j * r_dim1] * qtb[i__];
 	}
 	l = ipvt[j];
@@ -1304,12 +1267,12 @@ L150:
 	*par = max(d__1,d__2);
     }
     temp = sqrt(*par);
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	wa1[j] = temp * diag[j];
     }
     qrsolv_(n, &r__[r_offset], ldr, &ipvt[1], &wa1[1], &qtb[1], &x[1], &sdiag[
 	    1], &wa2[1]);
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	wa2[j] = diag[j] * x[j];
     }
     dxnorm = enorm_(n, &wa2[1]);
@@ -1320,25 +1283,25 @@ L150:
         of par. also test for the exceptional cases where parl
         is zero or the number of iterations has reached 10. */
 
-    if (abs(fp) <= p1 * *delta || parl == zero && fp <= temp && temp < zero ||
-	     iter == 10) {
+    if (abs(fp) <= p1 * *delta || (parl == zero && fp <= temp && temp < zero) ||
+	iter == 10) {
 	goto L220;
     }
 
 /*        compute the newton correction. */
 
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	l = ipvt[j];
 	wa1[j] = diag[l] * (wa2[l] / dxnorm);
     }
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	wa1[j] /= sdiag[j];
 	temp = wa1[j];
 	jp1 = j + 1;
 	if (*n < jp1) {
 	    goto L200;
 	}
-	for (i__ = jp1; i__ <= *n; ++i__) { /* f2c-clean: s {i__2} {*n} */
+	for (i__ = jp1; i__ <= *n; ++i__) {
 	    wa1[i__] -= r__[i__ + j * r_dim1] * temp;
 	}
 L200:
@@ -1373,14 +1336,12 @@ L220:
 	*par = zero;
     }
     return 0;
-} /* lmpar_
+} /* lmpar_ */
 
- 	subroutine lmpar.
- Subroutine */ int qrsolv_(int *n, double *r__, int *ldr,
-
-	int *ipvt, double *diag, double *qtb, double *x,
-
-	double *sdiag, double *wa)
+/* Subroutine */
+int qrsolv_(int *n, double *r__, int *ldr,
+	    int *ipvt, double *diag, double *qtb, double *x,
+	    double *sdiag, double *wa)
 {
     /* Initialized data */
 
@@ -1389,17 +1350,12 @@ L220:
     static double zero = 0.;
 
     /* System generated locals */
-    int r_dim1, r_offset, i__1, i__2, i__3;
+    int r_dim1, r_offset;
     double d__1, d__2;
 
-    /* Builtin functions */
-    double sqrt(double);
-
     /* Local variables */
-    static int i__, j, k, l, jp1, kp1;
-    static double tan__, cos__, sin__, sum, temp, cotan;
-    static int nsing;
-    static double qtbpj;
+    int i__, j, k, l, jp1, kp1, nsing;
+    double tan__, cos__, sin__, sum, temp, cotan, qtbpj;
 
 /*     **********
 
@@ -1494,8 +1450,8 @@ L220:
      copy r and (q transpose)*b to preserve input and initialize s.
      in particular, save the diagonal elements of r in x. */
 
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
-	for (i__ = j; i__ <= *n; ++i__) { /* f2c-clean: s {i__2} {*n} */
+    for (j = 1; j <= *n; ++j) {
+	for (i__ = j; i__ <= *n; ++i__) {
 	    r__[i__ + j * r_dim1] = r__[j + i__ * r_dim1];
 	}
 	x[j] = r__[j + j * r_dim1];
@@ -1504,16 +1460,16 @@ L220:
 
 /*     eliminate the diagonal matrix d using a givens rotation. */
 
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n}
+    for (j = 1; j <= *n; ++j) {
 
-        prepare the row of d to be eliminated, locating the
-        diagonal element using p from the qr factorization. */
+        /* prepare the row of d to be eliminated, locating the
+	   diagonal element using p from the qr factorization. */
 
 	l = ipvt[j];
 	if (diag[l] == zero) {
 	    goto L90;
 	}
-	for (k = j; k <= *n; ++k) { /* f2c-clean: s {i__2} {*n} */
+	for (k = j; k <= *n; ++k) {
 	    sdiag[k] = zero;
 	}
 	sdiag[j] = diag[l];
@@ -1523,10 +1479,10 @@ L220:
         beyond the first n, which is initially zero. */
 
 	qtbpj = zero;
-	for (k = j; k <= *n; ++k) { /* f2c-clean: s {i__2} {*n}
+	for (k = j; k <= *n; ++k) {
 
-           determine a givens rotation which eliminates the
-           appropriate element in the current row of d. */
+	/* determine a givens rotation which eliminates the
+	   appropriate element in the current row of d. */
 
 	    if (sdiag[k] == zero) {
 		goto L70;
@@ -1565,7 +1521,7 @@ L50:
 	    if (*n < kp1) {
 		goto L70;
 	    }
-	    for (i__ = kp1; i__ <= *n; ++i__) { /* f2c-clean: s {i__3} {*n} */
+	    for (i__ = kp1; i__ <= *n; ++i__) {
 		temp = cos__ * r__[i__ + k * r_dim1] + sin__ * sdiag[i__];
 		sdiag[i__] = -sin__ * r__[i__ + k * r_dim1] + cos__ * sdiag[
 			i__];
@@ -1587,7 +1543,7 @@ L90:
      singular, then obtain a least squares solution. */
 
     nsing = *n;
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	if (sdiag[j] == zero && nsing == *n) {
 	    nsing = j - 1;
 	}
@@ -1598,14 +1554,14 @@ L90:
     if (nsing < 1) {
 	goto L150;
     }
-    for (k = 1; k <= nsing; ++k) { /* f2c-clean: s {i__1} {nsing} */
+    for (k = 1; k <= nsing; ++k) {
 	j = nsing - k + 1;
 	sum = zero;
 	jp1 = j + 1;
 	if (nsing < jp1) {
 	    goto L130;
 	}
-	for (i__ = jp1; i__ <= nsing; ++i__) { /* f2c-clean: s {i__2} {nsing} */
+	for (i__ = jp1; i__ <= nsing; ++i__) {
 	    sum += r__[i__ + j * r_dim1] * wa[i__];
 	}
 L130:
@@ -1615,7 +1571,7 @@ L150:
 
 /*     permute the components of z back to components of x. */
 
-    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+    for (j = 1; j <= *n; ++j) {
 	l = ipvt[j];
 	x[l] = wa[j];
     }
