@@ -15,23 +15,23 @@
 /* Common Block Declarations */
 
 struct {
-    doublereal fltmin, fltmax, epsmin, epsmax;
+    double fltmin, fltmax, epsmin, epsmax;
 } machfd_;
 
 #define machfd_1 machfd_
 
 struct {
-    doublereal epsp25, epspt3, epspt5, epsp75, bignum;
+    double epsp25, epspt3, epspt5, epsp75, bignum;
 } mauxfd_;
 
 #define mauxfd_1 mauxfd_
 
 union {
     struct {
-	integer nn, mm, np, nq, npq, npq1, maxpq, maxpq1, minpq, nm;
+	int nn, mm, np, nq, npq, npq1, maxpq, maxpq1, minpq, nm;
     } _1;
     struct {
-	integer n, m, np, nq, npq, npq1, maxpq, maxpq1, minpq, nm;
+	int n, m, np, nq, npq, npq1, maxpq, maxpq1, minpq, nm;
     } _2;
 } dimsfd_;
 
@@ -39,59 +39,59 @@ union {
 #define dimsfd_2 (dimsfd_._2)
 
 struct {
-    doublereal hatmu, wnv, cllf;
+    double hatmu, wnv, cllf;
 } filtfd_;
 
 #define filtfd_1 filtfd_
 
 struct {
-    integer ly, lamk, lak, lvk, lphi, lpi;
+    int ly, lamk, lak, lvk, lphi, lpi;
 } wfilfd_;
 
 #define wfilfd_1 wfilfd_
 
 struct {
-    integer lqp, la, lajac, ipvt, ldiag, lqtf, lwa1, lwa2, lwa3, lwa4;
+    int lqp, la, lajac, ipvt, ldiag, lqtf, lwa1, lwa2, lwa3, lwa4;
 } woptfd_;
 
 #define woptfd_1 woptfd_
 
 struct {
-    integer igamma, jgamma;
+    int igamma, jgamma;
 } gammfd_;
 
 #define gammfd_1 gammfd_
 
 struct {
-    integer ksvd, kcov, kcor;
+    int ksvd, kcov, kcor;
 } hessfd_;
 
 #define hessfd_1 hessfd_
 
 /* Table of constant values */
 
-static doublereal c_b2 = .3;
-static doublereal c_b3 = .75;
-static integer c__1 = 1;
-static integer c__11 = 11;
-static doublereal c_b8 = 0.;
-static integer c__0 = 0;
-static integer c__2 = 2;
-static doublereal c_b78 = -1.;
+static double c_b2 = .3;
+static double c_b3 = .75;
+static int c__1 = 1;
+static int c__11 = 11;
+static double c_b8 = 0.;
+static int c__0 = 0;
+static int c__2 = 2;
+static double c_b78 = -1.;
 
-/* ****************************************************************************** */
-/* ****************************************************************************** */
-/* Fill "parameter"s into global variables (Common blocks) called later: */
-/* Subroutine */ int fdcom_(integer *n, integer *m, integer *nar, integer *
-	nma, doublereal *hood, doublereal *flmin, doublereal *flmax, 
-	doublereal *epmin, doublereal *epmax)
+/* ****************************************************************************** 
+ ****************************************************************************** 
+ Fill "parameter"s into global variables (Common blocks) called later: 
+ Subroutine */ int fdcom_(int *n, int *m, int *nar, int *
+	nma, double *hood, double *flmin, double *flmax,
+	double *epmin, double *epmax)
 {
     /* Builtin functions */
-    double sqrt(doublereal), pow_dd(doublereal *, doublereal *);
+    double sqrt(double), pow_dd(double *, double *);
 
-/*  copyright 1991 Department of Statistics, University of Washington */
-/*  written by Chris Fraley */
-/* ----------------------------------------------------------------------------- */
+/*  copyright 1991 Department of Statistics, University of Washington 
+  written by Chris Fraley 
+ ----------------------------------------------------------------------------- */
     filtfd_1.cllf = *hood;
 /* machine constants */
     machfd_1.fltmin = *flmin;
@@ -135,27 +135,28 @@ static doublereal c_b78 = -1.;
     woptfd_1.lwa4 = woptfd_1.lwa3 + dimsfd_1.npq;
 /*      lfree  = lwa4   +  n - minpq */
     return 0;
-} /* fdcom_ */
+} /* fdcom_ 
 
-/* ****************************************************************************** */
-/* ****************************************************************************** */
-/* Subroutine */ int fdhpq_(doublereal *x, doublereal *h__, integer *lh, 
-	doublereal *w)
+ ****************************************************************************** 
+ ****************************************************************************** 
+ Subroutine */ int fdhpq_(double *x, double *h__, int *lh,
+
+	double *w)
 {
     /* System generated locals */
-    integer h_dim1, h_offset;
+    int h_dim1, h_offset;
 
     /* Local variables */
-    extern /* Subroutine */ int hesspq_(doublereal *, doublereal *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
-	    doublereal *);
+    extern /* Subroutine */ int hesspq_(double *, double *,
+	    double *, int *, double *, int *, double *,
+	    double *);
 
-/*     real		x(n) */
-/*     double precision	H(lH, npq1) */
-/*  copyright 1991 Department of Statistics, University of Washington */
-/*  written by Chris Fraley */
-/* ----------------------------------------------------------------------------- */
-    /* Parameter adjustments */
+/*     float		x(n) 
+     double precision	H(lH, npq1) 
+  copyright 1991 Department of Statistics, University of Washington 
+  written by Chris Fraley 
+ ----------------------------------------------------------------------------- 
+     Parameter adjustments */
     --x;
     h_dim1 = *lh;
     h_offset = 1 + h_dim1;
@@ -169,42 +170,43 @@ static doublereal c_b78 = -1.;
 /*     call dcopy( npq1, zero, 0, H(1,1), lH) */
 /*     call dcopy( npq , zero, 0, H(2,1), 1) */
     return 0;
-} /* fdhpq_ */
+} /* fdhpq_ 
 
-/* ****************************************************************************** */
-/* ****************************************************************************** */
-/* Subroutine */ int fdcov_(doublereal *x, doublereal *d__, doublereal *hh, 
-	doublereal *hd, doublereal *cov, integer *lcov, doublereal *cor, 
-	integer *lcor, doublereal *se, doublereal *w, integer *info)
+ ****************************************************************************** 
+ ****************************************************************************** 
+ Subroutine */ int fdcov_(double *x, double *d__, double *hh,
+
+	double *hd, double *cov, int *lcov, double *cor,
+	int *lcor, double *se, double *w, int *info)
 {
     /* System generated locals */
-    integer cov_dim1, cov_offset, cor_dim1, cor_offset, i__1, i__2;
-    doublereal d__1, d__2;
+    int cov_dim1, cov_offset, cor_dim1, cor_offset, i__1, i__2;
+    double d__1, d__2;
 
     /* Builtin functions */
-    double sqrt(doublereal);
+    double sqrt(double);
 
     /* Local variables */
-    static integer i__, j, k, le, ls, lu, lv;
-    static doublereal temp;
-    extern /* Subroutine */ int dscal_(integer *, doublereal *, doublereal *, 
-	    integer *), dsvdc_(doublereal *, integer *, integer *, integer *, 
-	    doublereal *, doublereal *, doublereal *, integer *, doublereal *,
-	     integer *, doublereal *, integer *, integer *), dcopy_(integer *,
-	     doublereal *, integer *, doublereal *, integer *);
-    static integer lwork;
-    extern /* Subroutine */ int hesdpq_(doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *), invsvd_(doublereal *, 
-	    doublereal *, integer *, doublereal *, integer *, doublereal *, 
-	    integer *);
+    static int i__, j, k, le, ls, lu, lv;
+    static double temp;
+    extern /* Subroutine */ int dscal_(int *, double *, double *,
+	    int *), dsvdc_(double *, int *, int *, int *,
+	    double *, double *, double *, int *, double *,
+	     int *, double *, int *, int *), dcopy_(int *,
+	     double *, int *, double *, int *);
+    static int lwork;
+    extern /* Subroutine */ int hesdpq_(double *, double *,
+	    double *, double *, double *), invsvd_(double *,
+	    double *, int *, double *, int *, double *,
+	    int *);
 
-/*     real               x(n) */
-/*     double precision   d, hh, hd(npq1), cov(lcov,npq1), */
-/*    *                   cor(lcor,npq1), se(npq1) */
-/*  copyright 1991 Department of Statistics, University of Washington */
-/*  written by Chris Fraley */
-/* ----------------------------------------------------------------------------- */
-    /* Parameter adjustments */
+/*     float               x(n) 
+     double precision   d, hh, hd(npq1), cov(lcov,npq1), 
+    *                   cor(lcor,npq1), se(npq1) 
+  copyright 1991 Department of Statistics, University of Washington 
+  written by Chris Fraley 
+ ----------------------------------------------------------------------------- 
+     Parameter adjustments */
     --x;
     --hd;
     cov_dim1 = *lcov;
@@ -277,7 +279,7 @@ static doublereal c_b78 = -1.;
     if (temp == 1.) {
 	i__1 = dimsfd_2.npq1;
 	for (k = 1; k <= i__1; ++k) {
-	    dcopy_(&k, &cov[k * cov_dim1 + 1], &c__1, &cor[k * cor_dim1 + 1], 
+	    dcopy_(&k, &cov[k * cov_dim1 + 1], &c__1, &cor[k * cor_dim1 + 1],
 		    &c__1);
 	}
 	i__1 = dimsfd_2.npq1;
@@ -322,31 +324,32 @@ static doublereal c_b78 = -1.;
 	*info = 3;
     }
     return 0;
-} /* fdcov_ */
+} /* fdcov_ 
 
-/* ****************************************************************************** */
-/* ****************************************************************************** */
-/* Subroutine */ int invsvd_(doublereal *s, doublereal *u, integer *lu, 
-	doublereal *v, integer *lv, doublereal *cov, integer *lcov)
+ ****************************************************************************** 
+ ****************************************************************************** 
+ Subroutine */ int invsvd_(double *s, double *u, int *lu,
+
+	double *v, int *lv, double *cov, int *lcov)
 {
     /* System generated locals */
-    integer u_dim1, u_offset, v_dim1, v_offset, cov_dim1, cov_offset, i__1, 
+    int u_dim1, u_offset, v_dim1, v_offset, cov_dim1, cov_offset, i__1,
 	    i__2;
-    doublereal d__1;
+    double d__1;
 
     /* Local variables */
-    static integer i__, j, k;
-    static doublereal ss;
-    static integer krank;
-    extern /* Subroutine */ int dcopy_(integer *, doublereal *, integer *, 
-	    doublereal *, integer *), daxpy_(integer *, doublereal *, 
-	    doublereal *, integer *, doublereal *, integer *);
+    static int i__, j, k;
+    static double ss;
+    static int krank;
+    extern /* Subroutine */ int dcopy_(int *, double *, int *,
+	    double *, int *), daxpy_(int *, double *,
+	    double *, int *, double *, int *);
 
-/*     double precision   s(npq1), u(lu,npq1), v(lv,npq1), cov(lcov,npq1) */
-/* copyright 1991 Department of Statistics, University of Washington */
-/* written by Chris Fraley */
-/* ----------------------------------------------------------------------------- */
-    /* Parameter adjustments */
+/*     double precision   s(npq1), u(lu,npq1), v(lv,npq1), cov(lcov,npq1) 
+ copyright 1991 Department of Statistics, University of Washington 
+ written by Chris Fraley 
+ ----------------------------------------------------------------------------- 
+     Parameter adjustments */
     --s;
     u_dim1 = *lu;
     u_offset = 1 + u_dim1;
@@ -366,7 +369,7 @@ static doublereal c_b78 = -1.;
 	i__2 = dimsfd_2.npq1;
 	for (j = 1; j <= i__2; ++j) {
 	    if (ss < 1.) {
-		if ((d__1 = u[i__ + j * u_dim1], abs(d__1)) > ss * 
+		if ((d__1 = u[i__ + j * u_dim1], abs(d__1)) > ss *
 			machfd_1.fltmax) {
 		    krank = i__ - 1;
 		    hessfd_1.kcov = 1;
@@ -402,37 +405,38 @@ L100:
 	i__2 = dimsfd_2.npq1;
 	for (j = 1; j <= i__2; ++j) {
 	    d__1 = ss * u[j + k * u_dim1];
-	    daxpy_(&j, &d__1, &v[k * v_dim1 + 1], &c__1, &cov[j * cov_dim1 + 
+	    daxpy_(&j, &d__1, &v[k * v_dim1 + 1], &c__1, &cov[j * cov_dim1 +
 		    1], &c__1);
 	}
     }
     return 0;
-} /* invsvd_ */
+} /* invsvd_ 
 
-/* ****************************************************************************** */
-/* ****************************************************************************** */
-/* Subroutine */ int hesspq_(doublereal *qp, doublereal *a, doublereal *ajac, 
-	integer *lajac, doublereal *h__, integer *lh, doublereal *aij, 
-	doublereal *g)
+ ****************************************************************************** 
+ ****************************************************************************** 
+ Subroutine */ int hesspq_(double *qp, double *a, double *ajac,
+
+	int *lajac, double *h__, int *lh, double *aij,
+	double *g)
 {
     /* System generated locals */
-    integer ajac_dim1, ajac_offset, h_dim1, h_offset, i__1, i__2, i__3, i__4;
+    int ajac_dim1, ajac_offset, h_dim1, h_offset, i__1, i__2, i__3, i__4;
 
     /* Local variables */
-    static integer i__, j, k, l;
-    static doublereal s, t, u;
-    static integer km;
-    static doublereal fac;
-    extern doublereal ddot_(integer *, doublereal *, integer *, doublereal *, 
-	    integer *);
+    static int i__, j, k, l;
+    static double s, t, u;
+    static int km;
+    static double fac;
+    extern double ddot_(int *, double *, int *, double *,
+	    int *);
 
-/*     double precision	qp(npq), a(nm), ajac(nm,npq) */
-/*     double precision	H(lH,npq1), aij(nm), g(npq) */
-/* analytic Hessian with respect to p and q variables */
-/* copyright 1991 Department of Statistics, University of Washington */
-/* written by Chris Fraley */
-/* ----------------------------------------------------------------------------- */
-    /* Parameter adjustments */
+/*     double precision	qp(npq), a(nm), ajac(nm,npq) 
+     double precision	H(lH,npq1), aij(nm), g(npq) 
+ analytic Hessian with respect to p and q variables 
+ copyright 1991 Department of Statistics, University of Washington 
+ written by Chris Fraley 
+ ----------------------------------------------------------------------------- 
+     Parameter adjustments */
     --qp;
     --a;
     ajac_dim1 = *lajac;
@@ -445,7 +449,7 @@ L100:
     --g;
 
     /* Function Body */
-    fac = 1. / (filtfd_1.wnv * (doublereal) (dimsfd_2.nm - 1));
+    fac = 1. / (filtfd_1.wnv * (double) (dimsfd_2.nm - 1));
     if (dimsfd_2.nq != 0 && dimsfd_2.np != 0) {
 	i__1 = dimsfd_2.npq;
 	for (k = 1; k <= i__1; ++k) {
@@ -471,16 +475,16 @@ L100:
 		    }
 L301:
 		    if (km > j) {
-			aij[km] = ajac[km - j + (dimsfd_2.nq + i__) * 
+			aij[km] = ajac[km - j + (dimsfd_2.nq + i__) *
 				ajac_dim1] + t;
 		    } else {
 			aij[km] = t;
 		    }
 		}
-		s = ddot_(&dimsfd_2.nm, &ajac[(dimsfd_2.nq + i__) * ajac_dim1 
+		s = ddot_(&dimsfd_2.nm, &ajac[(dimsfd_2.nq + i__) * ajac_dim1
 			+ 1], &c__1, &ajac[j * ajac_dim1 + 1], &c__1);
 		t = ddot_(&dimsfd_2.nm, &a[1], &c__1, &aij[1], &c__1);
-		h__[i__ + 1 + (dimsfd_2.np + j + 1) * h_dim1] = -((doublereal)
+		h__[i__ + 1 + (dimsfd_2.np + j + 1) * h_dim1] = -((double)
 			 dimsfd_2.n) * (s + t - fac * 2. * u) * fac;
 	    }
 	}
@@ -516,8 +520,8 @@ L302:
 		s = ddot_(&dimsfd_2.nm, &ajac[i__ * ajac_dim1 + 1], &c__1, &
 			ajac[j * ajac_dim1 + 1], &c__1);
 		t = ddot_(&dimsfd_2.nm, &a[1], &c__1, &aij[1], &c__1);
-		h__[dimsfd_2.np + i__ + 1 + (dimsfd_2.np + j + 1) * h_dim1] = 
-			-((doublereal) dimsfd_2.n) * (s + t - fac * 2. * u) * 
+		h__[dimsfd_2.np + i__ + 1 + (dimsfd_2.np + j + 1) * h_dim1] =
+			-((double) dimsfd_2.n) * (s + t - fac * 2. * u) *
 			fac;
 	    }
 	}
@@ -541,52 +545,53 @@ L302:
 /* 303          continue */
 /*              aij(km) = t */
 /*            end do */
-		s = ddot_(&dimsfd_2.nm, &ajac[(dimsfd_2.nq + i__) * ajac_dim1 
+		s = ddot_(&dimsfd_2.nm, &ajac[(dimsfd_2.nq + i__) * ajac_dim1
 			+ 1], &c__1, &ajac[(dimsfd_2.nq + j) * ajac_dim1 + 1],
 			 &c__1);
 /*            t = ddot( nm, a             , 1, aij           , 1) */
 /*            H(i+1,j+1) = -dble(n)*((s + t) - two*fac*u)*fac */
-		h__[i__ + 1 + (j + 1) * h_dim1] = -((doublereal) dimsfd_2.n) *
+		h__[i__ + 1 + (j + 1) * h_dim1] = -((double) dimsfd_2.n) *
 			 (s - fac * 2. * u) * fac;
 	    }
 	}
     }
     return 0;
-} /* hesspq_ */
+} /* hesspq_ 
 
-/*     hesspq */
-/* ****************************************************************************** */
-/* ****************************************************************************** */
-/* Subroutine */ int hesdpq_(doublereal *x, doublereal *d__, doublereal *hh, 
-	doublereal *hd, doublereal *w)
+     hesspq 
+ ****************************************************************************** 
+ ****************************************************************************** 
+ Subroutine */ int hesdpq_(double *x, double *d__, double *hh,
+
+	double *hd, double *w)
 {
     /* System generated locals */
-    doublereal d__1;
+    double d__1;
 
     /* Builtin functions */
-    double log(doublereal);
+    double log(double);
 
     /* Local variables */
-    static doublereal fa, fb;
-    extern doublereal ddot_(integer *, doublereal *, integer *, doublereal *, 
-	    integer *);
-    extern /* Subroutine */ int ajqp_(doublereal *, doublereal *, doublereal *
-	    , integer *, integer *, doublereal *), dscal_(integer *, 
-	    doublereal *, doublereal *, integer *), dcopy_(integer *, 
-	    doublereal *, integer *, doublereal *, integer *), daxpy_(integer 
-	    *, doublereal *, doublereal *, integer *, doublereal *, integer *)
-	    , fdfilt_(doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *), gradpq_(doublereal *, doublereal *, doublereal *, 
-	    integer *);
-    static doublereal slogvk;
+    static double fa, fb;
+    extern double ddot_(int *, double *, int *, double *,
+	    int *);
+    extern /* Subroutine */ int ajqp_(double *, double *, double *
+	    , int *, int *, double *), dscal_(int *,
+	    double *, double *, int *), dcopy_(int *,
+	    double *, int *, double *, int *), daxpy_(int
+	    *, double *, double *, int *, double *, int *)
+	    , fdfilt_(double *, double *, double *, double *,
+	    double *, double *, double *, double *,
+	    double *), gradpq_(double *, double *, double *,
+	    int *);
+    static double slogvk;
 
-/*     real		 x(n) */
-/*     double precision	 d, hh, hd(npq1), w(*) */
-/* copyright 1991 Department of Statistics, University of Washington */
-/* written by Chris Fraley */
-/* ----------------------------------------------------------------------------- */
-    /* Parameter adjustments */
+/*     float		 x(n) 
+     double precision	 d, hh, hd(npq1), w(*) 
+ copyright 1991 Department of Statistics, University of Washington 
+ written by Chris Fraley 
+ ----------------------------------------------------------------------------- 
+     Parameter adjustments */
     --w;
     --hd;
     --x;
@@ -612,12 +617,12 @@ L302:
 		    woptfd_1.la], &c__1);
 	    d__1 = 1. / filtfd_1.wnv;
 	    dscal_(&dimsfd_2.npq, &d__1, &w[woptfd_1.lwa1], &c__1);
-	    filtfd_1.wnv /= (doublereal) (dimsfd_2.nm - 1);
+	    filtfd_1.wnv /= (double) (dimsfd_2.nm - 1);
 	} else {
 	    filtfd_1.wnv = ddot_(&dimsfd_2.nm, &w[wfilfd_1.ly], &c__1, &w[
-		    wfilfd_1.ly], &c__1) / (doublereal) (dimsfd_2.nm - 1);
+		    wfilfd_1.ly], &c__1) / (double) (dimsfd_2.nm - 1);
 	}
-	fa = -((doublereal) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) + 
+	fa = -((double) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) +
 		slogvk) / 2.;
 	if (*d__ + *hh < .5) {
 	    d__1 = *d__ + *hh;
@@ -635,12 +640,12 @@ L302:
 			woptfd_1.la], &c__1);
 		d__1 = 1. / filtfd_1.wnv;
 		dscal_(&dimsfd_2.npq, &d__1, &w[woptfd_1.lwa2], &c__1);
-		filtfd_1.wnv /= (doublereal) (dimsfd_2.nm - 1);
+		filtfd_1.wnv /= (double) (dimsfd_2.nm - 1);
 	    } else {
 		filtfd_1.wnv = ddot_(&dimsfd_2.nm, &w[wfilfd_1.ly], &c__1, &w[
-			wfilfd_1.ly], &c__1) / (doublereal) (dimsfd_2.nm - 1);
+			wfilfd_1.ly], &c__1) / (double) (dimsfd_2.nm - 1);
 	    }
-	    fb = -((doublereal) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) + 
+	    fb = -((double) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) +
 		    slogvk) / 2.;
 	    hd[1] = (fa + fb - filtfd_1.cllf * 2.) / (*hh * *hh);
 	} else {
@@ -659,12 +664,12 @@ L302:
 			woptfd_1.la], &c__1);
 		d__1 = 1. / filtfd_1.wnv;
 		dscal_(&dimsfd_2.npq, &d__1, &w[woptfd_1.lwa2], &c__1);
-		filtfd_1.wnv /= (doublereal) (dimsfd_2.nm - 1);
+		filtfd_1.wnv /= (double) (dimsfd_2.nm - 1);
 	    } else {
 		filtfd_1.wnv = ddot_(&dimsfd_2.nm, &w[wfilfd_1.ly], &c__1, &w[
-			wfilfd_1.ly], &c__1) / (doublereal) (dimsfd_2.nm - 1);
+			wfilfd_1.ly], &c__1) / (double) (dimsfd_2.nm - 1);
 	    }
-	    fb = -((doublereal) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) + 
+	    fb = -((double) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) +
 		    slogvk) / 2.;
 	    hd[1] = (filtfd_1.cllf + fb - fa * 2.) / (*hh * 2. * *hh);
 	}
@@ -684,12 +689,12 @@ L302:
 		    woptfd_1.la], &c__1);
 	    d__1 = 1. / filtfd_1.wnv;
 	    dscal_(&dimsfd_2.npq, &d__1, &w[woptfd_1.lwa1], &c__1);
-	    filtfd_1.wnv /= (doublereal) (dimsfd_2.nm - 1);
+	    filtfd_1.wnv /= (double) (dimsfd_2.nm - 1);
 	} else {
 	    filtfd_1.wnv = ddot_(&dimsfd_2.nm, &w[wfilfd_1.ly], &c__1, &w[
-		    wfilfd_1.ly], &c__1) / (doublereal) (dimsfd_2.nm - 1);
+		    wfilfd_1.ly], &c__1) / (double) (dimsfd_2.nm - 1);
 	}
-	fa = -((doublereal) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) + 
+	fa = -((double) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) +
 		slogvk) / 2.;
 	d__1 = *d__ + *hh * 2.;
 	fdfilt_(&x[1], &d__1, &w[wfilfd_1.ly], &slogvk, &w[wfilfd_1.lamk], &w[
@@ -706,12 +711,12 @@ L302:
 		    woptfd_1.la], &c__1);
 	    d__1 = 1. / filtfd_1.wnv;
 	    dscal_(&dimsfd_2.npq, &d__1, &w[woptfd_1.lwa1], &c__1);
-	    filtfd_1.wnv /= (doublereal) (dimsfd_2.nm - 1);
+	    filtfd_1.wnv /= (double) (dimsfd_2.nm - 1);
 	} else {
 	    filtfd_1.wnv = ddot_(&dimsfd_2.nm, &w[wfilfd_1.ly], &c__1, &w[
-		    wfilfd_1.ly], &c__1) / (doublereal) (dimsfd_2.nm - 1);
+		    wfilfd_1.ly], &c__1) / (double) (dimsfd_2.nm - 1);
 	}
-	fb = -((doublereal) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) + 
+	fb = -((double) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) +
 		slogvk) / 2.;
 	hd[1] = (filtfd_1.cllf + fb - fa * 2.) / (*hh * 2. * *hh);
     }
@@ -720,31 +725,31 @@ L302:
     }
     daxpy_(&dimsfd_2.npq, &c_b78, &w[woptfd_1.lwa2], &c__1, &w[woptfd_1.lwa1],
 	     &c__1);
-    d__1 = (doublereal) dimsfd_2.n / (*hh * 2.);
+    d__1 = (double) dimsfd_2.n / (*hh * 2.);
     dscal_(&dimsfd_2.npq, &d__1, &w[woptfd_1.lwa1], &c__1);
     dcopy_(&dimsfd_2.npq, &w[woptfd_1.lwa1], &c__1, &hd[2], &c__1);
     return 0;
-} /* hesdpq_ */
+} /* hesdpq_ 
 
-/*     hesdpq */
-/* ****************************************************************************** */
-/* ****************************************************************************** */
-/* Subroutine */ int gradpq_(doublereal *g, doublereal *a, doublereal *ajac, 
-	integer *ljac)
+     hesdpq 
+ ****************************************************************************** 
+ ****************************************************************************** 
+ Subroutine */ int gradpq_(double *g, double *a, double *ajac,
+
+	int *ljac)
 {
     /* System generated locals */
-    integer ajac_dim1, ajac_offset, i__1;
+    int ajac_dim1, ajac_offset, i__1;
 
     /* Local variables */
-    static integer i__, j;
-    extern doublereal ddot_(integer *, doublereal *, integer *, doublereal *, 
-	    integer *);
+    static int i__, j;
+    extern double ddot_(int *, double *, int *, double *, int *);
 
-/*     double precision	g(npq), a(nm), ajac(nm,npq) */
-/* copyright 1991 Department of Statistics, University of Washington */
-/* written by Chris Fraley */
-/* ------------------------------------------------------------------------------ */
-    /* Parameter adjustments */
+/*     double precision	g(npq), a(nm), ajac(nm,npq) 
+ copyright 1991 Department of Statistics, University of Washington 
+ written by Chris Fraley 
+ ------------------------------------------------------------------------------ 
+     Parameter adjustments */
     --g;
     --a;
     ajac_dim1 = *ljac;
@@ -755,14 +760,14 @@ L302:
     if (dimsfd_2.np != 0) {
 	i__1 = dimsfd_2.np;
 	for (i__ = 1; i__ <= i__1; ++i__) {
-	    g[i__] = ddot_(&dimsfd_2.nm, &a[1], &c__1, &ajac[(dimsfd_2.nq + 
+	    g[i__] = ddot_(&dimsfd_2.nm, &a[1], &c__1, &ajac[(dimsfd_2.nq +
 		    i__) * ajac_dim1 + 1], &c__1);
 	}
     }
     if (dimsfd_2.nq != 0) {
 	i__1 = dimsfd_2.nq;
 	for (j = 1; j <= i__1; ++j) {
-	    g[dimsfd_2.np + j] = ddot_(&dimsfd_2.nm, &a[1], &c__1, &ajac[j * 
+	    g[dimsfd_2.np + j] = ddot_(&dimsfd_2.nm, &a[1], &c__1, &ajac[j *
 		    ajac_dim1 + 1], &c__1);
 	}
     }
