@@ -37,9 +37,10 @@ fracdiff <- function(x, nar = 0, nma = 0,
     n <- length(x)
     npq <- nar + nma
     npq1 <- npq + 1
-    lwork <- max(npq + 2 * (n + M),
-                 3 * n + (n + 6) * npq + npq %/% 2 + 1,
-                 (3 + 2 * npq1) * npq1 + 1)
+    lenw <- max(npq + 2*(n + M),
+                3*n + (n+6)*npq + npq %/% 2 + 1,
+                (3 + 2*npq1) * npq1 + 1)
+    lenw <- as.integer(lenw)
     ar[is.na(ar)] <- 0
     ma[is.na(ma)] <- 0
     if(is.null(dtol))
@@ -57,8 +58,8 @@ fracdiff <- function(x, nar = 0, nma = 0,
                        d = double(1),
                        ar = as.double(ar),
                        ma = as.double(ma),
-                       w = double(lwork),
-                       as.integer(lwork),
+                       w = double(lenw),
+                       lenw = lenw,
                        info = integer(1),
                        .Machine$double.xmin,
                        .Machine$double.xmax,
@@ -67,7 +68,8 @@ fracdiff <- function(x, nar = 0, nma = 0,
                        PACKAGE = "fracdiff")
     if(result$info)
         switch(result$info,
-               stop("insufficient workspace"),
+               stop("insufficient workspace; need ", result$lenw,
+                    " instead of just ", lenw),
                stop("error in gamma function"),
                stop("invalid MINPACK input"),
                warning("warning in gamma function"),
@@ -113,10 +115,11 @@ fracdiff <- function(x, nar = 0, nma = 0,
     se.ok <- temp$info != 0 || temp$info < 3
     list(log.likelihood = result$hood,
          d = result$d, ar = result$ar, ma = result$ma,
-         covariance.dpq = array(temp$cov, c(npq1, npq1), list(nam, nam)),
-         stderror.dpq = if(se.ok) temp$se, # else NULL
-         correlation.dpq = if(se.ok) array(temp$cor, c(npq1, npq1)), # else NULL
-         h = temp$h, d.tol = result$dtol, M = M, hessian.dpq = hess)
+         covariance.dpq  = array(temp$cov, c(npq1, npq1), list(nam, nam)),
+         stderror.dpq    = if(se.ok) temp$se, # else NULL
+         correlation.dpq = if(se.ok) array(temp$cor, c(npq1, npq1)),
+         h = temp$h, d.tol = result$dtol, M = M, hessian.dpq = hess,
+         length.w = lenw)
 }
 
 fracdiff.var <- function(x, fracdiff.out, h)
