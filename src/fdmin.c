@@ -1,3 +1,6 @@
+/* Produced by
+ * $Id: f2c-clean,v 1.10 2002/03/28 16:37:27 maechler Exp $
+ */
 /* fdmin.f -- translated by f2c (version 20031025).
    You must link the resulting object file with libf2c:
 	on Microsoft Windows system, link with libf2c.lib;
@@ -8,18 +11,33 @@
 	Source for libf2c is in /netlib/f2c/libf2c.zip, e.g.,
 
 		http://www.netlib.org/f2c/libf2c.zip
-*/
 
-#include "f2c.h"
+
+-- be brave, try without >>>
+ * #include "f2c.h" /* <<<<< ------*/
+/* but need this */
+typedef /* Subroutine */ int (*S_fp)();
+
+#include <math.h>
+#ifndef max
+# define	max(a, b) 		((a) < (b) ? (b) : (a))
+#endif
+#ifndef min
+# define	min(a, b)		((a) > (b) ? (b) : (a))
+#endif
+#ifndef abs
+# define	abs(x)			((x) >= 0 ? (x) : -(x))
+#endif
+
 
 /* Common Block Declarations */
 
 union {
     struct {
-	doublereal fltmin, fltmax, epsmin, epsmch;
+	double fltmin, fltmax, epsmin, epsmch;
     } _1;
     struct {
-	doublereal fltmin, fltmax, epsmin, epsmax;
+	double fltmin, fltmax, epsmin, epsmax;
     } _2;
 } machfd_;
 
@@ -27,245 +45,252 @@ union {
 #define machfd_2 (machfd_._2)
 
 struct {
-    doublereal epsp25, epspt3, epspt5, epsp75, bignum;
+    double epsp25, epspt3, epspt5, epsp75, bignum;
 } mauxfd_;
 
 #define mauxfd_1 mauxfd_
 
 struct {
-    doublereal told, tolf, tolx, tolg, fnorm, delta, gnorm;
+    double told, tolf, tolx, tolg, fnorm, delta, gnorm;
 } tolsfd_;
 
 #define tolsfd_1 tolsfd_
 
 /* Table of constant values */
 
-static logical c_true = TRUE_;
+static /*logical*/int c_true = (1);
 
-/* Subroutine */ int lmder1_(S_fp fcn, integer *m, integer *n, doublereal *x, 
-	doublereal *fvec, doublereal *fjac, integer *ldfjac, doublereal *ftol,
-	 doublereal *xtol, doublereal *gtol, integer *maxfev, doublereal *
-	diag, integer *mode, doublereal *factor, integer *info, integer *nfev,
-	 integer *njev, integer *ipvt, doublereal *qtf, doublereal *wa1, 
-	doublereal *wa2, doublereal *wa3, doublereal *wa4, doublereal *y)
+/* Subroutine */ int lmder1_(S_fp fcn, int *m, int *n, double *x,
+
+	double *fvec, double *fjac, int *ldfjac, double *ftol,
+	 double *xtol, double *gtol, int *maxfev, double *
+	diag, int *mode, double *factor, int *info, int *nfev,
+	 int *njev, int *ipvt, double *qtf, double *wa1,
+
+	double *wa2, double *wa3, double *wa4, double *y)
 {
     /* Initialized data */
 
-    static doublereal one = 1.;
-    static doublereal p1 = .1;
-    static doublereal p5 = .5;
-    static doublereal p25 = .25;
-    static doublereal p75 = .75;
-    static doublereal p0001 = 1e-4;
-    static doublereal zero = 0.;
+    static double one = 1.;
+    static double p1 = .1;
+    static double p5 = .5;
+    static double p25 = .25;
+    static double p75 = .75;
+    static double p0001 = 1e-4;
+    static double zero = 0.;
 
     /* System generated locals */
-    integer fjac_dim1, fjac_offset, i__1, i__2;
-    doublereal d__1, d__2, d__3;
+    int fjac_dim1, fjac_offset, i__1, i__2;
+    double d__1, d__2, d__3;
 
     /* Builtin functions */
-    double sqrt(doublereal);
+    double sqrt(double);
 
     /* Local variables */
-    static integer i__, j, l;
-    static doublereal par, sum;
-    static integer iter;
-    static doublereal temp, temp1, temp2;
-    static integer iflag;
-    extern /* Subroutine */ int qrfac_(integer *, integer *, doublereal *, 
-	    integer *, logical *, integer *, integer *, doublereal *, 
-	    doublereal *, doublereal *), lmpar_(integer *, doublereal *, 
-	    integer *, integer *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *, doublereal *, doublereal *, doublereal *, 
-	    doublereal *);
-    static doublereal ratio;
-    extern doublereal enorm_(integer *, doublereal *);
-    static doublereal pnorm, xnorm, fnorm1, actred, dirder, prered;
-    static integer nprint;
+    static int i__, j, l;
+    static double par, sum;
+    static int iter;
+    static double temp, temp1, temp2;
+    static int iflag;
+    extern /* Subroutine */ int qrfac_(int *, int *, double *,
 
-/*     ********** */
+	    int *, /*logical*/int *, int *, int *, double *,
 
-/*     subroutine lmder */
+	    double *, double *), lmpar_(int *, double *,
 
-/*     the purpose of lmder is to minimize the sum of the squares of */
-/*     m nonlinear functions in n variables by a modification of */
-/*     the levenberg-marquardt algorithm. the user must provide a */
-/*     subroutine which calculates the functions and the jacobian. */
+	    int *, int *, double *, double *, double *,
 
-/*     the subroutine statement is */
-/*       subroutine lmder(fcn,m,n,x,fvec,fjac,ldfjac,ftol,xtol,gtol, */
-/*                        maxfev,diag,mode,factor,nprint,info,nfev, */
-/*                        njev,ipvt,qtf,wa1,wa2,wa3,wa4) */
+	    double *, double *, double *, double *,
 
-/*     where */
+	    double *);
+    static double ratio;
+    extern double enorm_(int *, double *);
+    static double pnorm, xnorm, fnorm1, actred, dirder, prered;
+    static int nprint;
 
-/*       fcn is the name of the user-supplied subroutine which */
-/*         calculates the functions and the jacobian. fcn must */
-/*         be declared in an external statement in the user */
-/*         calling program, and should be written as follows. */
+/*     **********
 
-/*         subroutine fcn(m,n,x,fvec,fjac,ldfjac,iflag) */
-/*         integer m,n,ldfjac,iflag */
-/*         double precision x(n),fvec(m),fjac(ldfjac,n) */
-/*         ---------- */
-/*         if iflag = 1 calculate the functions at x and */
-/*         return this vector in fvec. do not alter fjac. */
-/*         if iflag = 2 calculate the jacobian at x and */
-/*         return this matrix in fjac. do not alter fvec. */
-/*         ---------- */
-/*         return */
-/*         end */
+     subroutine lmder
 
-/*         the value of iflag should not be changed by fcn unless */
-/*         the user wants to terminate execution of lmder. */
-/*         in this case set iflag to a negative integer. */
+     the purpose of lmder is to minimize the sum of the squares of
+     m nonlinear functions in n variables by a modification of
+     the levenberg-marquardt algorithm. the user must provide a
+     subroutine which calculates the functions and the jacobian.
 
-/*       m is a positive integer input variable set to the number */
-/*         of functions. */
+     the subroutine statement is
+       subroutine lmder(fcn,m,n,x,fvec,fjac,ldfjac,ftol,xtol,gtol,
+                        maxfev,diag,mode,factor,nprint,info,nfev,
+                        njev,ipvt,qtf,wa1,wa2,wa3,wa4)
 
-/*       n is a positive integer input variable set to the number */
-/*         of variables. n must not exceed m. */
+     where
 
-/*       x is an array of length n. on input x must contain */
-/*         an initial estimate of the solution vector. on output x */
-/*         contains the final estimate of the solution vector. */
+       fcn is the name of the user-supplied subroutine which
+         calculates the functions and the jacobian. fcn must
+         be declared in an external statement in the user
+         calling program, and should be written as follows.
 
-/*       fvec is an output array of length m which contains */
-/*         the functions evaluated at the output x. */
+         subroutine fcn(m,n,x,fvec,fjac,ldfjac,iflag)
+         int m,n,ldfjac,iflag
+         double precision x(n),fvec(m),fjac(ldfjac,n)
+         ----------
+         if iflag = 1 calculate the functions at x and
+         return this vector in fvec. do not alter fjac.
+         if iflag = 2 calculate the jacobian at x and
+         return this matrix in fjac. do not alter fvec.
+         ----------
+         return
+         end
 
-/*       fjac is an output m by n array. the upper n by n submatrix */
-/*         of fjac contains an upper triangular matrix r with */
-/*         diagonal elements of nonincreasing magnitude such that */
+         the value of iflag should not be changed by fcn unless
+         the user wants to terminate execution of lmder.
+         in this case set iflag to a negative int.
 
-/*                t     t           t */
-/*               p *(jac *jac)*p = r *r, */
+       m is a positive int input variable set to the number
+         of functions.
 
-/*         where p is a permutation matrix and jac is the final */
-/*         calculated jacobian. column j of p is column ipvt(j) */
-/*         (see below) of the identity matrix. the lower trapezoidal */
-/*         part of fjac contains information generated during */
-/*         the computation of r. */
+       n is a positive int input variable set to the number
+         of variables. n must not exceed m.
 
-/*       ldfjac is a positive integer input variable not less than m */
-/*         which specifies the leading dimension of the array fjac. */
+       x is an array of length n. on input x must contain
+         an initial estimate of the solution vector. on output x
+         contains the final estimate of the solution vector.
 
-/*       ftol is a nonnegative input variable. termination */
-/*         occurs when both the actual and predicted relative */
-/*         reductions in the sum of squares are at most ftol. */
-/*         therefore, ftol measures the relative error desired */
-/*         in the sum of squares. */
+       fvec is an output array of length m which contains
+         the functions evaluated at the output x.
 
-/*       xtol is a nonnegative input variable. termination */
-/*         occurs when the relative error between two consecutive */
-/*         iterates is at most xtol. therefore, xtol measures the */
-/*         relative error desired in the approximate solution. */
+       fjac is an output m by n array. the upper n by n submatrix
+         of fjac contains an upper triangular matrix r with
+         diagonal elements of nonincreasing magnitude such that
 
-/*       gtol is a nonnegative input variable. termination */
-/*         occurs when the cosine of the angle between fvec and */
-/*         any column of the jacobian is at most gtol in absolute */
-/*         value. therefore, gtol measures the orthogonality */
-/*         desired between the function vector and the columns */
-/*         of the jacobian. */
+                t     t           t
+               p *(jac *jac)*p = r *r,
 
-/*       maxfev is a positive integer input variable. termination */
-/*         occurs when the number of calls to fcn with iflag = 1 */
-/*         has reached maxfev. */
+         where p is a permutation matrix and jac is the final
+         calculated jacobian. column j of p is column ipvt(j)
+         (see below) of the identity matrix. the lower trapezoidal
+         part of fjac contains information generated during
+         the computation of r.
 
-/*       diag is an array of length n. if mode = 1 (see */
-/*         below), diag is internally set. if mode = 2, diag */
-/*         must contain positive entries that serve as */
-/*         multiplicative scale factors for the variables. */
+       ldfjac is a positive int input variable not less than m
+         which specifies the leading dimension of the array fjac.
 
-/*       mode is an integer input variable. if mode = 1, the */
-/*         variables will be scaled internally. if mode = 2, */
-/*         the scaling is specified by the input diag. other */
-/*         values of mode are equivalent to mode = 1. */
+       ftol is a nonnegative input variable. termination
+         occurs when both the actual and predicted relative
+         reductions in the sum of squares are at most ftol.
+         therefore, ftol measures the relative error desired
+         in the sum of squares.
 
-/*       factor is a positive input variable used in determining the */
-/*         initial step bound. this bound is set to the product of */
-/*         factor and the euclidean norm of diag*x if nonzero, or else */
-/*         to factor itself. in most cases factor should lie in the */
-/*         interval (.1,100.).100. is a generally recommended value. */
+       xtol is a nonnegative input variable. termination
+         occurs when the relative error between two consecutive
+         iterates is at most xtol. therefore, xtol measures the
+         relative error desired in the approximate solution.
 
-/*       nprint is an integer input variable that enables controlled */
-/*         printing of iterates if it is positive. in this case, */
-/*         fcn is called with iflag = 0 at the beginning of the first */
-/*         iteration and every nprint iterations thereafter and */
-/*         immediately prior to return, with x, fvec, and fjac */
-/*         available for printing. fvec and fjac should not be */
-/*         altered. if nprint is not positive, no special calls */
-/*         of fcn with iflag = 0 are made. */
+       gtol is a nonnegative input variable. termination
+         occurs when the cosine of the angle between fvec and
+         any column of the jacobian is at most gtol in absolute
+         value. therefore, gtol measures the orthogonality
+         desired between the function vector and the columns
+         of the jacobian.
 
-/*       info is an integer output variable. if the user has */
-/*         terminated execution, info is set to the (negative) */
-/*         value of iflag. see description of fcn. otherwise, */
-/*         info is set as follows. */
+       maxfev is a positive int input variable. termination
+         occurs when the number of calls to fcn with iflag = 1
+         has reached maxfev.
 
-/*         info = 0  improper input parameters. */
+       diag is an array of length n. if mode = 1 (see
+         below), diag is internally set. if mode = 2, diag
+         must contain positive entries that serve as
+         multiplicative scale factors for the variables.
 
-/*         info = 1  both actual and predicted relative reductions */
-/*                   in the sum of squares are at most ftol. */
+       mode is an int input variable. if mode = 1, the
+         variables will be scaled internally. if mode = 2,
+         the scaling is specified by the input diag. other
+         values of mode are equivalent to mode = 1.
 
-/*         info = 2  relative error between two consecutive iterates */
-/*                   is at most xtol. */
+       factor is a positive input variable used in determining the
+         initial step bound. this bound is set to the product of
+         factor and the euclidean norm of diag*x if nonzero, or else
+         to factor itself. in most cases factor should lie in the
+         interval (.1,100.).100. is a generally recommended value.
 
-/*         info = 3  conditions for info = 1 and info = 2 both hold. */
+       nprint is an int input variable that enables controlled
+         printing of iterates if it is positive. in this case,
+         fcn is called with iflag = 0 at the beginning of the first
+         iteration and every nprint iterations thereafter and
+         immediately prior to return, with x, fvec, and fjac
+         available for printing. fvec and fjac should not be
+         altered. if nprint is not positive, no special calls
+         of fcn with iflag = 0 are made.
 
-/*         info = 4  the cosine of the angle between fvec and any */
-/*                   column of the jacobian is at most gtol in */
-/*                   absolute value. */
+       info is an int output variable. if the user has
+         terminated execution, info is set to the (negative)
+         value of iflag. see description of fcn. otherwise,
+         info is set as follows.
 
-/*         info = 5  number of calls to fcn with iflag = 1 has */
-/*                   reached maxfev. */
+         info = 0  improper input parameters.
 
-/*         info = 6  ftol is too small. no further reduction in */
-/*                   the sum of squares is possible. */
+         info = 1  both actual and predicted relative reductions
+                   in the sum of squares are at most ftol.
 
-/*         info = 7  xtol is too small. no further improvement in */
-/*                   the approximate solution x is possible. */
+         info = 2  relative error between two consecutive iterates
+                   is at most xtol.
 
-/*         info = 8  gtol is too small. fvec is orthogonal to the */
-/*                   columns of the jacobian to machine precision. */
+         info = 3  conditions for info = 1 and info = 2 both hold.
 
-/*       nfev is an integer output variable set to the number of */
-/*         calls to fcn with iflag = 1. */
+         info = 4  the cosine of the angle between fvec and any
+                   column of the jacobian is at most gtol in
+                   absolute value.
 
-/*       njev is an integer output variable set to the number of */
-/*         calls to fcn with iflag = 2. */
+         info = 5  number of calls to fcn with iflag = 1 has
+                   reached maxfev.
 
-/*       ipvt is an integer output array of length n. ipvt */
-/*         defines a permutation matrix p such that jac*p = q*r, */
-/*         where jac is the final calculated jacobian, q is */
-/*         orthogonal (not stored), and r is upper triangular */
-/*         with diagonal elements of nonincreasing magnitude. */
-/*         column j of p is column ipvt(j) of the identity matrix. */
+         info = 6  ftol is too small. no further reduction in
+                   the sum of squares is possible.
 
-/*       qtf is an output array of length n which contains */
-/*         the first n elements of the vector (q transpose)*fvec. */
+         info = 7  xtol is too small. no further improvement in
+                   the approximate solution x is possible.
 
-/*       wa1, wa2, and wa3 are work arrays of length n. */
+         info = 8  gtol is too small. fvec is orthogonal to the
+                   columns of the jacobian to machine precision.
 
-/*       wa4 is a work array of length m. */
+       nfev is an int output variable set to the number of
+         calls to fcn with iflag = 1.
 
-/*     subprograms called */
+       njev is an int output variable set to the number of
+         calls to fcn with iflag = 2.
 
-/*       user-supplied ...... fcn */
+       ipvt is an int output array of length n. ipvt
+         defines a permutation matrix p such that jac*p = q*r,
+         where jac is the final calculated jacobian, q is
+         orthogonal (not stored), and r is upper triangular
+         with diagonal elements of nonincreasing magnitude.
+         column j of p is column ipvt(j) of the identity matrix.
 
-/*       minpack-supplied ... dpmpar,enorm,lmpar,qrfac */
+       qtf is an output array of length n which contains
+         the first n elements of the vector (q transpose)*fvec.
 
-/*       fortran-supplied ... dabs,dmax1,dmin1,dsqrt,mod */
+       wa1, wa2, and wa3 are work arrays of length n.
 
-/*     argonne national laboratory. minpack project. march 1980. */
-/*     burton s. garbow, kenneth e. hillstrom, jorge j. more */
+       wa4 is a work array of length m.
 
-/*     ********** */
-/*     double precision dpmpar,enorm */
+     subprograms called
 
-/*     epsmch is the machine precision. */
+       user-supplied ...... fcn
 
-/*     epsmch = dpmpar(1) */
+       minpack-supplied ... dpmpar,enorm,lmpar,qrfac
 
-    /* Parameter adjustments */
+       fortran-supplied ... fabs,dmax1,dmin1,dsqrt,mod
+
+     argonne national laboratory. minpack project. march 1980.
+     burton s. garbow, kenneth e. hillstrom, jorge j. more
+
+     **********
+     double precision dpmpar,enorm
+
+     epsmch is the machine precision.
+
+     epsmch = dpmpar(1)
+
+     Parameter adjustments */
     --wa4;
     --fvec;
     --wa3;
@@ -289,24 +314,23 @@ static logical c_true = TRUE_;
     *njev = 0;
 /*     check the input parameters for errors. */
 
-    if (*n <= 0 || *m < *n || *ldfjac < *m || *ftol < zero || *xtol < zero || 
+    if (*n <= 0 || *m < *n || *ldfjac < *m || *ftol < zero || *xtol < zero ||
+
 	    *gtol < zero || *maxfev <= 0 || *factor <= zero) {
 	goto L300;
     }
     if (*mode != 2) {
 	goto L20;
     }
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	if (diag[j] <= zero) {
 	    goto L300;
 	}
-/* L10: */
     }
 L20:
 
-/*     evaluate the function at the starting point */
-/*     and calculate its norm. */
+/*     evaluate the function at the starting point
+     and calculate its norm. */
 
     iflag = 1;
     (*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], ldfjac, &iflag, &y[1]);
@@ -355,8 +379,8 @@ L40:
     qrfac_(m, n, &fjac[fjac_offset], ldfjac, &c_true, &ipvt[1], n, &wa1[1], &
 	    wa2[1], &wa3[1]);
 
-/*        on the first iteration and if mode is 1, scale according */
-/*        to the norms of the columns of the initial jacobian. */
+/*        on the first iteration and if mode is 1, scale according
+        to the norms of the columns of the initial jacobian. */
 
     if (iter != 1) {
 	goto L80;
@@ -364,23 +388,19 @@ L40:
     if (*mode == 2) {
 	goto L60;
     }
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	diag[j] = wa2[j];
 	if (wa2[j] == zero) {
 	    diag[j] = one;
 	}
-/* L50: */
     }
 L60:
 
-/*        on the first iteration, calculate the norm of the scaled x */
-/*        and initialize the step bound delta. */
+/*        on the first iteration, calculate the norm of the scaled x
+        and initialize the step bound delta. */
 
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	wa3[j] = diag[j] * x[j];
-/* L70: */
     }
     xnorm = enorm_(n, &wa3[1]);
     tolsfd_1.delta = *factor * xnorm;
@@ -389,35 +409,27 @@ L60:
     }
 L80:
 
-/*        form (q transpose)*fvec and store the first n components in */
-/*        qtf. */
+/*        form (q transpose)*fvec and store the first n components in
+        qtf. */
 
-    i__1 = *m;
-    for (i__ = 1; i__ <= i__1; ++i__) {
+    for (i__ = 1; i__ <= *m; ++i__) { /* f2c-clean: s {i__1} {*m} */
 	wa4[i__] = fvec[i__];
-/* L90: */
     }
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	if (fjac[j + j * fjac_dim1] == zero) {
 	    goto L120;
 	}
 	sum = zero;
-	i__2 = *m;
-	for (i__ = j; i__ <= i__2; ++i__) {
+	for (i__ = j; i__ <= *m; ++i__) { /* f2c-clean: s {i__2} {*m} */
 	    sum += fjac[i__ + j * fjac_dim1] * wa4[i__];
-/* L100: */
 	}
 	temp = -sum / fjac[j + j * fjac_dim1];
-	i__2 = *m;
-	for (i__ = j; i__ <= i__2; ++i__) {
+	for (i__ = j; i__ <= *m; ++i__) { /* f2c-clean: s {i__2} {*m} */
 	    wa4[i__] += fjac[i__ + j * fjac_dim1] * temp;
-/* L110: */
 	}
 L120:
 	fjac[j + j * fjac_dim1] = wa1[j];
 	qtf[j] = wa4[j];
-/* L130: */
     }
 
 /*        compute the norm of the scaled gradient. */
@@ -426,23 +438,19 @@ L120:
     if (tolsfd_1.fnorm == zero) {
 	goto L170;
     }
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	l = ipvt[j];
 	if (wa2[l] == zero) {
 	    goto L150;
 	}
 	sum = zero;
-	i__2 = j;
-	for (i__ = 1; i__ <= i__2; ++i__) {
+	for (i__ = 1; i__ <= j; ++i__) { /* f2c-clean: s {i__2} {j} */
 	    sum += fjac[i__ + j * fjac_dim1] * (qtf[i__] / tolsfd_1.fnorm);
-/* L140: */
 	}
 /* Computing MAX */
-	d__2 = tolsfd_1.gnorm, d__3 = (d__1 = sum / wa2[l], abs(d__1));
+	d__2 = tolsfd_1.gnorm, d__3 = fabs(sum / wa2[l]);
 	tolsfd_1.gnorm = max(d__2,d__3);
 L150:
-/* L160: */
 	;
     }
 L170:
@@ -461,12 +469,10 @@ L170:
     if (*mode == 2) {
 	goto L190;
     }
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
-/* Computing MAX */
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n}
+ Computing MAX */
 	d__1 = diag[j], d__2 = wa2[j];
 	diag[j] = max(d__1,d__2);
-/* L180: */
     }
 L190:
 
@@ -480,12 +486,10 @@ L200:
 
 /*           store the direction p and x + p. calculate the norm of p. */
 
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	wa1[j] = -wa1[j];
 	wa2[j] = x[j] + wa1[j];
 	wa3[j] = diag[j] * wa1[j];
-/* L210: */
     }
     pnorm = enorm_(n, &wa3[1]);
 
@@ -515,22 +519,18 @@ L200:
 	d__1 = fnorm1 / tolsfd_1.fnorm;
 	actred = one - d__1 * d__1;
     }
-/*          actred = (fnorm*fnorm - fnorm1*fnorm1) */
+/*          actred = (fnorm*fnorm - fnorm1*fnorm1)
 
-/*           compute the scaled predicted reduction and */
-/*           the scaled directional derivative. */
+           compute the scaled predicted reduction and
+           the scaled directional derivative. */
 
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	wa3[j] = zero;
 	l = ipvt[j];
 	temp = wa1[l];
-	i__2 = j;
-	for (i__ = 1; i__ <= i__2; ++i__) {
+	for (i__ = 1; i__ <= j; ++i__) { /* f2c-clean: s {i__2} {j} */
 	    wa3[i__] += fjac[i__ + j * fjac_dim1] * temp;
-/* L220: */
 	}
-/* L230: */
     }
     temp1 = enorm_(n, &wa3[1]) / tolsfd_1.fnorm;
     temp2 = sqrt(par) * pnorm / tolsfd_1.fnorm;
@@ -539,17 +539,17 @@ L200:
 /* Computing 2nd power */
     d__2 = temp2;
     prered = d__1 * d__1 + d__2 * d__2 / p5;
-/*           temp1  = enorm(n,wa3) */
-/*           temp2  = (dsqrt(par)*pnorm) */
-/*           prered = (temp1**2 + 2.d0*temp2**2) */
-/* Computing 2nd power */
+/*           temp1  = enorm(n,wa3)
+           temp2  = (dsqrt(par)*pnorm)
+           prered = (temp1**2 + 2.d0*temp2**2)
+ Computing 2nd power */
     d__1 = temp1;
 /* Computing 2nd power */
     d__2 = temp2;
     dirder = -(d__1 * d__1 + d__2 * d__2);
 
-/*           compute the ratio of the actual to the predicted */
-/*           reduction. */
+/*           compute the ratio of the actual to the predicted
+           reduction. */
 
     ratio = zero;
     if (prered != zero) {
@@ -593,16 +593,12 @@ L260:
 /*           successful iteration. update x, fvec, and their norms. */
 
 
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	x[j] = wa2[j];
 	wa2[j] = diag[j] * x[j];
-/* L270: */
     }
-    i__1 = *m;
-    for (i__ = 1; i__ <= i__1; ++i__) {
+    for (i__ = 1; i__ <= *m; ++i__) { /* f2c-clean: s {i__1} {*m} */
 	fvec[i__] = wa4[i__];
-/* L280: */
     }
     xnorm = enorm_(n, &wa2[1]);
     tolsfd_1.fnorm = fnorm1;
@@ -620,7 +616,8 @@ L290:
     if (tolsfd_1.delta <= *xtol) {
 	*info = 2;
     }
-    if (abs(actred) <= *ftol && prered <= *ftol && p5 * ratio <= one && *info 
+    if (abs(actred) <= *ftol && prered <= *ftol && p5 * ratio <= one && *info
+
 	    == 2) {
 	*info = 3;
     }
@@ -633,7 +630,8 @@ L290:
     if (*nfev >= *maxfev) {
 	*info = 5;
     }
-    if (abs(actred) <= machfd_1.epsmch && prered <= machfd_1.epsmch && p5 * 
+    if (abs(actred) <= machfd_1.epsmch && prered <= machfd_1.epsmch && p5 *
+
 	    ratio <= one) {
 	*info = 6;
     }
@@ -668,67 +666,67 @@ L300:
 	(*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], ldfjac, &iflag, &y[1]);
     }
     return 0;
-} /* lmder1_ */
+} /* lmder1_
 
-/*     	subroutine lmder1 */
-doublereal enorm_(integer *n, doublereal *x)
+     	subroutine lmder1 */
+double enorm_(int *n, double *x)
 {
     /* Initialized data */
 
-    static doublereal one = 1.;
-    static doublereal zero = 0.;
-    static doublereal rdwarf = 3.834e-20;
-    static doublereal rgiant = 1.304e19;
+    static double one = 1.;
+    static double zero = 0.;
+    static double rdwarf = 3.834e-20;
+    static double rgiant = 1.304e19;
 
     /* System generated locals */
-    integer i__1;
-    doublereal ret_val, d__1;
+    int i__1;
+    double ret_val, d__1;
 
     /* Builtin functions */
-    double sqrt(doublereal);
+    double sqrt(double);
 
     /* Local variables */
-    static integer i__;
-    static doublereal s1, s2, s3, xabs, x1max, x3max, agiant, floatn;
+    static int i__;
+    static double s1, s2, s3, xabs, x1max, x3max, agiant, floatn;
 
-/*     ********** */
+/*     **********
 
-/*     function enorm */
+     function enorm
 
-/*     given an n-vector x, this function calculates the */
-/*     euclidean norm of x. */
+     given an n-vector x, this function calculates the
+     euclidean norm of x.
 
-/*     the euclidean norm is computed by accumulating the sum of */
-/*     squares in three different sums. the sums of squares for the */
-/*     small and large components are scaled so that no overflows */
-/*     occur. non-destructive underflows are permitted. underflows */
-/*     and overflows do not occur in the computation of the unscaled */
-/*     sum of squares for the intermediate components. */
-/*     the definitions of small, intermediate and large components */
-/*     depend on two constants, rdwarf and rgiant. the main */
-/*     restrictions on these constants are that rdwarf**2 not */
-/*     underflow and rgiant**2 not overflow. the constants */
-/*     given here are suitable for every known computer. */
+     the euclidean norm is computed by accumulating the sum of
+     squares in three different sums. the sums of squares for the
+     small and large components are scaled so that no overflows
+     occur. non-destructive underflows are permitted. underflows
+     and overflows do not occur in the computation of the unscaled
+     sum of squares for the intermediate components.
+     the definitions of small, intermediate and large components
+     depend on two constants, rdwarf and rgiant. the main
+     restrictions on these constants are that rdwarf**2 not
+     underflow and rgiant**2 not overflow. the constants
+     given here are suitable for every known computer.
 
-/*     the function statement is */
+     the function statement is
 
-/*       double precision function enorm(n,x) */
+       double precision function enorm(n,x)
 
-/*     where */
+     where
 
-/*       n is a positive integer input variable. */
+       n is a positive int input variable.
 
-/*       x is an input array of length n. */
+       x is an input array of length n.
 
-/*     subprograms called */
+     subprograms called
 
-/*       fortran-supplied ... dabs,dsqrt */
+       fortran-supplied ... fabs,dsqrt
 
-/*     argonne national laboratory. minpack project. march 1980. */
-/*     burton s. garbow, kenneth e. hillstrom, jorge j. more */
+     argonne national laboratory. minpack project. march 1980.
+     burton s. garbow, kenneth e. hillstrom, jorge j. more
 
-/*     ********** */
-    /* Parameter adjustments */
+     **********
+     Parameter adjustments */
     --x;
 
     /* Function Body */
@@ -738,11 +736,10 @@ doublereal enorm_(integer *n, doublereal *x)
     s3 = zero;
     x1max = zero;
     x3max = zero;
-    floatn = (doublereal) (*n);
+    floatn = (double) (*n);
     agiant = rgiant / floatn;
-    i__1 = *n;
-    for (i__ = 1; i__ <= i__1; ++i__) {
-	xabs = (d__1 = x[i__], abs(d__1));
+    for (i__ = 1; i__ <= *n; ++i__) { /* f2c-clean: s {i__1} {*n} */
+	xabs = fabs(x[i__]);
 	if (xabs > rdwarf && xabs < agiant) {
 	    goto L70;
 	}
@@ -789,13 +786,12 @@ L60:
 	goto L80;
 L70:
 
-/*           sum for intermediate components. */
+/*           sum for intermediate components.
 
-/* Computing 2nd power */
+ Computing 2nd power */
 	d__1 = xabs;
 	s2 += d__1 * d__1;
 L80:
-/* L90: */
 	;
     }
 
@@ -822,112 +818,112 @@ L110:
 L120:
 L130:
     return ret_val;
-} /* enorm_ */
+} /* enorm_
 
-/* 	function enorm */
-/* Subroutine */ int qrfac_(integer *m, integer *n, doublereal *a, integer *
-	lda, logical *pivot, integer *ipvt, integer *lipvt, doublereal *rdiag,
-	 doublereal *acnorm, doublereal *wa)
+ 	function enorm
+ Subroutine */ int qrfac_(int *m, int *n, double *a, int *
+	lda, /*logical*/int *pivot, int *ipvt, int *lipvt, double *rdiag,
+	 double *acnorm, double *wa)
 {
     /* Initialized data */
 
-    static doublereal one = 1.;
-    static doublereal p05 = .05;
-    static doublereal zero = 0.;
+    static double one = 1.;
+    static double p05 = .05;
+    static double zero = 0.;
 
     /* System generated locals */
-    integer a_dim1, a_offset, i__1, i__2, i__3;
-    doublereal d__1, d__2, d__3;
+    int a_dim1, a_offset, i__1, i__2, i__3;
+    double d__1, d__2, d__3;
 
     /* Builtin functions */
-    double sqrt(doublereal);
+    double sqrt(double);
 
     /* Local variables */
-    static integer i__, j, k, jp1;
-    static doublereal sum;
-    static integer kmax;
-    static doublereal temp;
-    static integer minmn;
-    extern doublereal enorm_(integer *, doublereal *);
-    static doublereal ajnorm;
+    static int i__, j, k, jp1;
+    static double sum;
+    static int kmax;
+    static double temp;
+    static int minmn;
+    extern double enorm_(int *, double *);
+    static double ajnorm;
 
-/*     ********** */
+/*     **********
 
-/*     subroutine qrfac */
+     subroutine qrfac
 
-/*     this subroutine uses householder transformations with column */
-/*     pivoting (optional) to compute a qr factorization of the */
-/*     m by n matrix a. that is, qrfac determines an orthogonal */
-/*     matrix q, a permutation matrix p, and an upper trapezoidal */
-/*     matrix r with diagonal elements of nonincreasing magnitude, */
-/*     such that a*p = q*r. the householder transformation for */
-/*     column k, k = 1,2,...,min(m,n), is of the form */
+     this subroutine uses householder transformations with column
+     pivoting (optional) to compute a qr factorization of the
+     m by n matrix a. that is, qrfac determines an orthogonal
+     matrix q, a permutation matrix p, and an upper trapezoidal
+     matrix r with diagonal elements of nonincreasing magnitude,
+     such that a*p = q*r. the householder transformation for
+     column k, k = 1,2,...,min(m,n), is of the form
 
-/*                           t */
-/*           i - (1/u(k))*u*u */
+                           t
+           i - (1/u(k))*u*u
 
-/*     where u has zeros in the first k-1 positions. the form of */
-/*     this transformation and the method of pivoting first */
-/*     appeared in the corresponding linpack subroutine. */
+     where u has zeros in the first k-1 positions. the form of
+     this transformation and the method of pivoting first
+     appeared in the corresponding linpack subroutine.
 
-/*     the subroutine statement is */
+     the subroutine statement is
 
-/*       subroutine qrfac(m,n,a,lda,pivot,ipvt,lipvt,rdiag,acnorm,wa) */
+       subroutine qrfac(m,n,a,lda,pivot,ipvt,lipvt,rdiag,acnorm,wa)
 
-/*     where */
+     where
 
-/*       m is a positive integer input variable set to the number */
-/*         of rows of a. */
+       m is a positive int input variable set to the number
+         of rows of a.
 
-/*       n is a positive integer input variable set to the number */
-/*         of columns of a. */
+       n is a positive int input variable set to the number
+         of columns of a.
 
-/*       a is an m by n array. on input a contains the matrix for */
-/*         which the qr factorization is to be computed. on output */
-/*         the strict upper trapezoidal part of a contains the strict */
-/*         upper trapezoidal part of r, and the lower trapezoidal */
-/*         part of a contains a factored form of q (the non-trivial */
-/*         elements of the u vectors described above). */
+       a is an m by n array. on input a contains the matrix for
+         which the qr factorization is to be computed. on output
+         the strict upper trapezoidal part of a contains the strict
+         upper trapezoidal part of r, and the lower trapezoidal
+         part of a contains a factored form of q (the non-trivial
+         elements of the u vectors described above).
 
-/*       lda is a positive integer input variable not less than m */
-/*         which specifies the leading dimension of the array a. */
+       lda is a positive int input variable not less than m
+         which specifies the leading dimension of the array a.
 
-/*       pivot is a logical input variable. if pivot is set true, */
-/*         then column pivoting is enforced. if pivot is set false, */
-/*         then no column pivoting is done. */
+       pivot is a *logical* input variable. if pivot is set true,
+         then column pivoting is enforced. if pivot is set false,
+         then no column pivoting is done.
 
-/*       ipvt is an integer output array of length lipvt. ipvt */
-/*         defines the permutation matrix p such that a*p = q*r. */
-/*         column j of p is column ipvt(j) of the identity matrix. */
-/*         if pivot is false, ipvt is not referenced. */
+       ipvt is an int output array of length lipvt. ipvt
+         defines the permutation matrix p such that a*p = q*r.
+         column j of p is column ipvt(j) of the identity matrix.
+         if pivot is false, ipvt is not referenced.
 
-/*       lipvt is a positive integer input variable. if pivot is false, */
-/*         then lipvt may be as small as 1. if pivot is true, then */
-/*         lipvt must be at least n. */
+       lipvt is a positive int input variable. if pivot is false,
+         then lipvt may be as small as 1. if pivot is true, then
+         lipvt must be at least n.
 
-/*       rdiag is an output array of length n which contains the */
-/*         diagonal elements of r. */
+       rdiag is an output array of length n which contains the
+         diagonal elements of r.
 
-/*       acnorm is an output array of length n which contains the */
-/*         norms of the corresponding columns of the input matrix a. */
-/*         if this information is not needed, then acnorm can coincide */
-/*         with rdiag. */
+       acnorm is an output array of length n which contains the
+         norms of the corresponding columns of the input matrix a.
+         if this information is not needed, then acnorm can coincide
+         with rdiag.
 
-/*       wa is a work array of length n. if pivot is false, then wa */
-/*         can coincide with rdiag. */
+       wa is a work array of length n. if pivot is false, then wa
+         can coincide with rdiag.
 
-/*     subprograms called */
+     subprograms called
 
-/*       minpack-supplied ... dpmpar,enorm */
+       minpack-supplied ... dpmpar,enorm
 
-/*       fortran-supplied ... dmax1,dsqrt,min0 */
+       fortran-supplied ... dmax1,dsqrt,min0
 
-/*     argonne national laboratory. minpack project. march 1980. */
-/*     burton s. garbow, kenneth e. hillstrom, jorge j. more */
+     argonne national laboratory. minpack project. march 1980.
+     burton s. garbow, kenneth e. hillstrom, jorge j. more
 
-/*     ********** */
-/*     double precision dpmpar,enorm */
-    /* Parameter adjustments */
+     **********
+     double precision dpmpar,enorm
+     Parameter adjustments */
     --wa;
     --acnorm;
     --rdiag;
@@ -936,29 +932,26 @@ L130:
     a -= a_offset;
     --ipvt;
 
-    /* Function Body */
-/*     epsmch is the machine precision. */
+    /* Function Body
+     epsmch is the machine precision.
 
-/*     epsmch = dpmpar(1) */
+     epsmch = dpmpar(1)
 
-/*     compute the initial column norms and initialize several arrays. */
+     compute the initial column norms and initialize several arrays. */
 
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	acnorm[j] = enorm_(m, &a[j * a_dim1 + 1]);
 	rdiag[j] = acnorm[j];
 	wa[j] = rdiag[j];
 	if (*pivot) {
 	    ipvt[j] = j;
 	}
-/* L10: */
     }
 
 /*     reduce a to r with householder transformations. */
 
     minmn = min(*m,*n);
-    i__1 = minmn;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= minmn; ++j) { /* f2c-clean: s {i__1} {minmn} */
 	if (! (*pivot)) {
 	    goto L40;
 	}
@@ -966,22 +959,18 @@ L130:
 /*        bring the column of largest norm into the pivot position. */
 
 	kmax = j;
-	i__2 = *n;
-	for (k = j; k <= i__2; ++k) {
+	for (k = j; k <= *n; ++k) { /* f2c-clean: s {i__2} {*n} */
 	    if (rdiag[k] > rdiag[kmax]) {
 		kmax = k;
 	    }
-/* L20: */
 	}
 	if (kmax == j) {
 	    goto L40;
 	}
-	i__2 = *m;
-	for (i__ = 1; i__ <= i__2; ++i__) {
+	for (i__ = 1; i__ <= *m; ++i__) { /* f2c-clean: s {i__2} {*m} */
 	    temp = a[i__ + j * a_dim1];
 	    a[i__ + j * a_dim1] = a[i__ + kmax * a_dim1];
 	    a[i__ + kmax * a_dim1] = temp;
-/* L30: */
 	}
 	rdiag[kmax] = rdiag[j];
 	wa[kmax] = wa[j];
@@ -990,51 +979,45 @@ L130:
 	ipvt[kmax] = k;
 L40:
 
-/*        compute the householder transformation to reduce the */
-/*        j-th column of a to a multiple of the j-th unit vector. */
+/*        compute the householder transformation to reduce the
+        j-th column of a to a multiple of the j-th unit vector. */
 
 	i__2 = *m - j + 1;
 	ajnorm = enorm_(&i__2, &a[j + j * a_dim1]);
+
 	if (ajnorm == zero) {
 	    goto L100;
 	}
 	if (a[j + j * a_dim1] < zero) {
 	    ajnorm = -ajnorm;
 	}
-	i__2 = *m;
-	for (i__ = j; i__ <= i__2; ++i__) {
+	for (i__ = j; i__ <= *m; ++i__) { /* f2c-clean: s {i__2} {*m} */
 	    a[i__ + j * a_dim1] /= ajnorm;
-/* L50: */
 	}
 	a[j + j * a_dim1] += one;
 
-/*        apply the transformation to the remaining columns */
-/*        and update the norms. */
+/*        apply the transformation to the remaining columns
+        and update the norms. */
 
 	jp1 = j + 1;
 	if (*n < jp1) {
 	    goto L100;
 	}
-	i__2 = *n;
-	for (k = jp1; k <= i__2; ++k) {
+	for (k = jp1; k <= *n; ++k) { /* f2c-clean: s {i__2} {*n} */
 	    sum = zero;
-	    i__3 = *m;
-	    for (i__ = j; i__ <= i__3; ++i__) {
+	    for (i__ = j; i__ <= *m; ++i__) { /* f2c-clean: s {i__3} {*m} */
 		sum += a[i__ + j * a_dim1] * a[i__ + k * a_dim1];
-/* L60: */
 	    }
 	    temp = sum / a[j + j * a_dim1];
-	    i__3 = *m;
-	    for (i__ = j; i__ <= i__3; ++i__) {
+	    for (i__ = j; i__ <= *m; ++i__) { /* f2c-clean: s {i__3} {*m} */
 		a[i__ + k * a_dim1] -= temp * a[i__ + j * a_dim1];
-/* L70: */
 	    }
 	    if (! (*pivot) || rdiag[k] == zero) {
 		goto L80;
 	    }
 	    temp = a[j + k * a_dim1] / rdiag[k];
-/* Computing MAX */
-/* Computing 2nd power */
+/* Computing MAX
+ Computing 2nd power */
 	    d__3 = temp;
 	    d__1 = zero, d__2 = one - d__3 * d__3;
 	    rdiag[k] *= sqrt((max(d__1,d__2)));
@@ -1047,145 +1030,147 @@ L40:
 	    rdiag[k] = enorm_(&i__3, &a[jp1 + k * a_dim1]);
 	    wa[k] = rdiag[k];
 L80:
-/* L90: */
 	    ;
 	}
 L100:
 	rdiag[j] = -ajnorm;
-/* L110: */
     }
     return 0;
-} /* qrfac_ */
+} /* qrfac_
 
-/* 	subroutine qrfac */
-/* Subroutine */ int lmpar_(integer *n, doublereal *r__, integer *ldr, 
-	integer *ipvt, doublereal *diag, doublereal *qtb, doublereal *delta, 
-	doublereal *par, doublereal *x, doublereal *sdiag, doublereal *wa1, 
-	doublereal *wa2)
+ 	subroutine qrfac
+ Subroutine */ int lmpar_(int *n, double *r__, int *ldr,
+
+	int *ipvt, double *diag, double *qtb, double *delta,
+
+	double *par, double *x, double *sdiag, double *wa1,
+
+	double *wa2)
 {
     /* Initialized data */
 
-    static doublereal p1 = .1;
-    static doublereal p001 = .001;
-    static doublereal zero = 0.;
+    static double p1 = .1;
+    static double p001 = .001;
+    static double zero = 0.;
 
     /* System generated locals */
-    integer r_dim1, r_offset, i__1, i__2;
-    doublereal d__1, d__2;
+    int r_dim1, r_offset, i__1, i__2;
+    double d__1, d__2;
 
     /* Builtin functions */
-    double sqrt(doublereal);
+    double sqrt(double);
 
     /* Local variables */
-    static integer i__, j, k, l;
-    static doublereal fp;
-    static integer jm1, jp1;
-    static doublereal sum, parc, parl;
-    static integer iter;
-    static doublereal temp, paru, dwarf;
-    static integer nsing;
-    extern doublereal enorm_(integer *, doublereal *);
-    static doublereal gnorm, dxnorm;
-    extern /* Subroutine */ int qrsolv_(integer *, doublereal *, integer *, 
-	    integer *, doublereal *, doublereal *, doublereal *, doublereal *,
-	     doublereal *);
+    static int i__, j, k, l;
+    static double fp;
+    static int jm1, jp1;
+    static double sum, parc, parl;
+    static int iter;
+    static double temp, paru, dwarf;
+    static int nsing;
+    extern double enorm_(int *, double *);
+    static double gnorm, dxnorm;
+    extern /* Subroutine */ int qrsolv_(int *, double *, int *,
 
-/*     ********** */
+	    int *, double *, double *, double *, double *,
+	     double *);
 
-/*     subroutine lmpar */
+/*     **********
 
-/*     given an m by n matrix a, an n by n nonsingular diagonal */
-/*     matrix d, an m-vector b, and a positive number delta, */
-/*     the problem is to determine a value for the parameter */
-/*     par such that if x solves the system */
+     subroutine lmpar
 
-/*           a*x = b ,     sqrt(par)*d*x = 0 , */
+     given an m by n matrix a, an n by n nonsingular diagonal
+     matrix d, an m-vector b, and a positive number delta,
+     the problem is to determine a value for the parameter
+     par such that if x solves the system
 
-/*     in the least squares sense, and dxnorm is the euclidean */
-/*     norm of d*x, then either par is zero and */
+           a*x = b ,     sqrt(par)*d*x = 0 ,
 
-/*           (dxnorm-delta) .le. 0.1*delta , */
+     in the least squares sense, and dxnorm is the euclidean
+     norm of d*x, then either par is zero and
 
-/*     or par is positive and */
+           (dxnorm-delta) <= 0.1*delta ,
 
-/*           abs(dxnorm-delta) .le. 0.1*delta . */
+     or par is positive and
 
-/*     this subroutine completes the solution of the problem */
-/*     if it is provided with the necessary information from the */
-/*     qr factorization, with column pivoting, of a. that is, if */
-/*     a*p = q*r, where p is a permutation matrix, q has orthogonal */
-/*     columns, and r is an upper triangular matrix with diagonal */
-/*     elements of nonincreasing magnitude, then lmpar expects */
-/*     the full upper triangle of r, the permutation matrix p, */
-/*     and the first n components of (q transpose)*b. on output */
-/*     lmpar also provides an upper triangular matrix s such that */
+           abs(dxnorm-delta) <= 0.1*delta .
 
-/*            t   t                   t */
-/*           p *(a *a + par*d*d)*p = s *s . */
+     this subroutine completes the solution of the problem
+     if it is provided with the necessary information from the
+     qr factorization, with column pivoting, of a. that is, if
+     a*p = q*r, where p is a permutation matrix, q has orthogonal
+     columns, and r is an upper triangular matrix with diagonal
+     elements of nonincreasing magnitude, then lmpar expects
+     the full upper triangle of r, the permutation matrix p,
+     and the first n components of (q transpose)*b. on output
+     lmpar also provides an upper triangular matrix s such that
 
-/*     s is employed within lmpar and may be of separate interest. */
+            t   t                   t
+           p *(a *a + par*d*d)*p = s *s .
 
-/*     only a few iterations are generally needed for convergence */
-/*     of the algorithm. if, however, the limit of 10 iterations */
-/*     is reached, then the output par will contain the best */
-/*     value obtained so far. */
+     s is employed within lmpar and may be of separate interest.
 
-/*     the subroutine statement is */
+     only a few iterations are generally needed for convergence
+     of the algorithm. if, however, the limit of 10 iterations
+     is reached, then the output par will contain the best
+     value obtained so far.
 
-/*       subroutine lmpar(n,r,ldr,ipvt,diag,qtb,delta,par,x,sdiag, */
-/*                        wa1,wa2) */
+     the subroutine statement is
 
-/*     where */
+       subroutine lmpar(n,r,ldr,ipvt,diag,qtb,delta,par,x,sdiag,
+                        wa1,wa2)
 
-/*       n is a positive integer input variable set to the order of r. */
+     where
 
-/*       r is an n by n array. on input the full upper triangle */
-/*         must contain the full upper triangle of the matrix r. */
-/*         on output the full upper triangle is unaltered, and the */
-/*         strict lower triangle contains the strict upper triangle */
-/*         (transposed) of the upper triangular matrix s. */
+       n is a positive int input variable set to the order of r.
 
-/*       ldr is a positive integer input variable not less than n */
-/*         which specifies the leading dimension of the array r. */
+       r is an n by n array. on input the full upper triangle
+         must contain the full upper triangle of the matrix r.
+         on output the full upper triangle is unaltered, and the
+         strict lower triangle contains the strict upper triangle
+         (transposed) of the upper triangular matrix s.
 
-/*       ipvt is an integer input array of length n which defines the */
-/*         permutation matrix p such that a*p = q*r. column j of p */
-/*         is column ipvt(j) of the identity matrix. */
+       ldr is a positive int input variable not less than n
+         which specifies the leading dimension of the array r.
 
-/*       diag is an input array of length n which must contain the */
-/*         diagonal elements of the matrix d. */
+       ipvt is an int input array of length n which defines the
+         permutation matrix p such that a*p = q*r. column j of p
+         is column ipvt(j) of the identity matrix.
 
-/*       qtb is an input array of length n which must contain the first */
-/*         n elements of the vector (q transpose)*b. */
+       diag is an input array of length n which must contain the
+         diagonal elements of the matrix d.
 
-/*       delta is a positive input variable which specifies an upper */
-/*         bound on the euclidean norm of d*x. */
+       qtb is an input array of length n which must contain the first
+         n elements of the vector (q transpose)*b.
 
-/*       par is a nonnegative variable. on input par contains an */
-/*         initial estimate of the levenberg-marquardt parameter. */
-/*         on output par contains the final estimate. */
+       delta is a positive input variable which specifies an upper
+         bound on the euclidean norm of d*x.
 
-/*       x is an output array of length n which contains the least */
-/*         squares solution of the system a*x = b, sqrt(par)*d*x = 0, */
-/*         for the output par. */
+       par is a nonnegative variable. on input par contains an
+         initial estimate of the levenberg-marquardt parameter.
+         on output par contains the final estimate.
 
-/*       sdiag is an output array of length n which contains the */
-/*         diagonal elements of the upper triangular matrix s. */
+       x is an output array of length n which contains the least
+         squares solution of the system a*x = b, sqrt(par)*d*x = 0,
+         for the output par.
 
-/*       wa1 and wa2 are work arrays of length n. */
+       sdiag is an output array of length n which contains the
+         diagonal elements of the upper triangular matrix s.
 
-/*     subprograms called */
+       wa1 and wa2 are work arrays of length n.
 
-/*       minpack-supplied ... dpmpar,enorm,qrsolv */
+     subprograms called
 
-/*       fortran-supplied ... dabs,dmax1,dmin1,dsqrt */
+       minpack-supplied ... dpmpar,enorm,qrsolv
 
-/*     argonne national laboratory. minpack project. march 1980. */
-/*     burton s. garbow, kenneth e. hillstrom, jorge j. more */
+       fortran-supplied ... fabs,dmax1,dmin1,dsqrt
 
-/*     ********** */
-/*     double precision dpmpar,enorm */
-    /* Parameter adjustments */
+     argonne national laboratory. minpack project. march 1980.
+     burton s. garbow, kenneth e. hillstrom, jorge j. more
+
+     **********
+     double precision dpmpar,enorm
+     Parameter adjustments */
     --wa2;
     --wa1;
     --sdiag;
@@ -1197,18 +1182,17 @@ L100:
     r_offset = 1 + r_dim1;
     r__ -= r_offset;
 
-    /* Function Body */
-/*     dwarf is the smallest positive magnitude. */
+    /* Function Body
+     dwarf is the smallest positive magnitude.
 
-/*     dwarf = dpmpar(2) */
+     dwarf = dpmpar(2) */
     dwarf = machfd_2.fltmin;
 
-/*     compute and store in x the gauss-newton direction. if the */
-/*     jacobian is rank-deficient, obtain a least squares solution. */
+/*     compute and store in x the gauss-newton direction. if the
+     jacobian is rank-deficient, obtain a least squares solution. */
 
     nsing = *n;
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	wa1[j] = qtb[j];
 	if (r__[j + j * r_dim1] == zero && nsing == *n) {
 	    nsing = j - 1;
@@ -1216,13 +1200,11 @@ L100:
 	if (nsing < *n) {
 	    wa1[j] = zero;
 	}
-/* L10: */
     }
     if (nsing < 1) {
 	goto L50;
     }
-    i__1 = nsing;
-    for (k = 1; k <= i__1; ++k) {
+    for (k = 1; k <= nsing; ++k) { /* f2c-clean: s {i__1} {nsing} */
 	j = nsing - k + 1;
 	wa1[j] /= r__[j + j * r_dim1];
 	temp = wa1[j];
@@ -1230,32 +1212,25 @@ L100:
 	if (jm1 < 1) {
 	    goto L30;
 	}
-	i__2 = jm1;
-	for (i__ = 1; i__ <= i__2; ++i__) {
+	for (i__ = 1; i__ <= jm1; ++i__) { /* f2c-clean: s {i__2} {jm1} */
 	    wa1[i__] -= r__[i__ + j * r_dim1] * temp;
-/* L20: */
 	}
 L30:
-/* L40: */
 	;
     }
 L50:
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	l = ipvt[j];
 	x[l] = wa1[j];
-/* L60: */
     }
 
-/*     initialize the iteration counter. */
-/*     evaluate the function at the origin, and test */
-/*     for acceptance of the gauss-newton direction. */
+/*     initialize the iteration counter.
+     evaluate the function at the origin, and test
+     for acceptance of the gauss-newton direction. */
 
     iter = 0;
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	wa2[j] = diag[j] * x[j];
-/* L70: */
     }
     dxnorm = enorm_(n, &wa2[1]);
     fp = dxnorm - *delta;
@@ -1263,35 +1238,29 @@ L50:
 	goto L220;
     }
 
-/*     if the jacobian is not rank deficient, the newton */
-/*     step provides a lower bound, parl, for the zero of */
-/*     the function. otherwise set this bound to zero. */
+/*     if the jacobian is not rank deficient, the newton
+     step provides a lower bound, parl, for the zero of
+     the function. otherwise set this bound to zero. */
 
     parl = zero;
     if (nsing < *n) {
 	goto L120;
     }
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	l = ipvt[j];
 	wa1[j] = diag[l] * (wa2[l] / dxnorm);
-/* L80: */
     }
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	sum = zero;
 	jm1 = j - 1;
 	if (jm1 < 1) {
 	    goto L100;
 	}
-	i__2 = jm1;
-	for (i__ = 1; i__ <= i__2; ++i__) {
+	for (i__ = 1; i__ <= jm1; ++i__) { /* f2c-clean: s {i__2} {jm1} */
 	    sum += r__[i__ + j * r_dim1] * wa1[i__];
-/* L90: */
 	}
 L100:
 	wa1[j] = (wa1[j] - sum) / r__[j + j * r_dim1];
-/* L110: */
     }
     temp = enorm_(n, &wa1[1]);
     parl = fp / *delta / temp / temp;
@@ -1299,17 +1268,13 @@ L120:
 
 /*     calculate an upper bound, paru, for the zero of the function. */
 
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	sum = zero;
-	i__2 = j;
-	for (i__ = 1; i__ <= i__2; ++i__) {
+	for (i__ = 1; i__ <= j; ++i__) { /* f2c-clean: s {i__2} {j} */
 	    sum += r__[i__ + j * r_dim1] * qtb[i__];
-/* L130: */
 	}
 	l = ipvt[j];
 	wa1[j] = sum / diag[l];
-/* L140: */
     }
     gnorm = enorm_(n, &wa1[1]);
     paru = gnorm / *delta;
@@ -1317,8 +1282,8 @@ L120:
 	paru = dwarf / min(*delta,p1);
     }
 
-/*     if the input par lies outside of the interval (parl,paru), */
-/*     set par to the closer endpoint. */
+/*     if the input par lies outside of the interval (parl,paru),
+     set par to the closer endpoint. */
 
     *par = max(*par,parl);
     *par = min(*par,paru);
@@ -1339,25 +1304,21 @@ L150:
 	*par = max(d__1,d__2);
     }
     temp = sqrt(*par);
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	wa1[j] = temp * diag[j];
-/* L160: */
     }
     qrsolv_(n, &r__[r_offset], ldr, &ipvt[1], &wa1[1], &qtb[1], &x[1], &sdiag[
 	    1], &wa2[1]);
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	wa2[j] = diag[j] * x[j];
-/* L170: */
     }
     dxnorm = enorm_(n, &wa2[1]);
     temp = fp;
     fp = dxnorm - *delta;
 
-/*        if the function is small enough, accept the current value */
-/*        of par. also test for the exceptional cases where parl */
-/*        is zero or the number of iterations has reached 10. */
+/*        if the function is small enough, accept the current value
+        of par. also test for the exceptional cases where parl
+        is zero or the number of iterations has reached 10. */
 
     if (abs(fp) <= p1 * *delta || parl == zero && fp <= temp && temp < zero ||
 	     iter == 10) {
@@ -1366,27 +1327,21 @@ L150:
 
 /*        compute the newton correction. */
 
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	l = ipvt[j];
 	wa1[j] = diag[l] * (wa2[l] / dxnorm);
-/* L180: */
     }
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	wa1[j] /= sdiag[j];
 	temp = wa1[j];
 	jp1 = j + 1;
 	if (*n < jp1) {
 	    goto L200;
 	}
-	i__2 = *n;
-	for (i__ = jp1; i__ <= i__2; ++i__) {
+	for (i__ = jp1; i__ <= *n; ++i__) { /* f2c-clean: s {i__2} {*n} */
 	    wa1[i__] -= r__[i__ + j * r_dim1] * temp;
-/* L190: */
 	}
 L200:
-/* L210: */
 	;
     }
     temp = enorm_(n, &wa1[1]);
@@ -1401,9 +1356,9 @@ L200:
 	paru = min(paru,*par);
     }
 
-/*        compute an improved estimate for par. */
+/*        compute an improved estimate for par.
 
-/* Computing MAX */
+ Computing MAX */
     d__1 = parl, d__2 = *par + parc;
     *par = max(d__1,d__2);
 
@@ -1418,110 +1373,112 @@ L220:
 	*par = zero;
     }
     return 0;
-} /* lmpar_ */
+} /* lmpar_
 
-/* 	subroutine lmpar. */
-/* Subroutine */ int qrsolv_(integer *n, doublereal *r__, integer *ldr, 
-	integer *ipvt, doublereal *diag, doublereal *qtb, doublereal *x, 
-	doublereal *sdiag, doublereal *wa)
+ 	subroutine lmpar.
+ Subroutine */ int qrsolv_(int *n, double *r__, int *ldr,
+
+	int *ipvt, double *diag, double *qtb, double *x,
+
+	double *sdiag, double *wa)
 {
     /* Initialized data */
 
-    static doublereal p5 = .5;
-    static doublereal p25 = .25;
-    static doublereal zero = 0.;
+    static double p5 = .5;
+    static double p25 = .25;
+    static double zero = 0.;
 
     /* System generated locals */
-    integer r_dim1, r_offset, i__1, i__2, i__3;
-    doublereal d__1, d__2;
+    int r_dim1, r_offset, i__1, i__2, i__3;
+    double d__1, d__2;
 
     /* Builtin functions */
-    double sqrt(doublereal);
+    double sqrt(double);
 
     /* Local variables */
-    static integer i__, j, k, l, jp1, kp1;
-    static doublereal tan__, cos__, sin__, sum, temp, cotan;
-    static integer nsing;
-    static doublereal qtbpj;
+    static int i__, j, k, l, jp1, kp1;
+    static double tan__, cos__, sin__, sum, temp, cotan;
+    static int nsing;
+    static double qtbpj;
 
-/*     ********** */
+/*     **********
 
-/*     subroutine qrsolv */
+     subroutine qrsolv
 
-/*     given an m by n matrix a, an n by n diagonal matrix d, */
-/*     and an m-vector b, the problem is to determine an x which */
-/*     solves the system */
+     given an m by n matrix a, an n by n diagonal matrix d,
+     and an m-vector b, the problem is to determine an x which
+     solves the system
 
-/*           a*x = b ,     d*x = 0 , */
+           a*x = b ,     d*x = 0 ,
 
-/*     in the least squares sense. */
+     in the least squares sense.
 
-/*     this subroutine completes the solution of the problem */
-/*     if it is provided with the necessary information from the */
-/*     qr factorization, with column pivoting, of a. that is, if */
-/*     a*p = q*r, where p is a permutation matrix, q has orthogonal */
-/*     columns, and r is an upper triangular matrix with diagonal */
-/*     elements of nonincreasing magnitude, then qrsolv expects */
-/*     the full upper triangle of r, the permutation matrix p, */
-/*     and the first n components of (q transpose)*b. the system */
-/*     a*x = b, d*x = 0, is then equivalent to */
+     this subroutine completes the solution of the problem
+     if it is provided with the necessary information from the
+     qr factorization, with column pivoting, of a. that is, if
+     a*p = q*r, where p is a permutation matrix, q has orthogonal
+     columns, and r is an upper triangular matrix with diagonal
+     elements of nonincreasing magnitude, then qrsolv expects
+     the full upper triangle of r, the permutation matrix p,
+     and the first n components of (q transpose)*b. the system
+     a*x = b, d*x = 0, is then equivalent to
 
-/*                  t       t */
-/*           r*z = q *b ,  p *d*p*z = 0 , */
+                  t       t
+           r*z = q *b ,  p *d*p*z = 0 ,
 
-/*     where x = p*z. if this system does not have full rank, */
-/*     then a least squares solution is obtained. on output qrsolv */
-/*     also provides an upper triangular matrix s such that */
+     where x = p*z. if this system does not have full rank,
+     then a least squares solution is obtained. on output qrsolv
+     also provides an upper triangular matrix s such that
 
-/*            t   t               t */
-/*           p *(a *a + d*d)*p = s *s . */
+            t   t               t
+           p *(a *a + d*d)*p = s *s .
 
-/*     s is computed within qrsolv and may be of separate interest. */
+     s is computed within qrsolv and may be of separate interest.
 
-/*     the subroutine statement is */
+     the subroutine statement is
 
-/*       subroutine qrsolv(n,r,ldr,ipvt,diag,qtb,x,sdiag,wa) */
+       subroutine qrsolv(n,r,ldr,ipvt,diag,qtb,x,sdiag,wa)
 
-/*     where */
+     where
 
-/*       n is a positive integer input variable set to the order of r. */
+       n is a positive int input variable set to the order of r.
 
-/*       r is an n by n array. on input the full upper triangle */
-/*         must contain the full upper triangle of the matrix r. */
-/*         on output the full upper triangle is unaltered, and the */
-/*         strict lower triangle contains the strict upper triangle */
-/*         (transposed) of the upper triangular matrix s. */
+       r is an n by n array. on input the full upper triangle
+         must contain the full upper triangle of the matrix r.
+         on output the full upper triangle is unaltered, and the
+         strict lower triangle contains the strict upper triangle
+         (transposed) of the upper triangular matrix s.
 
-/*       ldr is a positive integer input variable not less than n */
-/*         which specifies the leading dimension of the array r. */
+       ldr is a positive int input variable not less than n
+         which specifies the leading dimension of the array r.
 
-/*       ipvt is an integer input array of length n which defines the */
-/*         permutation matrix p such that a*p = q*r. column j of p */
-/*         is column ipvt(j) of the identity matrix. */
+       ipvt is an int input array of length n which defines the
+         permutation matrix p such that a*p = q*r. column j of p
+         is column ipvt(j) of the identity matrix.
 
-/*       diag is an input array of length n which must contain the */
-/*         diagonal elements of the matrix d. */
+       diag is an input array of length n which must contain the
+         diagonal elements of the matrix d.
 
-/*       qtb is an input array of length n which must contain the first */
-/*         n elements of the vector (q transpose)*b. */
+       qtb is an input array of length n which must contain the first
+         n elements of the vector (q transpose)*b.
 
-/*       x is an output array of length n which contains the least */
-/*         squares solution of the system a*x = b, d*x = 0. */
+       x is an output array of length n which contains the least
+         squares solution of the system a*x = b, d*x = 0.
 
-/*       sdiag is an output array of length n which contains the */
-/*         diagonal elements of the upper triangular matrix s. */
+       sdiag is an output array of length n which contains the
+         diagonal elements of the upper triangular matrix s.
 
-/*       wa is a work array of length n. */
+       wa is a work array of length n.
 
-/*     subprograms called */
+     subprograms called
 
-/*       fortran-supplied ... dabs,dsqrt */
+       fortran-supplied ... fabs,dsqrt
 
-/*     argonne national laboratory. minpack project. march 1980. */
-/*     burton s. garbow, kenneth e. hillstrom, jorge j. more */
+     argonne national laboratory. minpack project. march 1980.
+     burton s. garbow, kenneth e. hillstrom, jorge j. more
 
-/*     ********** */
-    /* Parameter adjustments */
+     **********
+     Parameter adjustments */
     --wa;
     --sdiag;
     --x;
@@ -1532,57 +1489,50 @@ L220:
     r_offset = 1 + r_dim1;
     r__ -= r_offset;
 
-    /* Function Body */
+    /* Function Body
 
-/*     copy r and (q transpose)*b to preserve input and initialize s. */
-/*     in particular, save the diagonal elements of r in x. */
+     copy r and (q transpose)*b to preserve input and initialize s.
+     in particular, save the diagonal elements of r in x. */
 
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
-	i__2 = *n;
-	for (i__ = j; i__ <= i__2; ++i__) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
+	for (i__ = j; i__ <= *n; ++i__) { /* f2c-clean: s {i__2} {*n} */
 	    r__[i__ + j * r_dim1] = r__[j + i__ * r_dim1];
-/* L10: */
 	}
 	x[j] = r__[j + j * r_dim1];
 	wa[j] = qtb[j];
-/* L20: */
     }
 
 /*     eliminate the diagonal matrix d using a givens rotation. */
 
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n}
 
-/*        prepare the row of d to be eliminated, locating the */
-/*        diagonal element using p from the qr factorization. */
+        prepare the row of d to be eliminated, locating the
+        diagonal element using p from the qr factorization. */
 
 	l = ipvt[j];
 	if (diag[l] == zero) {
 	    goto L90;
 	}
-	i__2 = *n;
-	for (k = j; k <= i__2; ++k) {
+	for (k = j; k <= *n; ++k) { /* f2c-clean: s {i__2} {*n} */
 	    sdiag[k] = zero;
-/* L30: */
 	}
 	sdiag[j] = diag[l];
 
-/*        the transformations to eliminate the row of d */
-/*        modify only a single element of (q transpose)*b */
-/*        beyond the first n, which is initially zero. */
+/*        the transformations to eliminate the row of d
+        modify only a single element of (q transpose)*b
+        beyond the first n, which is initially zero. */
 
 	qtbpj = zero;
-	i__2 = *n;
-	for (k = j; k <= i__2; ++k) {
+	for (k = j; k <= *n; ++k) { /* f2c-clean: s {i__2} {*n}
 
-/*           determine a givens rotation which eliminates the */
-/*           appropriate element in the current row of d. */
+           determine a givens rotation which eliminates the
+           appropriate element in the current row of d. */
 
 	    if (sdiag[k] == zero) {
 		goto L70;
 	    }
-	    if ((d__1 = r__[k + k * r_dim1], abs(d__1)) >= (d__2 = sdiag[k], 
+	    if (fabs(r__[k + k * r_dim1]) >= (d__2 = sdiag[k],
+
 		    abs(d__2))) {
 		goto L40;
 	    }
@@ -1600,8 +1550,8 @@ L40:
 	    sin__ = cos__ * tan__;
 L50:
 
-/*           compute the modified diagonal element of r and */
-/*           the modified element of ((q transpose)*b,0). */
+/*           compute the modified diagonal element of r and
+           the modified element of ((q transpose)*b,0). */
 
 	    r__[k + k * r_dim1] = cos__ * r__[k + k * r_dim1] + sin__ * sdiag[
 		    k];
@@ -1615,71 +1565,59 @@ L50:
 	    if (*n < kp1) {
 		goto L70;
 	    }
-	    i__3 = *n;
-	    for (i__ = kp1; i__ <= i__3; ++i__) {
+	    for (i__ = kp1; i__ <= *n; ++i__) { /* f2c-clean: s {i__3} {*n} */
 		temp = cos__ * r__[i__ + k * r_dim1] + sin__ * sdiag[i__];
 		sdiag[i__] = -sin__ * r__[i__ + k * r_dim1] + cos__ * sdiag[
 			i__];
 		r__[i__ + k * r_dim1] = temp;
-/* L60: */
 	    }
 L70:
-/* L80: */
 	    ;
 	}
 L90:
 
-/*        store the diagonal element of s and restore */
-/*        the corresponding diagonal element of r. */
+/*        store the diagonal element of s and restore
+        the corresponding diagonal element of r. */
 
 	sdiag[j] = r__[j + j * r_dim1];
 	r__[j + j * r_dim1] = x[j];
-/* L100: */
     }
 
-/*     solve the triangular system for z. if the system is */
-/*     singular, then obtain a least squares solution. */
+/*     solve the triangular system for z. if the system is
+     singular, then obtain a least squares solution. */
 
     nsing = *n;
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	if (sdiag[j] == zero && nsing == *n) {
 	    nsing = j - 1;
 	}
 	if (nsing < *n) {
 	    wa[j] = zero;
 	}
-/* L110: */
     }
     if (nsing < 1) {
 	goto L150;
     }
-    i__1 = nsing;
-    for (k = 1; k <= i__1; ++k) {
+    for (k = 1; k <= nsing; ++k) { /* f2c-clean: s {i__1} {nsing} */
 	j = nsing - k + 1;
 	sum = zero;
 	jp1 = j + 1;
 	if (nsing < jp1) {
 	    goto L130;
 	}
-	i__2 = nsing;
-	for (i__ = jp1; i__ <= i__2; ++i__) {
+	for (i__ = jp1; i__ <= nsing; ++i__) { /* f2c-clean: s {i__2} {nsing} */
 	    sum += r__[i__ + j * r_dim1] * wa[i__];
-/* L120: */
 	}
 L130:
 	wa[j] = (wa[j] - sum) / sdiag[j];
-/* L140: */
     }
 L150:
 
 /*     permute the components of z back to components of x. */
 
-    i__1 = *n;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= *n; ++j) { /* f2c-clean: s {i__1} {*n} */
 	l = ipvt[j];
 	x[l] = wa[j];
-/* L160: */
     }
     return 0;
 } /* qrsolv_ */
