@@ -3,9 +3,8 @@
  * and produced by
  * $Id: f2c-clean,v 1.10 2002/03/28 16:37:27 maechler Exp $
  *
--- be brave, try without >>>
- * #include "f2c.h"  <<<<< ------*/
-/* but use this: */
+ * and manually pretty edited by Martin Maechler, 2004-09-18
+ */
 
 #include <Rmath.h>
 
@@ -110,9 +109,9 @@ union {
 /* Table of constant values */
 
 static float c_b2 = -99.f;
-static int c__1 = 1;
-static int c__0 = 0;
-static double c_b21 = 1.;
+static int ic__1 = 1;
+static int ic__0 = 0;
+static double c__1 = 1.;
 
 /*****************************************************************************
  ******************************************************************************/
@@ -234,9 +233,9 @@ fracdf_(double *x, int *n, int *m, int *nar, int *nma,
     *dtol = tolsfd_1.told;
 /*     if (npq != 0) call dcopy( npq, zero, 0, w(lqp), 1) */
     if (dimsfd_1.npq != 0) {
-	dcopy_(&dimsfd_1.np, &ar[1], &c__1, &w[woptfd_1.lqp + dimsfd_1.nq], &
-		c__1);
-	dcopy_(&dimsfd_1.nq, &ma[1], &c__1, &w[woptfd_1.lqp], &c__1);
+	dcopy_(&dimsfd_1.np, &ar[1], &ic__1, &w[woptfd_1.lqp + dimsfd_1.nq], &
+		ic__1);
+	dcopy_(&dimsfd_1.nq, &ma[1], &ic__1, &w[woptfd_1.lqp], &ic__1);
     }
     cntrfd_1.nopt = 0;
     cntrfd_1.nfun = 0;
@@ -253,8 +252,8 @@ fracdf_(double *x, int *n, int *m, int *nar, int *nma,
     if (gammfd_1.igamma != 0 || mnpkfd_1.iminpk != 0) {
 	*d__ = machfd_1.fltmax;
 	*hood = machfd_1.fltmax;
-	dcopy_(&dimsfd_1.np, &machfd_1.fltmax, &c__0, &ar[1], &c__1);
-	dcopy_(&dimsfd_1.nq, &machfd_1.fltmax, &c__0, &ma[1], &c__1);
+	dcopy_(&dimsfd_1.np, &machfd_1.fltmax, &ic__0, &ar[1], &ic__1);
+	dcopy_(&dimsfd_1.nq, &machfd_1.fltmax, &ic__0, &ma[1], &ic__1);
 	if (gammfd_1.igamma != 0) {
 	    *inform__ = 2;
 	}
@@ -263,9 +262,9 @@ fracdf_(double *x, int *n, int *m, int *nar, int *nma,
 	}
 	return 0;
     }
-    dcopy_(&dimsfd_1.np, &w[woptfd_1.lqp + dimsfd_1.nq], &c__1, &ar[1], &c__1)
+    dcopy_(&dimsfd_1.np, &w[woptfd_1.lqp + dimsfd_1.nq], &ic__1, &ar[1], &ic__1)
 	    ;
-    dcopy_(&dimsfd_1.nq, &w[woptfd_1.lqp], &c__1, &ma[1], &c__1);
+    dcopy_(&dimsfd_1.nq, &w[woptfd_1.lqp], &ic__1, &ma[1], &ic__1);
     if (gammfd_1.jgamma != 0) {
 	*inform__ = 4;
     }
@@ -533,8 +532,8 @@ double pqopt_(double *x, double *d__, double *w)
     t = (double) dimsfd_2.n;
     if (dimsfd_2.npq == 0) {
 /* 	trivial case  p = q = 0 : */
-	filtfd_2.wnv = ddot_(&dimsfd_2.n, &w[wfilfd_1.ly], &c__1, &w[
-		wfilfd_1.ly], &c__1) / t;
+	filtfd_2.wnv = ddot_(&dimsfd_2.n, &w[wfilfd_1.ly], &ic__1, &w[
+		wfilfd_1.ly], &ic__1) / t;
 	cntrfd_1.ifun = 0;
 	cntrfd_1.igrd = 0;
 	cntrfd_1.info = -1;
@@ -543,7 +542,7 @@ double pqopt_(double *x, double *d__, double *w)
 /*     optimize as an unconstrained optimization problem */
 
 	if (modelm == 2) {
-	    dcopy_(&dimsfd_2.npq, &c_b21, &c__0, &w[woptfd_1.ldiag], &c__1);
+	    dcopy_(&dimsfd_2.npq, &c__1, &ic__0, &w[woptfd_1.ldiag], &ic__1);
 	}
 	if (cntrfd_1.nopt < 0) {
 	    if (dimsfd_2.np != 0) {
@@ -625,9 +624,6 @@ fdfilt_(double *x, double *d__, double *y,
     /* System generated locals */
     double d__1;
 
-    /* Builtin functions */
-    double pow_dd(double *, double *);
-
     /* Local variables */
     static int j, k;
     static double r__, s, t, u, v, z__, g0;
@@ -700,12 +696,12 @@ fdfilt_(double *x, double *d__, double *y,
 
 /*  k = 3, mcap */
 
-    for (k = 3; k <= mcap; ++k) { /* f2c-clean: s {i__1} {mcap} */
+    for (k = 3; k <= mcap; ++k) {
 	km = k - 1;
 	t = (double) km;
 	u = t - *d__;
 
-/*  calculate phi() and vk() using the recursion formula on W498 */
+	/*  calculate phi() and vk() using the recursion formula on W498 */
 
 	for (j = 1; j <= (km - 1); ++j) { /* f2c-clean: s {i__2} {km - 1} */
 	    s = t - (double) j;
@@ -715,7 +711,7 @@ fdfilt_(double *x, double *d__, double *y,
 	phi[km] = v;
 	vk[k] = vk[km] * (1. - v * v);
 
-/*  form amk(k) and ak(k) */
+	/*  form amk(k) and ak(k) */
 
 	u = 0.;
 	v = 1.;
@@ -727,16 +723,16 @@ fdfilt_(double *x, double *d__, double *y,
 	amk[k] = u;
 	ak[k] = v;
     }
-    if (dimsfd_2.m < dimsfd_2.n) {
-/* 	   i.e. mcap = min(M,n) != n
 
-     k = mcap+1, n
+/*     k = mcap+1, n */
 
-     calculate pi(j), j = 1,mcap */
+    if (dimsfd_2.m < dimsfd_2.n) { /* i.e. mcap = min(M,n) != n */
+
+      /* calculate pi(j), j = 1,mcap */
 
 	pi[1] = *d__;
 	s = *d__;
-	for (j = 2; j <= mcap; ++j) { /* f2c-clean: s {i__1} {mcap} */
+	for (j = 2; j <= mcap; ++j) {
 	    u = (double) j;
 	    t = pi[j - 1] * ((u - 1. - *d__) / u);
 	    s += t;
@@ -747,10 +743,10 @@ fdfilt_(double *x, double *d__, double *y,
 	u = (double) mcap;
 	t = u * pi[mcap];
 
-	for (k = mcap1; k <= (dimsfd_2.n); ++k) { /* f2c-clean: s {i__1} {dimsfd_2.n} */
+	for (k = mcap1; k <= (dimsfd_2.n); ++k) {
 	    km = k - mcap;
 	    z__ = 0.;
-	    for (j = 1; j <= mcap; ++j) { /* f2c-clean: s {i__2} {mcap} */
+	    for (j = 1; j <= mcap; ++j) {
 		z__ += pi[j] * x[k - j];
 	    }
 	    if (r__ == 0.) {
@@ -758,7 +754,7 @@ fdfilt_(double *x, double *d__, double *y,
 		ak[k] = s;
 	    } else {
 		d__1 = u / (double) k;
-		v = t * (1. - pow_dd(&d__1, d__)) / *d__;
+		v = t * (1. - pow(d__1, *d__)) / *d__;
 		amk[k] = z__ + v * r__ / ((double) km - 1.);
 		ak[k] = s - v;
 	    }
@@ -770,7 +766,7 @@ fdfilt_(double *x, double *d__, double *y,
 
     r__ = 0.;
     s = 0.;
-    for (k = 1; k <= (dimsfd_2.n); ++k) { /* f2c-clean: s {i__1} {dimsfd_2.n} */
+    for (k = 1; k <= (dimsfd_2.n); ++k) {
 	t = ak[k];
 	u = (x[k] - amk[k]) * t;
 	v = t * t;
@@ -787,12 +783,12 @@ fdfilt_(double *x, double *d__, double *y,
 /*  form filtered version */
 
     s = 0.;
-    for (k = 1; k <= mcap; ++k) { /* f2c-clean: s {i__1} {mcap} */
+    for (k = 1; k <= mcap; ++k)
 	s += log(vk[k]);
-    }
+
     *slogvk = s;
     s = 0.;
-    for (k = 1; k <= (dimsfd_2.n); ++k) { /* f2c-clean: s {i__1} {dimsfd_2.n} */
+    for (k = 1; k <= (dimsfd_2.n); ++k) {
 	t = x[k] - amk[k] - filtfd_1.hatmu * ak[k];
 	if (k <= mcap) {
 	    t /= sqrt(vk[k]);
@@ -805,9 +801,9 @@ fdfilt_(double *x, double *d__, double *y,
     }
     t = (double) dimsfd_2.n;
     u = z__ / t;
-    for (k = 1; k <= (dimsfd_2.n); ++k) { /* f2c-clean: s {i__1} {dimsfd_2.n} */
+    for (k = 1; k <= dimsfd_2.n; ++k)
 	y[k] -= u;
-    }
+
     return 0;
 } /* fdfilt_
 
