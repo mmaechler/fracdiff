@@ -35,8 +35,10 @@ fracdiff <- function(x, nar = 0, nma = 0,
     if(is.matrix(x) && ncol(x) > 2)
         stop("multivariate time series not allowed")
     n <- length(x)
-    npq <- nar + nma
-    npq1 <- npq + 1
+    if(round(nar) != nar || nar < 0 || round(nma) != nma || nma < 0)
+        stop("'nar' and 'nma' must be non-negative integers")
+    npq <- as.integer(nar + nma)
+    npq1 <- as.integer(npq + 1:1)
     lenw <- max(npq + 2*(n + M),
                 3*n + (n+6)*npq + npq %/% 2 + 1,
                 31 * 12, ## << added because checked in ../src/fdcore.f
@@ -47,9 +49,10 @@ fracdiff <- function(x, nar = 0, nma = 0,
     if(is.null(dtol))
         dtol <- .Machine$double.eps^0.25 # ~ 1.22e-4
     ## if dtol < 0: the fortran code will choose defaults
+    x <- as.double(x)
     result <- .Fortran("fracdf",
-                       as.double(x),
-                       as.integer(n),
+                       x,
+                       n,
                        as.integer(M),
                        as.integer(nar),
                        as.integer(nma),
@@ -78,21 +81,19 @@ fracdiff <- function(x, nar = 0, nma = 0,
                warning("optimization limit reached"))
 
     hess <- .Fortran("fdhpq",
-                     as.double(x),
+                     x,
                      hess = double(npq1 * npq1),
-                     as.integer(npq1),
+                     npq1,
                      result$w,
                      PACKAGE = "fracdiff")$hess
 
     temp <- .Fortran("fdcov",
-                     as.double(x),
-                     as.double(result$d),
+                     x,
+                     result$d,
                      h = as.double(if(missing(h)) -1 else h),
                      hd = double(npq1),
-                     cov = hess,
-                     as.integer(npq1),
-                     cor = hess,
-                     as.integer(npq1),
+                     cov = hess, npq1,
+                     cor = hess, npq1,
                      se = double(npq1),
                      result$w,
                      info = integer(1),
