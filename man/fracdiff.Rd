@@ -12,8 +12,7 @@
 \usage{
 fracdiff(x, nar = 0, nma = 0,
          ar = rep(NA, max(nar, 1)), ma = rep(NA, max(nma, 1)),
-         dtol,
-         drange = c(0, 0.5), h, M = 100)
+         dtol = NULL, drange = c(0, 0.5), h, M = 100)
 }
 \arguments{
   \item{x}{time series (numeric vector) for the ARIMA model}
@@ -21,12 +20,21 @@ fracdiff(x, nar = 0, nma = 0,
   \item{nma}{number of moving average parameters \eqn{q}.}
   \item{ar}{initial autoregressive parameters}
   \item{ma}{initial moving average parameters}
-  \item{dtol}{interval of uncertainty for \eqn{d}. If \code{dtol < 0},
-    the fourth root of machine precision will be used.  \code{dtol} will
-    be altered if necessary by the program.}
+  \item{dtol}{interval of uncertainty for \eqn{d}.  If \code{dtol} is
+    negative or NULL, the fourth root of machine precision will be used.
+    \code{dtol} will be altered if necessary by the program.}
   \item{drange}{interval over which the likelihood function is to be
     maximized as a function of \eqn{d}.}
-  \item{h}{finite difference interval.}
+  \item{h}{size of finite difference interval for numerical derivatives.
+    By default (or if negative),
+%% Only found the following in src/fdhess.f :
+    \code{h = min(0.1, eps.5 * (1+ abs(cllf)))}, where
+    \code{clff := log. max.likelihood} (as returned) and
+    \code{eps.5 := sqrt(.Machine$double.neg.eps)} (typically 1.05e-8).
+
+    This only influences the cov, cor, and std.error computations;
+    see also \code{\link{fracdiff.var}}.
+  }
   \item{M}{number of terms in the likelihood approximation (see Haslett
     and Raftery 1989).}
 }
@@ -41,7 +49,10 @@ fracdiff(x, nar = 0, nma = 0,
   \item{stderror.dpq}{standard errors of the parameter estimates  c(d, ar, ma).}
   \item{correlation.dpq}{correlation matrix of the parameter estimates
     (order : d, ar, ma).}
+  \item{h}{size of interval used for numerical derivatives.}
   \item{dtol}{interval of uncertainty for d.}
+  \item{M}{as input.}
+  \item{hessian.dpq}{......}% FIXME (missing from original docu)
 }
 \note{
   Ordinarily, \code{nar} and \code{nma} should not be too large (say < 10)
@@ -55,7 +66,7 @@ fracdiff(x, nar = 0, nma = 0,
   using Brent's \code{fmin} algorithm), and\cr
   an inner nonlinear least-squares optimization in the AR and MA parameters to
   minimize white noise variance (uses the MINPACK subroutine \code{lm}DER).
-  written by Chris Fraley (March 1991)
+  written by Chris Fraley (March 1991).
 }
 \references{
   J. Haslett and A. E. Raftery (1989)
