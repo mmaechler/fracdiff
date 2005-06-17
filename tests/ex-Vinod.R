@@ -4,13 +4,13 @@
 ## Subject: fracdiff in R  does not work for gnp series  "insufficient workspace"
 ## Date: Sun, 15 May 2005 13:24:46 -0400
 
-
 ## Dear Martin Maechler
 
 ## I teach econometrics at Fordham.  For some reason the fracdiff
 ## does not work for the basic gnp series.
 
 library(fracdiff)
+
 if(FALSE) {
     ##MM library(urca)
     ##MM data(npext)
@@ -43,8 +43,8 @@ fr1 <-  fracdiff(realgnp2, nar = 0, nma = 0,  M = 100)
 ##         insufficient workspace
 
 fr1
-## YOur help will be most appreciated
-## thanks
+
+## ...
 
 ## Hrishikesh D. Vinod
 ## Professor of Economics, Fordham University
