@@ -34,7 +34,8 @@ static double dcsevl_(double *x, double *a, int *n);
 static int initds_(double *, int *, float *);
 
 
-/* Common Block Declarations */
+/* Common Block Declarations --- included as "extern" */
+#define FD_EXTERNAL extern
 #include "mach_comm.h"
 #include "gamm_comm.h"
 
@@ -579,10 +580,8 @@ double dcsevl_(double *x, double *a, int *n)
     double ret_val;
 
     /* Local variables */
-    static int i__;
-    static double b0, b1, b2;
-    static int ni;
-    static double twox;
+    int i__, ni;
+    double b0, b1, b2, twox;
 
 
 /* evaluate the n-term chebyshev series a at x.  adapted from */
@@ -609,25 +608,16 @@ double dcsevl_(double *x, double *a, int *n)
 /*    1  25hdcsevl  x outside (-1,+1), 25, 1, 1) */
 
     if (*n < 1) {
-/*       write(6,*) 'dcsevl : number of terms le 0' */
-	gammfd_.igamma = 41;
-/*       dcsevl = d1mach(2) */
-	ret_val = machfd_.fltmax;
-	return ret_val;
+	/* 'dcsevl : number of terms le 0' */
+	gammfd_.igamma = 41; return machfd_.fltmax;
     }
     if (*n > 1000) {
-/*       write(6,*) 'dcsevl : number of terms gt 1000' */
-	gammfd_.igamma = 42;
-/*       dcsevl = d1mach(2) */
-	ret_val = machfd_.fltmax;
-	return ret_val;
+	/* 'dcsevl : number of terms gt 1000' */
+	gammfd_.igamma = 42; return machfd_.fltmax;
     }
     if (*x < -1.1 || *x > 1.1) {
-/*       write(6,*) 'dcsevl : x outside (-1,+1)' */
-	gammfd_.igamma = 43;
-/*       dcsevl = d1mach(2) */
-	ret_val = machfd_.fltmax;
-	return ret_val;
+	/* 'dcsevl : x outside (-1,+1)' */
+	gammfd_.igamma = 43; return machfd_.fltmax;
     }
 
     twox = *x * 2.;
@@ -639,12 +629,10 @@ double dcsevl_(double *x, double *a, int *n)
 	b1 = b0;
 	ni = *n - i__ + 1;
 	b0 = twox * b1 - b2 + a[ni];
-/* L10: */
     }
 
-    ret_val = (b0 - b2) * .5;
+    return (b0 - b2) * .5;
 
-    return ret_val;
 } /* dcsevl_ */
 
 double dlngam_(double *x)
