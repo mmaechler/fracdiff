@@ -1,17 +1,18 @@
 typedef /* Subroutine */ int (*S_fp)();
 
-/* Subroutine */
 void fdcom(int *n, int *m, int *nar, int *nma,
 	   double *hood, double *flmin, double *flmax,
 	   double *epmin, double *epmax);
-
-/* Subroutine */ int
-fdfilt_(double *x, double *d__, double *y,
-	double *slogvk, double *amk, double *ak, double *vk,
-	double *phi, double *pi);
+void
+fdfilt(double *x, double d,
+       /* output : */
+       double *y, double *slogvk,
+       /* using */
+       double *amk, double *ak, double *vk,
+       double *phi, double *pi);
 
 void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
-	   double *d__, double *rmu, double *y, double *s,
+	   double *d__, double *mu, double *y, double *s,
 	   double *flmin, double *flmax, double *epmin, double *epmax);
 
 int lmder1_(S_fp fcn, int *m, int *n, double *x,
