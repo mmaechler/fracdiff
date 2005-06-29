@@ -26,31 +26,25 @@
 
 #include "mach_comm.h"
 #include "maux_comm.h"
+#include "tols_comm.h"
 
-struct {
-    double told, tolf, tolx, tolg, fnorm, delta, gnorm;
-} tolsfd_;
 
-#define tolsfd_1 tolsfd_
-
-/* Table of constant values */
-
+/* Constant (used to pass pointer) */
 static /*logical*/int c_true = (1);
 
-/* --------- EXPORTS (need all ??) ------------------- */
-
-double enorm_(int *, double *);
-/* Subroutine */
-int lmpar_(int *, double *, int *, int *, double *, double *, double *,
-	   double *, double *, double *, double *, double *);
 static void qrfac_(int *, int *, double *, int *,
 		   /*logical*/int *, int *, int *,
 		   double *, double *, double *);
 static void qrsolv_(int *, double *, int *, int *,
 		    double *, double *, double *, double *, double *);
 
-/* ------------------------------- */
+/* --------- EXPORTS ------------------- */
 
+double enorm_(int *, double *);
+/* Subroutine */
+int lmpar_(int *, double *, int *, int *, double *, double *, double *,
+	   double *, double *, double *, double *, double *);
+/* and this : */
 
 /* Subroutine */
 int lmder1_(S_fp fcn, int *m, int *n, double *x,
@@ -310,7 +304,7 @@ L20:
 	goto L300;
     }
 
-    tolsfd_1.fnorm = fmin2(enorm_(m, &fvec[1]), mauxfd_1.bignum);
+    tolsfd_.fnorm = fmin2(enorm_(m, &fvec[1]), mauxfd_1.bignum);
 
 /*     initialize levenberg-marquardt parameter and iteration counter. */
 
@@ -346,8 +340,8 @@ L40:
 
 /*        compute the qr factorization of the jacobian. */
 
-    qrfac_(m, n, &fjac[fjac_offset], ldfjac, &c_true, &ipvt[1], n, &wa1[1], &
-	   wa2[1], &wa3[1]);
+    qrfac_(m, n, &fjac[fjac_offset], ldfjac, &c_true, &ipvt[1], n,
+	   &wa1[1], &wa2[1], &wa3[1]);
 
 /*        on the first iteration and if mode is 1, scale according
         to the norms of the columns of the initial jacobian. */
@@ -373,9 +367,9 @@ L60:
 	wa3[j] = diag[j] * x[j];
     }
     xnorm = enorm_(n, &wa3[1]);
-    tolsfd_1.delta = *factor * xnorm;
-    if (tolsfd_1.delta == zero) {
-	tolsfd_1.delta = *factor;
+    tolsfd_.delta = *factor * xnorm;
+    if (tolsfd_.delta == zero) {
+	tolsfd_.delta = *factor;
     }
 L80:
 
@@ -404,8 +398,8 @@ L120:
 
 /*        compute the norm of the scaled gradient. */
 
-    tolsfd_1.gnorm = zero;
-    if (tolsfd_1.fnorm == zero) {
+    tolsfd_.gnorm = zero;
+    if (tolsfd_.fnorm == zero) {
 	goto L170;
     }
     for (j = 1; j <= *n; ++j) {
@@ -413,16 +407,16 @@ L120:
 	if (wa2[l] != zero) {
 	    sum = zero;
 	    for (i__ = 1; i__ <= j; ++i__) {
-		sum += fjac[i__ + j * fjac_dim1] * (qtf[i__] / tolsfd_1.fnorm);
+		sum += fjac[i__ + j * fjac_dim1] * (qtf[i__] / tolsfd_.fnorm);
 	    }
-	    tolsfd_1.gnorm = fmax2(tolsfd_1.gnorm, fabs(sum / wa2[l]));
+	    tolsfd_.gnorm = fmax2(tolsfd_.gnorm, fabs(sum / wa2[l]));
 	}
     }
 L170:
 
 /*        test for convergence of the gradient norm. */
 
-    if (tolsfd_1.gnorm <= *gtol) {
+    if (tolsfd_.gnorm <= *gtol) {
 	*info = 4;
     }
     if (*info != 0) {
@@ -445,7 +439,7 @@ L200:
 /*           determine the levenberg-marquardt parameter. */
 
     lmpar_(n, &fjac[fjac_offset], ldfjac, &ipvt[1], &diag[1], &qtf[1], &
-	    tolsfd_1.delta, &par, &wa1[1], &wa2[1], &wa3[1], &wa4[1]);
+	    tolsfd_.delta, &par, &wa1[1], &wa2[1], &wa3[1], &wa4[1]);
 
 /*           store the direction p and x + p. calculate the norm of p. */
 
@@ -459,7 +453,7 @@ L200:
 /*           on the first iteration, adjust the initial step bound. */
 
     if (iter == 1) {
-	tolsfd_1.delta = min(tolsfd_1.delta,enorm_n);
+	tolsfd_.delta = min(tolsfd_.delta,enorm_n);
     }
 
 /*           evaluate the function at x + p and calculate its norm. */
@@ -475,9 +469,9 @@ L200:
 /*           compute the scaled actual reduction. */
 
     actred = -one;
-    if (p1 * fnorm1 < tolsfd_1.fnorm) {
+    if (p1 * fnorm1 < tolsfd_.fnorm) {
 /* Computing 2nd power */
-	d__1 = fnorm1 / tolsfd_1.fnorm;
+	d__1 = fnorm1 / tolsfd_.fnorm;
 	actred = one - d__1 * d__1;
     }
 /*          actred = (fnorm*fnorm - fnorm1*fnorm1)
@@ -493,8 +487,8 @@ L200:
 	    wa3[i__] += fjac[i__ + j * fjac_dim1] * temp;
 	}
     }
-    temp1 = enorm_(n, &wa3[1]) / tolsfd_1.fnorm;
-    temp2 = sqrt(par) * enorm_n / tolsfd_1.fnorm;
+    temp1 = enorm_(n, &wa3[1]) / tolsfd_.fnorm;
+    temp2 = sqrt(par) * enorm_n / tolsfd_.fnorm;
 /* Computing 2nd power */
     d__1 = temp1;
 /* Computing 2nd power */
@@ -528,17 +522,17 @@ L200:
     if (actred < zero) {
 	temp = p5 * dirder / (dirder + p5 * actred);
     }
-    if (p1 * fnorm1 >= tolsfd_1.fnorm || temp < p1) {
+    if (p1 * fnorm1 >= tolsfd_.fnorm || temp < p1) {
 	temp = p1;
     }
-    tolsfd_1.delta = temp * fmin2(tolsfd_1.delta, enorm_n / p1);
+    tolsfd_.delta = temp * fmin2(tolsfd_.delta, enorm_n / p1);
     par /= temp;
     goto L260;
 L240:
     if (par != zero && ratio < p75) {
 	goto L250;
     }
-    tolsfd_1.delta = enorm_n / p5;
+    tolsfd_.delta = enorm_n / p5;
     par = p5 * par;
 L250:
 L260:
@@ -560,47 +554,40 @@ L260:
 	fvec[i__] = wa4[i__];
     }
     xnorm = enorm_(n, &wa2[1]);
-    tolsfd_1.fnorm = fnorm1;
+    tolsfd_.fnorm = fnorm1;
     ++iter;
 
-L290:
-/*           tests for convergence. */
+L290: /*           tests for convergence. */
 
-    if (abs(actred) <= *ftol && prered <= *ftol && p5 * ratio <= one) {
-	*info = 1;
+    if((abs(actred) <= *ftol && prered <= *ftol && p5 * ratio <= one) ||
+       (tolsfd_.fnorm <= *ftol))
+					*info = 1;
+
+    if (tolsfd_.delta <= *xtol) {
+					*info = 2;
+	if (abs(actred) <= *ftol && prered <= *ftol && p5 * ratio <= one)
+	    				*info = 3;
     }
-    if (tolsfd_1.fnorm <= *ftol) {
-	*info = 1;
-    }
-    if (tolsfd_1.delta <= *xtol) {
-	*info = 2;
-    }
-    if (abs(actred) <= *ftol && prered <= *ftol && p5 * ratio <= one &&
-	*info == 2) {
-	*info = 3;
-    }
-    if (*info != 0) {
+
+    if (*info != 0)
 	goto L300;
-    }
 
-/*           tests for termination and stringent tolerances. */
 
-    if (*nfev >= *maxfev) {
-	*info = 5;
-    }
-    if (fabs(actred) <= machfd_.epsmax && prered <= machfd_.epsmax &&
-	p5 * ratio <= one) {
-	*info = 6;
-    }
-    if (tolsfd_1.delta <= machfd_.epsmax) {
-	*info = 7;
-    }
-    if (tolsfd_1.gnorm <= machfd_.epsmax) {
-	*info = 8;
-    }
-    if (*info != 0) {
+/* tests for termination and stringent tolerances. */
+
+    if (*nfev >= *maxfev)			*info = 5;
+
+    if (fabs(actred) <= machfd_.epsmax &&
+	prered       <= machfd_.epsmax &&
+	p5 * ratio <= one)			*info = 6;
+
+    if (tolsfd_.delta <= machfd_.epsmax)	*info = 7;
+
+    if (tolsfd_.gnorm <= machfd_.epsmax)	*info = 8;
+
+    if (*info != 0)
 	goto L300;
-    }
+
 
 /*           end of the inner loop. repeat if iteration unsuccessful. */
 
@@ -609,8 +596,8 @@ L290:
     }
 
 /*        end of the outer loop. */
-
     goto L30;
+
 L300:
 
 /*     termination, either normal or user imposed. */
