@@ -52,6 +52,9 @@ fracdiff <- function(x, nar = 0, nma = 0,
         dtol <- .Machine$double.eps^0.25 # ~ 1.22e-4
     ## if dtol < 0: the fortran code will choose defaults
     x <- as.double(x)
+
+    ## this also initializes "common blocks" that are used
+    ## in .Fortran(.) calls :
     result <- .Fortran("fracdf",
                        x,
                        n,
@@ -84,7 +87,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
                warning("optimization limit reached"))
 
     hess <- .C("fdhpq",
-               x,
+               ## x,
                hess = double(npq1 * npq1),
                npq1,
                result$w,
@@ -181,8 +184,8 @@ fracdiff.var <- function(x, fracdiff.out, h)
     fracdiff.out$h <- temp$h
     fracdiff.out$covariance.dpq <-
         matrix(temp$cov, nrow = npq1, ncol = npq1, dimnames = list(nam, nam))
-    se.ok <- temp$info != 0 || temp$info < 3
-    fracdiff.out$stderror.dpq <- if(se.ok) temp$se # else NULL
+    se.ok <- temp$info != 0 || temp$info < 3 ## << FIXME -- illogical!!
+    fracdiff.out$stderror.dpq    <- if(se.ok) temp$se # else NULL
     fracdiff.out$correlation.dpq <- if(se.ok) array(temp$cor, c(npq1, npq1))
     fracdiff.out$hessian.dpq[1, ] <- temp$hd
     fracdiff.out$hessian.dpq[, 1] <- temp$hd
@@ -201,12 +204,12 @@ fracdiff.sim <- function(n, ar, ma, d, mu = 0)
                as.double(ma),
                as.double(d),
                as.double(mu),
-               rnorm(n + q),
-               x = double(n + q),
+               y = rnorm(n + q),
+               s = double(n + q),
                .Machine$double.xmin,
                .Machine$double.xmax,
                .Machine$double.neg.eps,
                .Machine$double.eps,
-               PACKAGE = "fracdiff")$x[1:n]
+               PACKAGE = "fracdiff")$s[1:n]
     list(series = temp, ar = ar, ma = ma, d = d, mu = mu)
 }
