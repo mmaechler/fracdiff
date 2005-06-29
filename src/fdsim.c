@@ -1,7 +1,8 @@
-/* fdsim.f -- translated by f2c (version 20031025).
+/*-*- mode: C; kept-old-versions: 12;  kept-new-versions: 20; -*-
  *
- * and produced by
- * $Id: f2c-clean,v 1.10 2002/03/28 16:37:27 maechler Exp $
+ * fdsim.f -- translated by f2c (version 20031025).
+ *
+ * and produced by  f2c-clean,v 1.10 2002/03/28 16:37:27 maechler
  */
 #include <Rmath.h>
 
@@ -10,7 +11,9 @@
 extern double dgamr_(double *);
 extern double dgamma_(double *);
 
-/* Common Block Declarations -- used in  ./fdgam.c and fdcore.c */
+/* Common Block Declarations --- included as "extern" */
+#define FD_EXTERNAL extern
+
 #include "mach_comm.h"
 #include "gamm_comm.h"
 
