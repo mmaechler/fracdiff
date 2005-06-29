@@ -310,17 +310,12 @@ double dgamr_(double *x)
 /* Subroutine */
 int dlgams_(double *x, double *dlgam, double *sgngam)
 {
-    /* System generated locals */
-    double d__1;
-
-    /* Local variables */
-    int intx;
-
 /* july 1977 edition.  w. fullerton, c3, los alamos scientific lab. */
 
 /* evaluate log abs (gamma(x)) and return the sign of gamma(x) in sgngam. */
 /* sgngam is either +1.0 or -1.0. */
 
+    int intx;
 
     *dlgam = dlngam_(x);
     if (gammfd_.igamma != 0) {
@@ -577,7 +572,6 @@ double dcsevl_(double *x, double *a, int *n)
 {
     /* System generated locals */
     int i__1;
-    double ret_val;
 
     /* Local variables */
     int i__, ni;
