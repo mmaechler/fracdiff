@@ -16,14 +16,8 @@
 /* dsvdc: */
 #include <R_ext/Linpack.h>
 
-#ifndef max
-# define	max(a, b) 		((a) < (b) ? (b) : (a))
-#endif
 #ifndef min
 # define	min(a, b)		((a) > (b) ? (b) : (a))
-#endif
-#ifndef abs
-# define	abs(x)			((x) >= 0 ? (x) : -(x))
 #endif
 
 /* called from R : */
@@ -32,16 +26,15 @@ void fdcov(double *x, double *d__, double *hh,
 	   double *hd, double *cov, int *lcov, double *cor,
 	   int *lcor, double *se, double *w, int *info);
 
-void fdhpq(double *x, double *h__, int *lh, double *w);
+void fdhpq(/*double *x, */double *h__, int *lh, double *w);
 
-
+/* local to this file: */
 static
 int hesdpq_(double *, double *,
 	    double *, double *, double *);
 static
-int hesspq_(double *qp, double *a, double *ajac,
-	    int *lajac, double *h__, int *lh, double *aij,
-	    double *g);
+void hesspq_(double *qp, double *a, double *ajac,
+	     int *lajac, double *h__, int *lh, double *aij, double *g);
 
 static
 int invsvd_(double *, double *, int *,
@@ -51,151 +44,47 @@ static
 int gradpq_(double *g, double *a, double *ajac,	int *ljac);
 
 
-/* Common Block Declarations */
+/* Common Block Declarations --- included as "extern" */
+#define FD_EXTERNAL extern
 
-struct {
-    double fltmin, fltmax, epsmin, epsmax;
-} machfd_;
+#include "mach_comm.h"
+#include "maux_comm.h"
+#include "Dims_comm.h"
 
-#define machfd_1 machfd_
+#include "filt_comm.h"
+#include "wfil_comm.h"
+#include "wopt_comm.h"
 
-struct {
-    double epsp25, epspt3, epspt5, epsp75, bignum;
-} mauxfd_;
+#include "gamm_comm.h"
+#include "hess_comm.h"
 
-#define mauxfd_1 mauxfd_
-
-union {
-    struct { int nn, mm, np, nq, npq, npq1, maxpq, maxpq1, minpq, nm; } _1;
-    struct { int  n,  m, np, nq, npq, npq1, maxpq, maxpq1, minpq, nm; } _2;
-} dimsfd_;
-
-#define dimsfd_1 (dimsfd_._1)
-#define dimsfd_2 (dimsfd_._2)
-
-struct {
-    double hatmu, wnv, cllf;
-} filtfd_;
-
-#define filtfd_1 filtfd_
-
-struct {
-    int ly, lamk, lak, lvk, lphi, lpi;
-} wfilfd_;
-
-#define wfilfd_1 wfilfd_
-
-struct {
-    int lqp, la, lajac, ipvt, ldiag, lqtf, lwa1, lwa2, lwa3, lwa4;
-} woptfd_;
-
-#define woptfd_1 woptfd_
-
-struct {
-    int igamma, jgamma;
-} gammfd_;
-
-#define gammfd_1 gammfd_
-
-struct {
-    int ksvd, kcov, kcor;
-} hessfd_;
-
-#define hessfd_1 hessfd_
 
 /* Table of constant values */
-
-static double c_b2 = .3;
-static double c_b3 = .75;
-static int c__1 = 1;
-static int c__11 = 11;
-static double c_b8 = 0.;
 static int c__0 = 0;
+static int c__1 = 1;
 static int c__2 = 2;
-static double c_b78 = -1.;
+static int c__11 = 11;
 
-/* ******************************************************************************
- ******************************************************************************
- Fill "parameter"s into global variables (Common blocks) called later:
- Subroutine */
-void fdcom(int *n, int *m, int *nar, int *nma,
-	   double *hood, double *flmin, double *flmax,
-	   double *epmin, double *epmax)
-{
-
-/*  copyright 1991 Department of Statistics, University of Washington
-  written by Chris Fraley
- ----------------------------------------------------------------------------- */
-    filtfd_1.cllf = *hood;
-/* machine constants */
-    machfd_1.fltmin = *flmin;
-    machfd_1.fltmax = *flmax;
-    machfd_1.epsmin = *epmin;
-    machfd_1.epsmax = *epmax;
-    mauxfd_1.epspt5 = sqrt(machfd_1.epsmin);
-    mauxfd_1.epsp25 = sqrt(mauxfd_1.epspt5);
-    mauxfd_1.epspt3 = pow(machfd_1.epsmin, c_b2);
-    mauxfd_1.epsp75 = pow(machfd_1.epsmin, c_b3);
-    mauxfd_1.bignum = 1. / machfd_1.epsmin;
-/* useful quantities */
-    dimsfd_1.nn = *n;
-    dimsfd_1.mm = *m;
-    dimsfd_1.np = *nar;
-    dimsfd_1.nq = *nma;
-    dimsfd_1.npq = dimsfd_1.np + dimsfd_1.nq;
-    dimsfd_1.npq1 = dimsfd_1.npq + 1;
-    dimsfd_1.maxpq = max(dimsfd_1.np,dimsfd_1.nq);
-    dimsfd_1.minpq = min(dimsfd_1.np,dimsfd_1.nq);
-    dimsfd_1.maxpq1 = dimsfd_1.maxpq + 1;
-    dimsfd_1.nm = *n - dimsfd_1.maxpq;
-/* workspace allocation */
-    woptfd_1.lqp = 1;
-    wfilfd_1.ly = woptfd_1.lqp + dimsfd_1.npq;
-    wfilfd_1.lamk = wfilfd_1.ly;
-    wfilfd_1.lak = wfilfd_1.lamk + *n;
-    wfilfd_1.lphi = wfilfd_1.lak + *n;
-    wfilfd_1.lvk = wfilfd_1.lphi + *m;
-/* 	= lamk  + 2*n +  M = 1 + npq + 2n + M */
-    wfilfd_1.lpi = wfilfd_1.lphi;
-    woptfd_1.la = wfilfd_1.ly + *n;
-    woptfd_1.lajac = woptfd_1.la + *n - dimsfd_1.minpq;
-/* old ipvt   = lajac  +  max( (n-np)*np, (n-nq)*nq, (n-maxpq)*npq) */
-    woptfd_1.ipvt = woptfd_1.lajac + (*n - dimsfd_1.maxpq) * dimsfd_1.npq;
-    woptfd_1.ldiag = woptfd_1.ipvt + dimsfd_1.npq / 2 + 1;
-    woptfd_1.lqtf = woptfd_1.ldiag + dimsfd_1.npq;
-    woptfd_1.lwa1 = woptfd_1.lqtf + dimsfd_1.npq;
-    woptfd_1.lwa2 = woptfd_1.lwa1 + dimsfd_1.npq;
-    woptfd_1.lwa3 = woptfd_1.lwa2 + dimsfd_1.npq;
-    woptfd_1.lwa4 = woptfd_1.lwa3 + dimsfd_1.npq;
-/*      lfree  = lwa4   +  n - minpq */
-    return;
-} /* fdcom */
+static double c_0d = 0.;
+static double c_m1 = -1.;
 
 /*******************************************************************************
  *******************************************************************************/
 
-void fdhpq(double *x, double *h__, int *lh, double *w)
+void fdhpq(/*double *x, */double *h__, int *lh, double *w)
 {
-/*     float		x(n)
-     double precision	H(lH, npq1)
+/* double precision	H(lH, npq1)
 */
-    /* System generated locals */
-    int h_dim1, h_offset;
 
 /*  copyright 1991 Department of Statistics, University of Washington
   written by Chris Fraley
  -----------------------------------------------------------------------------
      Parameter adjustments */
-    --x;
-    h_dim1 = *lh;
-    h_offset = 1 + h_dim1;
-    h__ -= h_offset;
     --w;
 
     /* Function Body */
-    hesspq_(&w[woptfd_1.lqp], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-	    dimsfd_2.nm, &h__[h_offset], lh, &w[woptfd_1.lwa4], &w[
-	    woptfd_1.lwa1]);
+    hesspq_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac], &Dims.nm,
+	    h__, lh, &w[woptfd_.lwa4], &w[woptfd_.lwa1]);
 /*     call dcopy( npq1, zero, 0, H(1,1), lH) */
 /*     call dcopy( npq , zero, 0, H(2,1), 1) */
     return;
@@ -209,16 +98,16 @@ void fdcov(double *x, double *d__, double *hh,
 	   int *lcor, double *se, double *w, int *info)
 {
     /* System generated locals */
-    int cov_dim1, cov_offset, cor_dim1, cor_offset, i__1, i__2;
-    double d__1, d__2;
+    int cov_dim1, cov_offset, cor_dim1, cor_offset, npq1, i__2;
+    double d__1;
 
     /* Local variables */
     int i__, j, k, le, ls, lu, lv, lwork;
     double temp;
 
-/*     float               x(n)
-     double precision   d, hh, hd(npq1), cov(lcov,npq1),
-    *                   cor(lcor,npq1), se(npq1)
+/*     float		   x(n)
+     double precision	d, hh, hd(npq1), cov(lcov,npq1),
+    *			cor(lcor,npq1), se(npq1)
   copyright 1991 Department of Statistics, University of Washington
   written by Chris Fraley
  -----------------------------------------------------------------------------
@@ -235,110 +124,89 @@ void fdcov(double *x, double *d__, double *hh,
     --w;
 
     /* Function Body */
+    npq1 = Dims.npq1;
+
     hesdpq_(&x[1], d__, hh, &hd[1], &w[1]);
-    F77_CALL(dcopy)(&dimsfd_2.npq1, &hd[1], &c__1, &cov[cov_offset], lcov);
-    gammfd_1.igamma = 0;
-    gammfd_1.jgamma = 0;
-    hessfd_1.ksvd = 0;
-    hessfd_1.kcov = 0;
-    hessfd_1.kcor = 0;
+    F77_CALL(dcopy)(&npq1, &hd[1], &c__1, &cov[cov_offset], lcov);
+
+    gammfd_.igamma = 0;
+    gammfd_.jgamma = 0;
+    hessfd_.ksvd = 0;
+    hessfd_.kcov = 0;
+    hessfd_.kcor = 0;
     *info = 0;
     temp = 1.;
-    i__1 = dimsfd_2.npq1;
-    for (i__ = 1; i__ <= i__1; ++i__) {
-	i__2 = dimsfd_2.npq1;
-	for (j = i__ + 1; j <= i__2; ++j) {
+
+    for (i__ = 1; i__ <= npq1; ++i__) {
+	for (j = i__ + 1; j <= npq1; ++j) {
 	    cov[j + i__ * cov_dim1] = cov[i__ + j * cov_dim1];
 	}
     }
-    ls = wfilfd_1.ly;
-    lu = ls + dimsfd_2.npq1 + 1;
-    lv = lu + dimsfd_2.npq1 * dimsfd_2.npq1;
-    le = lv + dimsfd_2.npq1 * dimsfd_2.npq1;
-    lwork = le + dimsfd_2.npq1;
-/*      lfree = lwork + npq1 */
-    F77_CALL(dsvdc)(&cov[cov_offset], lcov, &dimsfd_2.npq1, &dimsfd_2.npq1, &w[ls], &w[
-	    le], &w[lu], &dimsfd_2.npq1, &w[lv], &dimsfd_2.npq1, &w[lwork], &
-	    c__11, info);
+    ls = wfilfd_.ly;
+    lu = ls + npq1 + 1;
+    lv = lu + npq1 * npq1;
+    le = lv + npq1 * npq1;
+    lwork = le + npq1;
+/*	lfree = lwork + npq1 */
+    F77_CALL(dsvdc)(&cov[cov_offset], lcov, &npq1, &npq1, &w[ls],
+		    &w[le], &w[lu], &npq1, &w[lv], &npq1, &w[lwork],
+		    &c__11, info);
     if (*info != 0) {
-	F77_CALL(dcopy)(&dimsfd_2.npq1, &c_b8, &c__0, &se[1], &c__1);
-	i__1 = dimsfd_2.npq1;
-	for (j = 1; j <= i__1; ++j) {
-	    F77_CALL(dcopy)(&dimsfd_2.npq1, &c_b8, &c__0, &cov[j * cov_dim1 + 1], &
-		    c__1);
+	F77_CALL(dcopy)(&npq1, &c_0d, &c__0, &se[1], &c__1);
+	for (j = 1; j <= npq1; ++j) {
+	    F77_CALL(dcopy)(&npq1, &c_0d, &c__0,
+			    &cov[j * cov_dim1 + 1], & c__1);
 	}
-	hessfd_1.ksvd = 1;
+	hessfd_.ksvd = 1;
 	*info = 3;
 	return;
     }
-    invsvd_(&w[ls], &w[lu], &dimsfd_2.npq1, &w[lv], &dimsfd_2.npq1, &cov[
+    invsvd_(&w[ls], &w[lu], &npq1, &w[lv], &npq1, &cov[
 	    cov_offset], lcov);
-    i__1 = dimsfd_2.npq1;
-    for (i__ = 1; i__ <= i__1; ++i__) {
-	i__2 = dimsfd_2.npq1;
-	for (j = i__ + 1; j <= i__2; ++j) {
+    for (i__ = 1; i__ <= npq1; ++i__) {
+	for (j = i__ + 1; j <= npq1; ++j) {
 	    cov[j + i__ * cov_dim1] = cov[i__ + j * cov_dim1];
 	}
     }
     temp = 1.;
-    i__1 = dimsfd_2.npq1;
-    for (j = 1; j <= i__1; ++j) {
+    for (j = 1; j <= npq1; ++j) {
 	if (cov[j + j * cov_dim1] > 0.) {
 	    se[j] = sqrt(cov[j + j * cov_dim1]);
 	} else {
-/* Computing MIN */
-	    d__1 = temp, d__2 = cov[j + j * cov_dim1];
-	    temp = min(d__1,d__2);
+	    temp = fmin2(temp, cov[j + j * cov_dim1]);
 	    se[j] = 0.;
 	}
     }
     if (temp == 1.) {
-	i__1 = dimsfd_2.npq1;
-	for (k = 1; k <= i__1; ++k) {
-	    F77_CALL(dcopy)(&k, &cov[k * cov_dim1 + 1], &c__1, &cor[k * cor_dim1 + 1],
-		    &c__1);
+	for (k = 1; k <= npq1; ++k) {
+	    F77_CALL(dcopy)(&k, &cov[k * cov_dim1 + 1], &c__1,
+				&cor[k * cor_dim1 + 1], &c__1);
 	}
-	i__1 = dimsfd_2.npq1;
-	for (i__ = 1; i__ <= i__1; ++i__) {
-	    i__2 = dimsfd_2.npq1 - i__ + 1;
+	for (i__ = 1; i__ <= npq1; ++i__) {
+	    i__2 = npq1 - i__ + 1;
 	    d__1 = 1. / se[i__];
 	    F77_CALL(dscal)(&i__2, &d__1, &cor[i__ + i__ * cor_dim1], lcor);
 	}
-	i__1 = dimsfd_2.npq1;
-	for (j = 1; j <= i__1; ++j) {
+	for (j = 1; j <= npq1; ++j) {
 	    d__1 = 1. / se[j];
 	    F77_CALL(dscal)(&j, &d__1, &cor[j * cor_dim1 + 1], &c__1);
 	}
     } else {
-	hessfd_1.kcor = 1;
-	i__1 = dimsfd_2.npq1;
-	for (j = 1; j <= i__1; ++j) {
-	    F77_CALL(dcopy)(&dimsfd_2.npq1, &c_b8, &c__0, &cor[j * cor_dim1 + 1], &
-		    c__1);
+	hessfd_.kcor = 1;
+	for (j = 1; j <= npq1; ++j) {
+	    F77_CALL(dcopy)(&npq1, &c_0d, &c__0,
+			    &cor[j * cor_dim1 + 1], &c__1);
 	}
     }
-    i__1 = dimsfd_2.npq1;
-    for (i__ = 1; i__ <= i__1; ++i__) {
-	i__2 = dimsfd_2.npq1;
-	for (j = i__ + 1; j <= i__2; ++j) {
+    for (i__ = 1; i__ <= npq1; ++i__)
+	for (j = i__ + 1; j <= npq1; ++j)
 	    cor[j + i__ * cor_dim1] = cor[i__ + j * cor_dim1];
-	}
-    }
-    if (gammfd_1.igamma != 0) {
-	*info = 4;
-    }
-    if (gammfd_1.jgamma != 0) {
-	*info = 1;
-    }
-    if (hessfd_1.ksvd != 0) {
-	*info = 3;
-    }
-    if (hessfd_1.kcov != 0) {
-	*info = 2;
-    }
-    if (hessfd_1.kcor != 0) {
-	*info = 3;
-    }
+
+    if (gammfd_.igamma != 0) *info = 4;
+    if (gammfd_.jgamma != 0) *info = 1;
+    if (hessfd_.ksvd != 0)   *info = 3;
+    if (hessfd_.kcov != 0)   *info = 2;
+    if (hessfd_.kcor != 0)   *info = 3;
     return;
 } /* fdcov */
 
@@ -348,53 +216,42 @@ void fdcov(double *x, double *d__, double *hh,
 invsvd_(double *s, double *u, int *lu,
 	double *v, int *lv, double *cov, int *lcov)
 {
-    /* System generated locals */
-    int u_dim1, u_offset, v_dim1, v_offset, cov_dim1, cov_offset, i__1,
-	    i__2;
-    double d__1;
-
-    /* Local variables */
-    static int i__, j, k;
-    static double ss;
-    static int krank;
-
 /*     double precision   s(npq1), u(lu,npq1), v(lv,npq1), cov(lcov,npq1)
  copyright 1991 Department of Statistics, University of Washington
  written by Chris Fraley
- -----------------------------------------------------------------------------
-     Parameter adjustments */
+ ---------------------------------------------------------------------------*/
+
+    /* System generated locals */
+    int u_dim1, u_offset, v_dim1, v_offset, cov_dim1, cov_offset;
+    double d__1;
+
+    /* Local variables */
+    int i__, j, k, krank, npq1 = Dims.npq1;
+    double ss;
+
+    /* Parameter adjustments */
     --s;
-    u_dim1 = *lu;
-    u_offset = 1 + u_dim1;
-    u -= u_offset;
-    v_dim1 = *lv;
-    v_offset = 1 + v_dim1;
-    v -= v_offset;
-    cov_dim1 = *lcov;
-    cov_offset = 1 + cov_dim1;
-    cov -= cov_offset;
+    u_dim1 = *lu;	u_offset = 1 + u_dim1;		  u -= u_offset;
+    v_dim1 = *lv;	v_offset = 1 + v_dim1;		  v -= v_offset;
+    cov_dim1 = *lcov; cov_offset = 1 + cov_dim1;	cov -= cov_offset;
 
     /* Function Body */
-    krank = dimsfd_2.npq1;
-    i__1 = dimsfd_2.npq1;
-    for (i__ = 1; i__ <= i__1; ++i__) {
+    krank = npq1;
+    for (i__ = 1; i__ <= npq1; ++i__) {
 	ss = s[i__];
-	i__2 = dimsfd_2.npq1;
-	for (j = 1; j <= i__2; ++j) {
+	for (j = 1; j <= npq1; ++j) {
 	    if (ss < 1.) {
-		if ((d__1 = u[i__ + j * u_dim1], abs(d__1)) > ss *
-			machfd_1.fltmax) {
+		if (fabs(u[i__ + j * u_dim1]) > ss * machfd_.fltmax) {
 		    krank = i__ - 1;
-		    hessfd_1.kcov = 1;
+		    hessfd_.kcov = 1;
 		    goto L100;
 		}
 	    }
 	}
     }
 L100:
-    i__1 = dimsfd_2.npq1;
-    for (k = 1; k <= i__1; ++k) {
-	F77_CALL(dcopy)(&k, &c_b8, &c__0, &cov[k * cov_dim1 + 1], &c__1);
+    for (k = 1; k <= npq1; ++k) {
+	F77_CALL(dcopy)(&k, &c_0d, &c__0, &cov[k * cov_dim1 + 1], &c__1);
     }
     if (krank == 0) {
 	return 0;
@@ -412,170 +269,144 @@ L100:
 /*          call daxpy( j, ss*v(j,k), u(1,k), 1, H(1,j), 1) */
 /*        end do */
 /*      end do */
-    i__1 = krank;
-    for (k = 1; k <= i__1; ++k) {
+    for (k = 1; k <= krank; ++k) {
 	ss = -1. / s[k];
-	i__2 = dimsfd_2.npq1;
-	for (j = 1; j <= i__2; ++j) {
+	for (j = 1; j <= npq1; ++j) {
 	    d__1 = ss * u[j + k * u_dim1];
-	    F77_CALL(daxpy)(&j, &d__1, &v[k * v_dim1 + 1], &c__1, &cov[j * cov_dim1 +
-		    1], &c__1);
+	    F77_CALL(daxpy)(&j, &d__1, &v[k * v_dim1 + 1], &c__1,
+			    &cov[j * cov_dim1 + 1], &c__1);
 	}
     }
     return 0;
 } /* invsvd_
 
  ******************************************************************************
- ******************************************************************************
- Subroutine */
-int hesspq_(double *qp, double *a, double *ajac,
-	    int *lajac, double *h__, int *lh, double *aij,
-	    double *g)
+ *****************************************************************************/
+
+void hesspq_(double *qp, double *a, double *ajac,
+	     int *lajac, double *h__, int *lh, double *aij, double *g)
 {
-    /* System generated locals */
-    int ajac_dim1, ajac_offset, h_dim1, h_offset, i__1, i__2, i__3, i__4;
-
-    /* Local variables */
-    static int i__, j, k, l;
-    static double s, t, u;
-    static int km;
-    static double fac;
-
-
-/*     double precision	qp(npq), a(nm), ajac(nm,npq)
+/*   double precision	qp(npq), a(nm), ajac(nm,npq)
      double precision	H(lH,npq1), aij(nm), g(npq)
+
  analytic Hessian with respect to p and q variables
  copyright 1991 Department of Statistics, University of Washington
  written by Chris Fraley
- -----------------------------------------------------------------------------
-     Parameter adjustments */
+ ----------------------------------------------------------------------------*/
+
+    /* System generated locals */
+    int ajac_dim1, ajac_offset, h_dim1, h_offset, i__1, i__2, i__3;
+
+    /* Local variables */
+    int i__, j, k, l, km;
+    double s, t, u, fac;
+
+    /* Parameter adjustments */
     --qp;
     --a;
-    ajac_dim1 = *lajac;
-    ajac_offset = 1 + ajac_dim1;
-    ajac -= ajac_offset;
-    h_dim1 = *lh;
-    h_offset = 1 + h_dim1;
-    h__ -= h_offset;
+    ajac_dim1 = *lajac; ajac_offset = 1 + ajac_dim1; ajac -= ajac_offset;
+    h_dim1 = *lh;	h_offset    = 1 + h_dim1;     h__ -= h_offset;
     --aij;
     --g;
 
-    /* Function Body */
-    fac = 1. / (filtfd_1.wnv * (double) (dimsfd_2.nm - 1));
-    if (dimsfd_2.nq != 0 && dimsfd_2.np != 0) {
-	i__1 = dimsfd_2.npq;
-	for (k = 1; k <= i__1; ++k) {
-	    g[k] = F77_CALL(ddot)(&dimsfd_2.nm, &a[1], &c__1, &ajac[k * ajac_dim1 + 1],
-		     &c__1);
+    fac = 1. / (filtfd_.wnv * (double) (Dims.nm - 1));
+    if (Dims.nq != 0 && Dims.np != 0) {
+	for (k = 1; k <= Dims.npq; ++k) {
+	    g[k] = F77_CALL(ddot)(&Dims.nm, &a[1], &c__1,
+				  &ajac[k * ajac_dim1 + 1], &c__1);
 	}
-	i__1 = dimsfd_2.np;
+	i__1 = Dims.np;
+	i__2 = Dims.nq;
+	i__3 = Dims.n;
 	for (i__ = 1; i__ <= i__1; ++i__) {
-	    u = g[dimsfd_2.nq + i__];
-	    i__2 = dimsfd_2.nq;
+	    u = g[Dims.nq + i__];
+	    int i__a = (Dims.nq + i__)* ajac_dim1;
 	    for (j = 1; j <= i__2; ++j) {
-		u = g[j] * u;
-		i__3 = dimsfd_2.n;
-		for (k = dimsfd_2.maxpq1; k <= i__3; ++k) {
-		    km = k - dimsfd_2.maxpq;
+		u *= g[j];
+		for (k = Dims.maxpq1; k <= i__3; ++k) {
+		    km = k - Dims.maxpq;
 		    t = 0.;
-		    i__4 = dimsfd_2.nq;
-		    for (l = 1; l <= i__4; ++l) {
-			if (km <= l) {
-			    goto L301;
-			}
+		    for (l = 1; km <= l && l <= i__2; ++l)
 			t += qp[l] * aij[km - l];
-		    }
-L301:
-		    if (km > j) {
-			aij[km] = ajac[km - j + (dimsfd_2.nq + i__) *
-				ajac_dim1] + t;
-		    } else {
+
+		    if (km > j)
+			aij[km] = ajac[km - j + i__a] + t;
+		    else
 			aij[km] = t;
-		    }
 		}
-		s = F77_CALL(ddot)(&dimsfd_2.nm, &ajac[(dimsfd_2.nq + i__) * ajac_dim1
-			+ 1], &c__1, &ajac[j * ajac_dim1 + 1], &c__1);
-		t = F77_CALL(ddot)(&dimsfd_2.nm, &a[1], &c__1, &aij[1], &c__1);
-		h__[i__ + 1 + (dimsfd_2.np + j + 1) * h_dim1] = -((double)
-			 dimsfd_2.n) * (s + t - fac * 2. * u) * fac;
+		s = F77_CALL(ddot)(&Dims.nm, &ajac[i__a + 1], &c__1,
+				   &ajac[j * ajac_dim1 + 1], &c__1);
+		t = F77_CALL(ddot)(&Dims.nm, &a[1], &c__1, &aij[1], &c__1);
+		h__[i__ + 1 + (Dims.np + j + 1) * h_dim1] =
+		    -((double) Dims.n) * (s + t - fac * 2. * u) * fac;
 	    }
 	}
     }
-    if (dimsfd_2.nq != 0) {
-	i__1 = dimsfd_2.nq;
+    if (Dims.nq != 0) {
+	i__1 = Dims.nq;
+	i__3 = Dims.n;
 	for (i__ = 1; i__ <= i__1; ++i__) {
 	    u = g[i__];
-	    i__2 = dimsfd_2.nq;
-	    for (j = i__; j <= i__2; ++j) {
-		u = g[j] * u;
-		i__3 = dimsfd_2.n;
-		for (k = dimsfd_2.maxpq1; k <= i__3; ++k) {
-		    km = k - dimsfd_2.maxpq;
+	    int i__a = i__ * ajac_dim1;
+	    for (j = i__; j <= i__1; ++j) {
+		u *= g[j];
+		int j__a = j * ajac_dim1;
+		for (k = Dims.maxpq1; k <= i__3; ++k) {
+		    km = k - Dims.maxpq;
 		    t = 0.;
-		    i__4 = dimsfd_2.nq;
-		    for (l = 1; l <= i__4; ++l) {
-			if (km <= l) {
-			    goto L302;
-			}
+		    for (l = 1; km <= l && l <= i__1; ++l)
 			t += qp[l] * aij[km - l];
-		    }
-L302:
+
 		    s = 0.;
-		    if (km > i__) {
-			s += ajac[km - i__ + j * ajac_dim1];
-		    }
-		    if (km > j) {
-			s += ajac[km - j + i__ * ajac_dim1];
-		    }
+		    if (km > i__) s += ajac[km - i__ + j__a];
+		    if (km > j)	  s += ajac[km - j + i__a];
+
 		    aij[km] = s + t;
 		}
-		s = F77_CALL(ddot)(&dimsfd_2.nm, &ajac[i__ * ajac_dim1 + 1], &c__1, &
-			ajac[j * ajac_dim1 + 1], &c__1);
-		t = F77_CALL(ddot)(&dimsfd_2.nm, &a[1], &c__1, &aij[1], &c__1);
-		h__[dimsfd_2.np + i__ + 1 + (dimsfd_2.np + j + 1) * h_dim1] =
-			-((double) dimsfd_2.n) * (s + t - fac * 2. * u) *
-			fac;
+		s = F77_CALL(ddot)(&Dims.nm, &ajac[i__a + 1], &c__1,
+				   &ajac[j__a + 1], &c__1);
+		t = F77_CALL(ddot)(&Dims.nm, &a[1], &c__1, &aij[1], &c__1);
+		h__[Dims.np + i__ + 1 + (Dims.np + j + 1) * h_dim1] =
+			-((double) Dims.n) * (s + t - fac * 2. * u) * fac;
 	    }
 	}
     }
-    if (dimsfd_2.np != 0) {
-	i__1 = dimsfd_2.np;
+    if (Dims.np != 0) {
+	i__1 = Dims.np;
 	for (i__ = 1; i__ <= i__1; ++i__) {
-	    u = g[dimsfd_2.nq + i__];
-	    i__2 = dimsfd_2.np;
-	    for (j = i__; j <= i__2; ++j) {
-		u = g[dimsfd_2.nq + j] * u;
-/*            do k = maxpq1, n */
-/*              km  =  k - maxpq */
-/*              t  = zero */
-/*              if (nq .ne. 0) then */
-/*               do l = 1, nq */
-/*                  if (km .le. l) goto 303 */
-/*                  t  = t + qp(l)*aij(km-l) */
-/*               end do */
-/*              end if */
-/* 303          continue */
-/*              aij(km) = t */
-/*            end do */
-		s = F77_CALL(ddot)(&dimsfd_2.nm, &ajac[(dimsfd_2.nq + i__) * ajac_dim1
-			+ 1], &c__1, &ajac[(dimsfd_2.nq + j) * ajac_dim1 + 1],
-			 &c__1);
-/*            t = ddot( nm, a             , 1, aij           , 1) */
-/*            H(i+1,j+1) = -dble(n)*((s + t) - two*fac*u)*fac */
-		h__[i__ + 1 + (j + 1) * h_dim1] = -((double) dimsfd_2.n) *
-			 (s - fac * 2. * u) * fac;
+	    u = g[Dims.nq + i__];
+	    for (j = i__; j <= i__1; ++j) {
+		u = g[Dims.nq + j] * u;
+/*	      do k = maxpq1, n */
+/*		km  =  k - maxpq */
+/*		t  = zero */
+/*		if (nq .ne. 0) then */
+/*		 do l = 1, nq */
+/*		    if (km .le. l) goto 303 */
+/*		    t  = t + qp(l)*aij(km-l) */
+/*		 end do */
+/*		end if */
+/* 303		continue */
+/*		aij(km) = t */
+/*	      end do */
+		s = F77_CALL(ddot)(&Dims.nm, &ajac[(Dims.nq+i__)*ajac_dim1 + 1],
+				   &c__1, &ajac[(Dims.nq + j) * ajac_dim1 + 1],
+				   &c__1);
+/*	      t = ddot( nm, a		  , 1, aij	     , 1) */
+/*	      H(i+1,j+1) = -dble(n)*((s + t) - two*fac*u)*fac */
+		h__[i__ + 1 + (j + 1) * h_dim1] =
+		    -((double) Dims.n) * (s - fac * 2. * u) * fac;
 	    }
 	}
     }
-    return 0;
+    return;
 } /* hesspq_ */
 
 
 /******************************************************************************
  ******************************************************************************
  Subroutine */ int
-hesdpq_(double *x, double *d__, double *hh,
-	double *hd, double *w)
+hesdpq_(double *x, double *d__, double *hh, double *hd, double *w)
 {
 /*     float		 x(n)
      double precision	 d, hh, hd(npq1), w(*)
@@ -592,140 +423,135 @@ hesdpq_(double *x, double *d__, double *hh,
      Parameter adjustments */
     --w;
     --hd;
-    --x;
 
     /* Function Body */
     if (*hh <= 0.) {
-	*hh = (abs(filtfd_1.cllf) + 1.) * mauxfd_1.epspt5;
+	*hh = (fabs(filtfd_.cllf) + 1.) * mauxfd_.epspt5;
     }
-    *hh = min(*hh,.1);
+    if(*hh > 0.1) *hh = 0.1;
     if (*d__ - *hh > 0.) {
-	d__1 = *d__ - *hh;
-	fdfilt_(&x[1], &d__1, &w[wfilfd_1.ly], &slogvk, &w[wfilfd_1.lamk], &w[
-		wfilfd_1.lak], &w[wfilfd_1.lvk], &w[wfilfd_1.lphi], &w[
-		wfilfd_1.lpi]);
-	if (dimsfd_2.npq != 0) {
-	    ajqp_(&w[woptfd_1.lqp], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-		    dimsfd_2.nm, &c__1, &w[wfilfd_1.ly]);
-	    ajqp_(&w[woptfd_1.lqp], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-		    dimsfd_2.nm, &c__2, &w[wfilfd_1.ly]);
-	    gradpq_(&w[woptfd_1.lwa1], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-		    dimsfd_2.nm);
-	    filtfd_1.wnv = F77_CALL(ddot)(&dimsfd_2.nm, &w[woptfd_1.la], &c__1, &w[
-		    woptfd_1.la], &c__1);
-	    d__1 = 1. / filtfd_1.wnv;
-	    F77_CALL(dscal)(&dimsfd_2.npq, &d__1, &w[woptfd_1.lwa1], &c__1);
-	    filtfd_1.wnv /= (double) (dimsfd_2.nm - 1);
+	fdfilt(x, *d__ - *hh, &w[wfilfd_.ly], &slogvk,
+	       &w[wfilfd_.lamk], &w[wfilfd_.lak], &w[wfilfd_.lvk],
+	       &w[wfilfd_.lphi], &w[wfilfd_.lpi]);
+	if (Dims.npq != 0) {
+	    ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
+		  &Dims.nm, &c__1, &w[wfilfd_.ly]);
+	    ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
+		  &Dims.nm, &c__2, &w[wfilfd_.ly]);
+	    gradpq_(&w[woptfd_.lwa1], &w[woptfd_.la], &w[woptfd_.lajac],
+		    &Dims.nm);
+	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[woptfd_.la], &c__1,
+					  &w[woptfd_.la], &c__1);
+	    d__1 = 1. / filtfd_.wnv;
+	    F77_CALL(dscal)(&Dims.npq, &d__1, &w[woptfd_.lwa1], &c__1);
+	    filtfd_.wnv /= (double) (Dims.nm - 1);
 	} else {
-	    filtfd_1.wnv = F77_CALL(ddot)(&dimsfd_2.nm, &w[wfilfd_1.ly], &c__1, &w[
-		    wfilfd_1.ly], &c__1) / (double) (dimsfd_2.nm - 1);
+	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[wfilfd_.ly], &c__1,
+					  &w[wfilfd_.ly], &c__1) /
+		(double) (Dims.nm - 1);
 	}
-	fa = -((double) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) +
-		slogvk) / 2.;
+	fa = -((double) Dims.n * (log(filtfd_.wnv) + 2.8378) + slogvk) / 2.;
 	if (*d__ + *hh < .5) {
-	    d__1 = *d__ + *hh;
-	    fdfilt_(&x[1], &d__1, &w[wfilfd_1.ly], &slogvk, &w[wfilfd_1.lamk],
-		     &w[wfilfd_1.lak], &w[wfilfd_1.lvk], &w[wfilfd_1.lphi], &
-		    w[wfilfd_1.lpi]);
-	    if (dimsfd_2.npq != 0) {
-		ajqp_(&w[woptfd_1.lqp], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-			dimsfd_2.nm, &c__1, &w[wfilfd_1.ly]);
-		ajqp_(&w[woptfd_1.lqp], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-			dimsfd_2.nm, &c__2, &w[wfilfd_1.ly]);
-		gradpq_(&w[woptfd_1.lwa2], &w[woptfd_1.la], &w[woptfd_1.lajac]
-			, &dimsfd_2.nm);
-		filtfd_1.wnv = F77_CALL(ddot)(&dimsfd_2.nm, &w[woptfd_1.la], &c__1, &w[
-			woptfd_1.la], &c__1);
-		d__1 = 1. / filtfd_1.wnv;
-		F77_CALL(dscal)(&dimsfd_2.npq, &d__1, &w[woptfd_1.lwa2], &c__1);
-		filtfd_1.wnv /= (double) (dimsfd_2.nm - 1);
+	    fdfilt(x, *d__ + *hh, &w[wfilfd_.ly], &slogvk,
+		   &w[wfilfd_.lamk], &w[wfilfd_.lak], &w[wfilfd_.lvk],
+		   &w[wfilfd_.lphi], &w[wfilfd_.lpi]);
+	    if (Dims.npq != 0) {
+		ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
+		      &Dims.nm, &c__1, &w[wfilfd_.ly]);
+		ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
+		      &Dims.nm, &c__2, &w[wfilfd_.ly]);
+		gradpq_(&w[woptfd_.lwa2], &w[woptfd_.la], &w[woptfd_.lajac],
+			&Dims.nm);
+		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[woptfd_.la], &c__1,
+					      &w[woptfd_.la], &c__1);
+		d__1 = 1. / filtfd_.wnv;
+		F77_CALL(dscal)(&Dims.npq, &d__1, &w[woptfd_.lwa2], &c__1);
+		filtfd_.wnv /= (double) (Dims.nm - 1);
 	    } else {
-		filtfd_1.wnv = F77_CALL(ddot)(&dimsfd_2.nm, &w[wfilfd_1.ly], &c__1, &w[
-			wfilfd_1.ly], &c__1) / (double) (dimsfd_2.nm - 1);
+		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[wfilfd_.ly], &c__1,
+					      &w[wfilfd_.ly], &c__1) /
+		    (double) (Dims.nm - 1);
 	    }
-	    fb = -((double) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) +
-		    slogvk) / 2.;
-	    hd[1] = (fa + fb - filtfd_1.cllf * 2.) / (*hh * *hh);
-	} else {
-	    d__1 = *d__ - *hh * 2.;
-	    fdfilt_(&x[1], &d__1, &w[wfilfd_1.ly], &slogvk, &w[wfilfd_1.lamk],
-		     &w[wfilfd_1.lak], &w[wfilfd_1.lvk], &w[wfilfd_1.lphi], &
-		    w[wfilfd_1.lpi]);
-	    if (dimsfd_2.npq != 0) {
-		ajqp_(&w[woptfd_1.lqp], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-			dimsfd_2.nm, &c__1, &w[wfilfd_1.ly]);
-		ajqp_(&w[woptfd_1.lqp], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-			dimsfd_2.nm, &c__2, &w[wfilfd_1.ly]);
-		gradpq_(&w[woptfd_1.lwa2], &w[woptfd_1.la], &w[woptfd_1.lajac]
-			, &dimsfd_2.nm);
-		filtfd_1.wnv = F77_CALL(ddot)(&dimsfd_2.nm, &w[woptfd_1.la], &c__1, &w[
-			woptfd_1.la], &c__1);
-		d__1 = 1. / filtfd_1.wnv;
-		F77_CALL(dscal)(&dimsfd_2.npq, &d__1, &w[woptfd_1.lwa2], &c__1);
-		filtfd_1.wnv /= (double) (dimsfd_2.nm - 1);
+	    fb = -((double) Dims.n * (log(filtfd_.wnv) + 2.8378) + slogvk)/ 2.;
+	    hd[1] = (fa + fb - filtfd_.cllf * 2.) / (*hh * *hh);
+	}
+	else {
+	    fdfilt(x, *d__ - *hh * 2., &w[wfilfd_.ly], &slogvk,
+		   &w[wfilfd_.lamk], &w[wfilfd_.lak], &w[wfilfd_.lvk],
+		   &w[wfilfd_.lphi], &w[wfilfd_.lpi]);
+	    if (Dims.npq != 0) {
+		ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
+		      &Dims.nm, &c__1, &w[wfilfd_.ly]);
+		ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
+		      &Dims.nm, &c__2, &w[wfilfd_.ly]);
+		gradpq_(&w[woptfd_.lwa2], &w[woptfd_.la], &w[woptfd_.lajac],
+			&Dims.nm);
+		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[woptfd_.la], &c__1,
+					      &w[woptfd_.la], &c__1);
+		d__1 = 1. / filtfd_.wnv;
+		F77_CALL(dscal)(&Dims.npq, &d__1, &w[woptfd_.lwa2], &c__1);
+		filtfd_.wnv /= (double) (Dims.nm - 1);
 	    } else {
-		filtfd_1.wnv = F77_CALL(ddot)(&dimsfd_2.nm, &w[wfilfd_1.ly], &c__1, &w[
-			wfilfd_1.ly], &c__1) / (double) (dimsfd_2.nm - 1);
+		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[wfilfd_.ly], &c__1,
+					      &w[wfilfd_.ly], &c__1) /
+		    (double) (Dims.nm - 1);
 	    }
-	    fb = -((double) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) +
-		    slogvk) / 2.;
-	    hd[1] = (filtfd_1.cllf + fb - fa * 2.) / (*hh * 2. * *hh);
+	    fb = -((double)Dims.n * (log(filtfd_.wnv) + 2.8378) + slogvk) / 2.;
+	    hd[1] = (filtfd_.cllf + fb - fa * 2.) / (*hh * 2. * *hh);
 	}
     } else {
-	d__1 = *d__ + *hh;
-	fdfilt_(&x[1], &d__1, &w[wfilfd_1.ly], &slogvk, &w[wfilfd_1.lamk], &w[
-		wfilfd_1.lak], &w[wfilfd_1.lvk], &w[wfilfd_1.lphi], &w[
-		wfilfd_1.lpi]);
-	if (dimsfd_2.npq != 0) {
-	    ajqp_(&w[woptfd_1.lqp], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-		    dimsfd_2.nm, &c__1, &w[wfilfd_1.ly]);
-	    ajqp_(&w[woptfd_1.lqp], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-		    dimsfd_2.nm, &c__2, &w[wfilfd_1.ly]);
-	    gradpq_(&w[woptfd_1.lwa1], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-		    dimsfd_2.nm);
-	    filtfd_1.wnv = F77_CALL(ddot)(&dimsfd_2.nm, &w[woptfd_1.la], &c__1, &w[
-		    woptfd_1.la], &c__1);
-	    d__1 = 1. / filtfd_1.wnv;
-	    F77_CALL(dscal)(&dimsfd_2.npq, &d__1, &w[woptfd_1.lwa1], &c__1);
-	    filtfd_1.wnv /= (double) (dimsfd_2.nm - 1);
+	fdfilt(x, *d__ + *hh, &w[wfilfd_.ly], &slogvk,
+	       &w[wfilfd_.lamk], &w[wfilfd_.lak], &w[wfilfd_.lvk],
+	       &w[wfilfd_.lphi], &w[wfilfd_.lpi]);
+	if (Dims.npq != 0) {
+	    ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
+		  &Dims.nm, &c__1, &w[wfilfd_.ly]);
+	    ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
+		  &Dims.nm, &c__2, &w[wfilfd_.ly]);
+	    gradpq_(&w[woptfd_.lwa1], &w[woptfd_.la], &w[woptfd_.lajac],
+		    &Dims.nm);
+	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[woptfd_.la], &c__1,
+					  &w[woptfd_.la], &c__1);
+	    d__1 = 1. / filtfd_.wnv;
+	    F77_CALL(dscal)(&Dims.npq, &d__1, &w[woptfd_.lwa1], &c__1);
+	    filtfd_.wnv /= (double) (Dims.nm - 1);
 	} else {
-	    filtfd_1.wnv = F77_CALL(ddot)(&dimsfd_2.nm, &w[wfilfd_1.ly], &c__1, &w[
-		    wfilfd_1.ly], &c__1) / (double) (dimsfd_2.nm - 1);
+	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[wfilfd_.ly], &c__1,
+					  &w[wfilfd_.ly], &c__1) /
+		(double) (Dims.nm - 1);
 	}
-	fa = -((double) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) +
-		slogvk) / 2.;
-	d__1 = *d__ + *hh * 2.;
-	fdfilt_(&x[1], &d__1, &w[wfilfd_1.ly], &slogvk, &w[wfilfd_1.lamk], &w[
-		wfilfd_1.lak], &w[wfilfd_1.lvk], &w[wfilfd_1.lphi], &w[
-		wfilfd_1.lpi]);
-	if (dimsfd_2.npq != 0) {
-	    ajqp_(&w[woptfd_1.lqp], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-		    dimsfd_2.nm, &c__1, &w[wfilfd_1.ly]);
-	    ajqp_(&w[woptfd_1.lqp], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-		    dimsfd_2.nm, &c__2, &w[wfilfd_1.ly]);
-	    gradpq_(&w[woptfd_1.lwa1], &w[woptfd_1.la], &w[woptfd_1.lajac], &
-		    dimsfd_2.nm);
-	    filtfd_1.wnv = F77_CALL(ddot)(&dimsfd_2.nm, &w[woptfd_1.la], &c__1, &w[
-		    woptfd_1.la], &c__1);
-	    d__1 = 1. / filtfd_1.wnv;
-	    F77_CALL(dscal)(&dimsfd_2.npq, &d__1, &w[woptfd_1.lwa1], &c__1);
-	    filtfd_1.wnv /= (double) (dimsfd_2.nm - 1);
+	fa = -((double) Dims.n * (log(filtfd_.wnv) + 2.8378) + slogvk) / 2.;
+	fdfilt(x, *d__ + *hh * 2., &w[wfilfd_.ly], &slogvk,
+	       &w[wfilfd_.lamk], &w[wfilfd_.lak], &w[wfilfd_.lvk],
+	       &w[wfilfd_.lphi], &w[wfilfd_.lpi]);
+	if (Dims.npq != 0) {
+	    ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
+		  &Dims.nm, &c__1, &w[wfilfd_.ly]);
+	    ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
+		  &Dims.nm, &c__2, &w[wfilfd_.ly]);
+	    gradpq_(&w[woptfd_.lwa1], &w[woptfd_.la], &w[woptfd_.lajac],
+		    &Dims.nm);
+	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[woptfd_.la], &c__1,
+					  &w[woptfd_.la], &c__1);
+	    d__1 = 1. / filtfd_.wnv;
+	    F77_CALL(dscal)(&Dims.npq, &d__1, &w[woptfd_.lwa1], &c__1);
+	    filtfd_.wnv /= (double) (Dims.nm - 1);
 	} else {
-	    filtfd_1.wnv = F77_CALL(ddot)(&dimsfd_2.nm, &w[wfilfd_1.ly], &c__1, &w[
-		    wfilfd_1.ly], &c__1) / (double) (dimsfd_2.nm - 1);
+	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[wfilfd_.ly], &c__1,
+					  &w[wfilfd_.ly], &c__1) /
+		(double) (Dims.nm - 1);
 	}
-	fb = -((double) dimsfd_2.n * (log(filtfd_1.wnv) + 2.8378) +
-		slogvk) / 2.;
-	hd[1] = (filtfd_1.cllf + fb - fa * 2.) / (*hh * 2. * *hh);
+	fb = -((double) Dims.n * (log(filtfd_.wnv) + 2.8378) + slogvk) / 2.;
+	hd[1] = (filtfd_.cllf + fb - fa * 2.) / (*hh * 2. * *hh);
     }
-    if (dimsfd_2.npq == 0) {
+    if (Dims.npq == 0) {
 	return 0;
     }
-    F77_CALL(daxpy)(&dimsfd_2.npq, &c_b78, &w[woptfd_1.lwa2], &c__1, &w[woptfd_1.lwa1],
-	     &c__1);
-    d__1 = (double) dimsfd_2.n / (*hh * 2.);
-    F77_CALL(dscal)(&dimsfd_2.npq, &d__1, &w[woptfd_1.lwa1], &c__1);
-    F77_CALL(dcopy)(&dimsfd_2.npq, &w[woptfd_1.lwa1], &c__1, &hd[2], &c__1);
+    F77_CALL(daxpy)(&Dims.npq, &c_m1, &w[woptfd_.lwa2], &c__1,
+		    &w[woptfd_.lwa1], &c__1);
+    d__1 = (double) Dims.n / (*hh * 2.);
+    F77_CALL(dscal)(&Dims.npq, &d__1, &w[woptfd_.lwa1], &c__1);
+    F77_CALL(dcopy)(&Dims.npq, &w[woptfd_.lwa1], &c__1, &hd[2], &c__1);
     return 0;
 } /* hesdpq_ */
 
@@ -752,17 +578,17 @@ int gradpq_(double *g, double *a, double *ajac,	int *ljac)
     ajac -= ajac_offset;
 
     /* Function Body */
-    if (dimsfd_2.np != 0) {
-	i__1 = dimsfd_2.np;
+    if (Dims.np != 0) {
+	i__1 = Dims.np;
 	for (i__ = 1; i__ <= i__1; ++i__) {
-	    g[i__] = F77_CALL(ddot)(&dimsfd_2.nm, &a[1], &c__1, &ajac[(dimsfd_2.nq +
+	    g[i__] = F77_CALL(ddot)(&Dims.nm, &a[1], &c__1, &ajac[(Dims.nq +
 		    i__) * ajac_dim1 + 1], &c__1);
 	}
     }
-    if (dimsfd_2.nq != 0) {
-	i__1 = dimsfd_2.nq;
+    if (Dims.nq != 0) {
+	i__1 = Dims.nq;
 	for (j = 1; j <= i__1; ++j) {
-	    g[dimsfd_2.np + j] = F77_CALL(ddot)(&dimsfd_2.nm, &a[1], &c__1, &ajac[j *
+	    g[Dims.np + j] = F77_CALL(ddot)(&Dims.nm, &a[1], &c__1, &ajac[j *
 		    ajac_dim1 + 1], &c__1);
 	}
     }
