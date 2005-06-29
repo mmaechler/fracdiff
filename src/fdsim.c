@@ -10,18 +10,13 @@
 extern double dgamr_(double *);
 extern double dgamma_(double *);
 
-/* Common Block Declarations --- used in  ./fdgam.c */
-
-struct { double fltmin, fltmax, epsmin, epsmax;
-} machfd_;
-
-struct { int igamma, jgamma;
-} gammfd_;
-
+/* Common Block Declarations -- used in  ./fdgam.c and fdcore.c */
+#include "mach_comm.h"
+#include "gamm_comm.h"
 
 /* Subroutine */
 void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
-	   double *d__, double *rmu, double *y, double *s,
+	   double *d__, double *mu, double *y, double *s,
 	   double *flmin, double *flmax, double *epmin, double *epmax)
 {
 /*  generates a random time series for use with fracdf
@@ -83,9 +78,8 @@ void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
     d__1 = 1. - *d__ * 2.;
     vk = dgamma_(&d__1) * (temp * temp);
     if (gammfd_.igamma != 0) {
-	for (i = 1; i <= *n; ++i) {
+	for (i = 1; i <= *n; ++i)
 	    s[i] = 0.;
-	}
 	return;
     }
     /* else -- Gamma values ok, compute	 : */
@@ -131,8 +125,8 @@ void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
 	y[k] = amk + y[k] * sqrt(vk);
     }
 
-/*	 We now have an ARIMA (0,d,0) realisation of length n+iq in
-	 y(k),k=1,n+iq. We now run this through an inverse ARMA(p,q)
+/* We now have an ARIMA (0,d,0) realisation of length n+iq in
+  y(k), k=1,n+iq. We now run this through an inverse ARMA(p,q)
 	 filter to get the final output in s(k), k=1,n. */
 
     for (k = 1; k <= *n; ++k) {
@@ -145,9 +139,9 @@ void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
 	s[k] = sum + y[k + *iq];
     }
     /* now add the global mean */
-    if (*rmu != 0.) {
+    if (*mu != 0.) {
 	for (i = 1; i <= *n; ++i)
-	    s[i] += *rmu;
+	    s[i] += *mu;
     }
     return;
 } /* fdsim */
