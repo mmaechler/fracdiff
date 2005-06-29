@@ -1,7 +1,7 @@
-/* fdhess.f -- translated by f2c (version 20031025).
-
- * and produced by
- * $Id: f2c-clean,v 1.10 2002/03/28 16:37:27 maechler Exp $
+/*-*- mode: C; kept-old-versions: 12;  kept-new-versions: 20; -*-
+ *
+ * fdhess.f -- translated by f2c (version 20031025).
+ * and produced by  f2c-clean,v 1.10 2002/03/28 16:37:27 maechler
  *
  * and manually pretty edited by Martin Maechler, 2004-10-01
 */
@@ -41,7 +41,7 @@ int invsvd_(double *, double *, int *,
 	    double *, int *, double *, int *);
 
 static
-int gradpq_(double *g, double *a, double *ajac,	int *ljac);
+void gradpq(double *g, double a[], double ajac[], int l_ajac);
 
 
 /* Common Block Declarations --- included as "extern" */
@@ -326,7 +326,7 @@ void hesspq_(double *qp, double *a, double *ajac,
 		for (k = Dims.maxpq1; k <= i__3; ++k) {
 		    km = k - Dims.maxpq;
 		    t = 0.;
-		    for (l = 1; km <= l && l <= i__2; ++l)
+		    for (l = 1; l < km && l <= i__2; ++l)
 			t += qp[l] * aij[km - l];
 
 		    if (km > j)
@@ -354,7 +354,7 @@ void hesspq_(double *qp, double *a, double *ajac,
 		for (k = Dims.maxpq1; k <= i__3; ++k) {
 		    km = k - Dims.maxpq;
 		    t = 0.;
-		    for (l = 1; km <= l && l <= i__1; ++l)
+		    for (l = 1; l < km && l <= i__1; ++l)
 			t += qp[l] * aij[km - l];
 
 		    s = 0.;
@@ -438,8 +438,7 @@ hesdpq_(double *x, double *d__, double *hh, double *hd, double *w)
 		  &Dims.nm, &c__1, &w[wfilfd_.ly]);
 	    ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
 		  &Dims.nm, &c__2, &w[wfilfd_.ly]);
-	    gradpq_(&w[woptfd_.lwa1], &w[woptfd_.la], &w[woptfd_.lajac],
-		    &Dims.nm);
+	    gradpq(&w[woptfd_.lwa1], &w[woptfd_.la], &w[woptfd_.lajac],Dims.nm);
 	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[woptfd_.la], &c__1,
 					  &w[woptfd_.la], &c__1);
 	    d__1 = 1. / filtfd_.wnv;
@@ -460,8 +459,8 @@ hesdpq_(double *x, double *d__, double *hh, double *hd, double *w)
 		      &Dims.nm, &c__1, &w[wfilfd_.ly]);
 		ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
 		      &Dims.nm, &c__2, &w[wfilfd_.ly]);
-		gradpq_(&w[woptfd_.lwa2], &w[woptfd_.la], &w[woptfd_.lajac],
-			&Dims.nm);
+		gradpq(&w[woptfd_.lwa2], &w[woptfd_.la], &w[woptfd_.lajac],
+		       Dims.nm);
 		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[woptfd_.la], &c__1,
 					      &w[woptfd_.la], &c__1);
 		d__1 = 1. / filtfd_.wnv;
@@ -484,8 +483,8 @@ hesdpq_(double *x, double *d__, double *hh, double *hd, double *w)
 		      &Dims.nm, &c__1, &w[wfilfd_.ly]);
 		ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
 		      &Dims.nm, &c__2, &w[wfilfd_.ly]);
-		gradpq_(&w[woptfd_.lwa2], &w[woptfd_.la], &w[woptfd_.lajac],
-			&Dims.nm);
+		gradpq(&w[woptfd_.lwa2], &w[woptfd_.la], &w[woptfd_.lajac],
+		       Dims.nm);
 		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[woptfd_.la], &c__1,
 					      &w[woptfd_.la], &c__1);
 		d__1 = 1. / filtfd_.wnv;
@@ -508,8 +507,7 @@ hesdpq_(double *x, double *d__, double *hh, double *hd, double *w)
 		  &Dims.nm, &c__1, &w[wfilfd_.ly]);
 	    ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
 		  &Dims.nm, &c__2, &w[wfilfd_.ly]);
-	    gradpq_(&w[woptfd_.lwa1], &w[woptfd_.la], &w[woptfd_.lajac],
-		    &Dims.nm);
+	    gradpq(&w[woptfd_.lwa1], &w[woptfd_.la], &w[woptfd_.lajac],Dims.nm);
 	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[woptfd_.la], &c__1,
 					  &w[woptfd_.la], &c__1);
 	    d__1 = 1. / filtfd_.wnv;
@@ -529,8 +527,7 @@ hesdpq_(double *x, double *d__, double *hh, double *hd, double *w)
 		  &Dims.nm, &c__1, &w[wfilfd_.ly]);
 	    ajqp_(&w[woptfd_.lqp], &w[woptfd_.la], &w[woptfd_.lajac],
 		  &Dims.nm, &c__2, &w[wfilfd_.ly]);
-	    gradpq_(&w[woptfd_.lwa1], &w[woptfd_.la], &w[woptfd_.lajac],
-		    &Dims.nm);
+	    gradpq(&w[woptfd_.lwa1], &w[woptfd_.la], &w[woptfd_.lajac],Dims.nm);
 	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[woptfd_.la], &c__1,
 					  &w[woptfd_.la], &c__1);
 	    d__1 = 1. / filtfd_.wnv;
@@ -556,42 +553,24 @@ hesdpq_(double *x, double *d__, double *hh, double *hd, double *w)
 } /* hesdpq_ */
 
 /******************************************************************************
- ******************************************************************************
- Subroutine */
-int gradpq_(double *g, double *a, double *ajac,	int *ljac)
+ *****************************************************************************/
+
+void gradpq(double *g, double a[], double ajac[], int l_ajac)
 {
-    /* System generated locals */
-    int ajac_dim1, ajac_offset, i__1;
-
-    /* Local variables */
-    static int i__, j;
-
 /*     double precision	g(npq), a(nm), ajac(nm,npq)
  copyright 1991 Department of Statistics, University of Washington
  written by Chris Fraley
- ------------------------------------------------------------------------------
-     Parameter adjustments */
-    --g;
-    --a;
-    ajac_dim1 = *ljac;
-    ajac_offset = 1 + ajac_dim1;
-    ajac -= ajac_offset;
+ -----------------------------------------------------------------------------*/
 
-    /* Function Body */
-    if (Dims.np != 0) {
-	i__1 = Dims.np;
-	for (i__ = 1; i__ <= i__1; ++i__) {
-	    g[i__] = F77_CALL(ddot)(&Dims.nm, &a[1], &c__1, &ajac[(Dims.nq +
-		    i__) * ajac_dim1 + 1], &c__1);
-	}
-    }
-    if (Dims.nq != 0) {
-	i__1 = Dims.nq;
-	for (j = 1; j <= i__1; ++j) {
-	    g[Dims.np + j] = F77_CALL(ddot)(&Dims.nm, &a[1], &c__1, &ajac[j *
-		    ajac_dim1 + 1], &c__1);
-	}
-    }
-    return 0;
-} /* gradpq_ */
+    int i, j;
+
+    for (i = 0; i < Dims.np; ++i)
+	g[i] = F77_CALL(ddot)(&Dims.nm, a, &c__1,
+			      &ajac[(Dims.nq + i) * l_ajac], &c__1);
+
+    for (j = 0; j < Dims.nq; ++j)
+	g[Dims.np + j] = F77_CALL(ddot)(&Dims.nm, a, &c__1,
+					&ajac[j * l_ajac], &c__1);
+    return;
+} /* gradpq */
 
