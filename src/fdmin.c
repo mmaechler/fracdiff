@@ -21,21 +21,11 @@
 #endif
 
 
-/* Common Block Declarations */
+/* Common Block Declarations --- included as "extern" */
+#define FD_EXTERNAL extern
 
-union {
-    struct { double fltmin, fltmax, epsmin, epsmch; } _1;
-    struct { double fltmin, fltmax, epsmin, epsmax; } _2;
-} machfd_;
-
-#define machfd_1 (machfd_._1)
-#define machfd_2 (machfd_._2)
-
-struct {
-    double epsp25, epspt3, epspt5, epsp75, bignum;
-} mauxfd_;
-
-#define mauxfd_1 mauxfd_
+#include "mach_comm.h"
+#include "maux_comm.h"
 
 struct {
     double told, tolf, tolx, tolg, fnorm, delta, gnorm;
@@ -598,14 +588,14 @@ L290:
     if (*nfev >= *maxfev) {
 	*info = 5;
     }
-    if (fabs(actred) <= machfd_1.epsmch && prered <= machfd_1.epsmch &&
+    if (fabs(actred) <= machfd_.epsmax && prered <= machfd_.epsmax &&
 	p5 * ratio <= one) {
 	*info = 6;
     }
-    if (tolsfd_1.delta <= machfd_1.epsmch) {
+    if (tolsfd_1.delta <= machfd_.epsmax) {
 	*info = 7;
     }
-    if (tolsfd_1.gnorm <= machfd_1.epsmch) {
+    if (tolsfd_1.gnorm <= machfd_.epsmax) {
 	*info = 8;
     }
     if (*info != 0) {
@@ -960,7 +950,7 @@ L40:
 	    rdiag[k] *= sqrt((max(d__1,d__2)));
 /* Computing 2nd power */
 	    d__1 = rdiag[k] / wa[k];
-	    if (p05 * (d__1 * d__1) > machfd_1.epsmch) {
+	    if (p05 * (d__1 * d__1) > machfd_.epsmax) {
 		goto L80;
 	    }
 	    i__3 = *m - j;
@@ -1112,7 +1102,7 @@ int lmpar_(int *n, double *r__, int *ldr,
      dwarf is the smallest positive magnitude.
 
      dwarf = dpmpar(2) */
-    dwarf = machfd_2.fltmin;
+    dwarf = machfd_.fltmin;
 
 /*     compute and store in x the gauss-newton direction. if the
      jacobian is rank-deficient, obtain a least squares solution. */
