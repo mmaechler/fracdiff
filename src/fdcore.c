@@ -41,11 +41,12 @@ ajq_(double *qp, double *a, double *ajac, int *lajac, int *iflag, double *y);
 
 /* Common Block Declarations */
 
-/* 1 - local ones : */
+/* 1 - local ones  --- MM: maybe get rid of (some of) them : */
 static
 struct { int maxopt, maxfun, nopt, nfun, ngrd, ifun, igrd, info; } OP;
 
-/* MM: get rid of these two : */
+static struct { double d, f, x, g; } TOL;
+
 static struct { int iminpk, jminpk; } MinPck;
 
 static struct { int ilimit, jlimit; } limsfd_;
@@ -56,17 +57,12 @@ static struct { int ilimit, jlimit; } limsfd_;
 
 #include "mach_comm.h"
 #include "maux_comm.h"
-#include "Dims_comm.h"
-
-#include "tols_comm.h"
-
-#include "filt_comm.h"
-#include "wfil_comm.h"
-#include "wopt_comm.h"
 
 #include "gamm_comm.h"
+
 #include "hess_comm.h"
 
+#include "tols_comm.h"
 
 
 /* Table of constant values (used as pointers) */
@@ -136,13 +132,13 @@ void fracdf_(double *x, int *n, int *m, int *nar, int *nma,
  *     initialize several of the above common blocks: */
     fdcom(n, m, nar, nma, &c_m99, flmin, flmax, epmin, epmax);
 
-    lfree = woptfd_1.lwa4 + *n - Dims.minpq;
+    lfree = w_opt.lwa4 + *n - Dims.minpq;
 /* 	= 1+ ipvt + 5.5*npq + n - minpq
  	= 2+ 6.5*npq + 3*n - 2*minpq + (n-maxpq)*npq
  and               lvk+M = 1 + npq + 2(n + M)
  */
 
-    lwfree = imax2(372, imax2(wfilfd_1.lvk + *m, lfree));
+    lwfree = imax2(372, imax2(w_fil.lvk + *m, lfree));
 /*                                 ^^^^^^^ MM: where is this needed? */
     if (lwfree > *lenw + 1) {
 	limsfd_.ilimit = lwfree - *lenw;
@@ -168,19 +164,19 @@ void fracdf_(double *x, int *n, int *m, int *nar, int *nma,
     if (*dtol > .1)
 	*dtol = .1;
     if (*dtol <= 0.) {
-	tolsfd_.d = mauxfd_.epsp25;
-	tolsfd_.f = mauxfd_.epspt3;
+	TOL.d = mauxfd_.epsp25;
+	TOL.f = mauxfd_.epspt3;
     } else {
-	tolsfd_.d = fmax2(*dtol, mauxfd_.epspt5);
-	tolsfd_.f = fmax2(*dtol / 10., mauxfd_.epsp75);
+	TOL.d = fmax2(*dtol, mauxfd_.epspt5);
+	TOL.f = fmax2(*dtol / 10., mauxfd_.epsp75);
     }
-    tolsfd_.g = tolsfd_.f;
-    tolsfd_.x = tolsfd_.d;
-    *dtol = tolsfd_.d;
+    TOL.g = TOL.f;
+    TOL.x = TOL.d;
+    *dtol = TOL.d;
 /*     if (npq != 0) call dcopy( npq, zero, 0, w(lqp), 1) */
-    if (Dims.npq != 0) {
-	F77_CALL(dcopy)(&Dims.np, ar, &ic__1, &w[woptfd_1.lqp + Dims.nq], &ic__1);
-	F77_CALL(dcopy)(&Dims.nq, ma, &ic__1, &w[woptfd_1.lqp], &ic__1);
+    if (Dims.pq != 0) {
+	F77_CALL(dcopy)(&Dims.p, ar, &ic__1, &w[w_opt.lqp + Dims.q], &ic__1);
+	F77_CALL(dcopy)(&Dims.q, ma, &ic__1, &w[w_opt.lqp], &ic__1);
     }
     OP.nopt = 0;
     OP.nfun = 0;
@@ -195,14 +191,14 @@ void fracdf_(double *x, int *n, int *m, int *nar, int *nma,
     if (gammfd_.igamma != 0 || MinPck.iminpk != 0) {
 	*d__ = machfd_.fltmax;
 	*hood = machfd_.fltmax;
-	F77_CALL(dcopy)(&Dims.np, &machfd_.fltmax, &ic__0, ar, &ic__1);
-	F77_CALL(dcopy)(&Dims.nq, &machfd_.fltmax, &ic__0, ma, &ic__1);
+	F77_CALL(dcopy)(&Dims.p, &machfd_.fltmax, &ic__0, ar, &ic__1);
+	F77_CALL(dcopy)(&Dims.q, &machfd_.fltmax, &ic__0, ma, &ic__1);
 
 	if (gammfd_.igamma != 0) { *inform__ = 2; return; }
 	if (MinPck.iminpk != 0) { *inform__ = 3; return; }
     }
-    F77_CALL(dcopy)(&Dims.np, &w[woptfd_1.lqp + Dims.nq], &ic__1, ar, &ic__1);
-    F77_CALL(dcopy)(&Dims.nq, &w[woptfd_1.lqp],           &ic__1, ma, &ic__1);
+    F77_CALL(dcopy)(&Dims.p, &w[w_opt.lqp + Dims.q], &ic__1, ar, &ic__1);
+    F77_CALL(dcopy)(&Dims.q, &w[w_opt.lqp],           &ic__1, ma, &ic__1);
 
     if (gammfd_.jgamma != 0) { *inform__ = 4; return; }
     if (MinPck.jminpk != 0) { *inform__ = 5; return; }
@@ -257,8 +253,8 @@ double dopt(double *x, double *dinit, double *drange,
 
     aa = drange[0];
     bb = drange[1];
-    if (*dinit > aa + tolsfd_.d &&
-	*dinit < bb - tolsfd_.d) {
+    if (*dinit > aa + TOL.d &&
+	*dinit < bb - TOL.d) {
 	vv = *dinit;
     } else {
 	vv = aa + cc * (bb - aa);
@@ -272,7 +268,7 @@ double dopt(double *x, double *dinit, double *drange,
 /*       ===== */
     fv = fx;
     fw = fx;
-    tol = fmax2(tolsfd_.d,0.);
+    tol = fmax2(TOL.d,0.);
     tol3 = tol / 3.;
 
 /*  main loop starts here */
@@ -419,8 +415,10 @@ void fdcom(int *n, int *m, int *nar, int *nma,
  *
  * copyright 1991 Department of Statistics, University of Washington
    written by Chris Fraley
- ----------------------------------------------------------------------------- */
+ -----------------------------------------------------------------------------*/
+
     filtfd_.cllf = *hood;
+
 /* machine constants */
     machfd_.fltmin = *flmin;
     machfd_.fltmax = *flmax;
@@ -431,41 +429,42 @@ void fdcom(int *n, int *m, int *nar, int *nma,
     mauxfd_.epspt3 = pow(machfd_.epsmin, 0.3);
     mauxfd_.epsp75 = pow(machfd_.epsmin, 0.75);
     mauxfd_.bignum = 1. / machfd_.epsmin;
-/* useful quantities */
+
+/* useful quantities -- integer "dimensions" : */
     Dims.n = *n;
     Dims.m = *m;
-    Dims.np = *nar;
-    Dims.nq = *nma;
-    Dims.npq = Dims.np + Dims.nq;
-    Dims.npq1 = Dims.npq + 1;
-    if(Dims.np >= Dims.nq) {
-	Dims.maxpq = Dims.np;
-	Dims.minpq = Dims.nq;
+    Dims.p = *nar;
+    Dims.q = *nma;
+    Dims.pq = Dims.p + Dims.q;
+    Dims.pq1 = Dims.pq + 1;
+    if(Dims.p >= Dims.q) {
+	Dims.maxpq = Dims.p;
+	Dims.minpq = Dims.q;
     } else {
-	Dims.maxpq = Dims.nq;
-	Dims.minpq = Dims.np;
+	Dims.maxpq = Dims.q;
+	Dims.minpq = Dims.p;
     }
     Dims.maxpq1 = Dims.maxpq + 1;
     Dims.nm = *n - Dims.maxpq;
+
 /* workspace allocation */
-    woptfd_1.lqp = 1;
-    wfilfd_1.ly = woptfd_1.lqp + Dims.npq;
-    wfilfd_1.lamk = wfilfd_1.ly;
-    wfilfd_1.lak = wfilfd_1.lamk + *n;
-    wfilfd_1.lphi = wfilfd_1.lak + *n;
-    wfilfd_1.lvk = wfilfd_1.lphi + *m;
-/* 	= lamk  + 2*n +  M = 1 + npq + 2n + M */
-    wfilfd_1.lpi = wfilfd_1.lphi;
-    woptfd_1.la = wfilfd_1.ly + *n;
-    woptfd_1.lajac = woptfd_1.la + *n - Dims.minpq;
-/* old ipvt   = lajac  +  max( (n-np)*np, (n-nq)*nq, (n-maxpq)*npq) */
-    woptfd_1.ipvt = woptfd_1.lajac + (*n - Dims.maxpq) * Dims.npq;
-    woptfd_1.ldiag = woptfd_1.ipvt + Dims.npq / 2 + 1;
-    woptfd_1.lqtf = woptfd_1.ldiag + Dims.npq;
-    woptfd_1.lwa1 = woptfd_1.lqtf + Dims.npq;
-    woptfd_1.lwa2 = woptfd_1.lwa1 + Dims.npq;
-    woptfd_1.lwa3 = woptfd_1.lwa2 + Dims.npq;
-    woptfd_1.lwa4 = woptfd_1.lwa3 + Dims.npq;
+    w_opt.lqp = 1;
+    w_fil.ly = w_opt.lqp + Dims.pq;
+    w_fil.lamk = w_fil.ly;
+    w_fil.lak = w_fil.lamk + *n;
+    w_fil.lphi= w_fil.lak  + *n;
+    w_fil.lvk = w_fil.lphi + *m; /* = lamk + 2*n + M = 1 + npq + 2n + M */
+    w_fil.lpi = w_fil.lphi;
+    w_opt.la  = w_fil.ly   + *n;
+    w_opt.lajac = w_opt.la + *n - Dims.minpq;
+    /* old   ipvt = lajac  +  max( (n-np)*np, (n-nq)*nq, (n-maxpq)*npq) */
+    w_opt.ipvt = w_opt.lajac + (*n - Dims.maxpq) * Dims.pq;
+    w_opt.ldiag= w_opt.ipvt + Dims.pq / 2 + 1;
+    w_opt.lqtf = w_opt.ldiag + Dims.pq;
+    w_opt.lwa1 = w_opt.lqtf + Dims.pq;
+    w_opt.lwa2 = w_opt.lwa1 + Dims.pq;
+    w_opt.lwa3 = w_opt.lwa2 + Dims.pq;
+    w_opt.lwa4 = w_opt.lwa3 + Dims.pq;
 /*      lfree  = lwa4   +  n - minpq */
     return;
 } /* fdcom */
@@ -480,8 +479,7 @@ double pqopt(double *x, double d__, double *w, int *iw)
     /* x: double x(n) */
     /* w: work array exactly as in main  fracdf() */
 
-    /* Initialized data */
-
+    /* 'const' (but need to pass pointers of these): */
     static int modelm = 1;
     static double factlm = 100.;
 
@@ -490,7 +488,7 @@ double pqopt(double *x, double d__, double *w, int *iw)
     double ret_val;
 
     /* Local variables */
-    double t, u, bic, slogvk;
+    double t, u, slogvk;
 
     /* Parameter adjustments */
     --w;
@@ -499,12 +497,12 @@ double pqopt(double *x, double d__, double *w, int *iw)
      * written by Chris Fraley
  ---------------------------------------------------------------------------- */
     fdfilt(x, d__,
-	   &w[(0 + (0 + (wfilfd_1.ly   << 3))) / 8], &slogvk,
-	   &w[(0 + (0 + (wfilfd_1.lamk << 3))) / 8],
-	   &w[(0 + (0 + (wfilfd_1.lak  << 3))) / 8],
-	   &w[(0 + (0 + (wfilfd_1.lvk  << 3))) / 8],
-	   &w[(0 + (0 + (wfilfd_1.lphi << 3))) / 8],
-	   &w[(0 + (0 + (wfilfd_1.lpi  << 3))) / 8]);
+	   &w[(0 + (0 + (w_fil.ly   << 3))) / 8], &slogvk,
+	   &w[(0 + (0 + (w_fil.lamk << 3))) / 8],
+	   &w[(0 + (0 + (w_fil.lak  << 3))) / 8],
+	   &w[(0 + (0 + (w_fil.lvk  << 3))) / 8],
+	   &w[(0 + (0 + (w_fil.lphi << 3))) / 8],
+	   &w[(0 + (0 + (w_fil.lpi  << 3))) / 8]);
     if (gammfd_.igamma != 0) {
 	ret_val = machfd_.fltmax;
 	filtfd_.wnv  =  ret_val;
@@ -513,11 +511,11 @@ double pqopt(double *x, double d__, double *w, int *iw)
     }
     t = (double) Dims.n;
 
-    if (Dims.npq == 0) { /* trivial case ---  p = q = 0 : */
+    if (Dims.pq == 0) { /* trivial case ---  p = q = 0 : */
 
 	filtfd_.wnv = F77_CALL(ddot)(&Dims.n,
-				      &w[wfilfd_1.ly], &ic__1,
-				      &w[wfilfd_1.ly], &ic__1) / t;
+				     &w[w_fil.ly], &ic__1,
+				     &w[w_fil.ly], &ic__1) / t;
 	OP.ifun = 0;
 	OP.igrd = 0;
 	OP.info = -1;
@@ -527,74 +525,69 @@ double pqopt(double *x, double d__, double *w, int *iw)
 /*     optimize as an unconstrained optimization problem */
 
 	if (modelm == 2) {
-	    F77_CALL(dcopy)(&Dims.npq, &c__1, &ic__0,
-			    &w[woptfd_1.ldiag], &ic__1);
+	    F77_CALL(dcopy)(&Dims.pq, &c__1, &ic__0,
+			    &w[w_opt.ldiag], &ic__1);
 	}
 	if (OP.nopt < 0) {
-	    if (Dims.np != 0) {
-		i__1 = Dims.n - Dims.np;
-		lmder1_((U_fp)ajp_, &i__1, &Dims.np,
-			&w[woptfd_1.lqp + Dims.nq], &w[woptfd_1.la],
-			&w[woptfd_1.lajac], &i__1, &tolsfd_.f, &tolsfd_.x,
-			&tolsfd_.g, &OP.maxfun, &w[woptfd_1.ldiag],
+	    if (Dims.p != 0) {
+		i__1 = Dims.n - Dims.p;
+		lmder1_((U_fp)ajp_, &i__1, &Dims.p,
+			&w[w_opt.lqp + Dims.q], &w[w_opt.la],
+			&w[w_opt.lajac], &i__1, &TOL.f, &TOL.x,
+			&TOL.g, &OP.maxfun, &w[w_opt.ldiag],
 			&modelm, &factlm, &OP.info, &OP.ifun,
-			&OP.igrd, iw /* was &w[woptfd_1.ipvt] */,
-			&w[woptfd_1.lqtf],
-			&w[woptfd_1.lwa1], &w[woptfd_1.lwa2], &w[woptfd_1.lwa3],
-			&w[woptfd_1.lwa4], &w[wfilfd_1.ly]);
+			&OP.igrd, iw /* was &w[w_opt.ipvt] */,
+			&w[w_opt.lqtf],
+			&w[w_opt.lwa1], &w[w_opt.lwa2], &w[w_opt.lwa3],
+			&w[w_opt.lwa4], &w[w_fil.ly]);
 	    }
-	    if (Dims.nq != 0) {
-		i__1 = Dims.n - Dims.nq;
-		lmder1_((U_fp)ajq_, &i__1, &Dims.nq, &w[woptfd_1.lqp],
-			&w[woptfd_1.la], &w[woptfd_1.lajac], &i__1,
-			&tolsfd_.f, &tolsfd_.x, &tolsfd_.g,
-			&OP.maxfun, &w[woptfd_1.ldiag], &modelm, &factlm,
+	    if (Dims.q != 0) {
+		i__1 = Dims.n - Dims.q;
+		lmder1_((U_fp)ajq_, &i__1, &Dims.q, &w[w_opt.lqp],
+			&w[w_opt.la], &w[w_opt.lajac], &i__1,
+			&TOL.f, &TOL.x, &TOL.g,
+			&OP.maxfun, &w[w_opt.ldiag], &modelm, &factlm,
 			&OP.info, &OP.ifun, &OP.igrd,
-			iw /* was &w[woptfd_1.ipvt] */, &w[woptfd_1.lqtf],
-			&w[woptfd_1.lwa1], &w[woptfd_1.lwa2],
-			&w[woptfd_1.lwa3], &w[woptfd_1.lwa4],
-			&w[wfilfd_1.ly]);
+			iw /* was &w[w_opt.ipvt] */, &w[w_opt.lqtf],
+			&w[w_opt.lwa1], &w[w_opt.lwa2],
+			&w[w_opt.lwa3], &w[w_opt.lwa4],
+			&w[w_fil.ly]);
 	    }
 	}
-	lmder1_((U_fp)ajqp_, &Dims.nm, &Dims.npq, &w[woptfd_1.lqp],
-		&w[woptfd_1.la], &w[woptfd_1.lajac], &Dims.nm,
-		&tolsfd_.f, &tolsfd_.x, &tolsfd_.g,
-		&OP.maxfun, &w[woptfd_1.ldiag], &modelm, &factlm,
+	lmder1_((U_fp)ajqp_, &Dims.nm, &Dims.pq, &w[w_opt.lqp],
+		&w[w_opt.la], &w[w_opt.lajac], &Dims.nm,
+		&TOL.f, &TOL.x, &TOL.g,
+		&OP.maxfun, &w[w_opt.ldiag], &modelm, &factlm,
 		&OP.info, &OP.ifun, &OP.igrd,
-		iw /* was &w[woptfd_1.ipvt] */, &w[woptfd_1.lqtf],
-		&w[woptfd_1.lwa1], &w[woptfd_1.lwa2],
-		&w[woptfd_1.lwa3], &w[woptfd_1.lwa4],
-		&w[wfilfd_1.ly]);
+		iw /* was &w[w_opt.ipvt] */, &w[w_opt.lqtf],
+		&w[w_opt.lwa1], &w[w_opt.lwa2],
+		&w[w_opt.lwa3], &w[w_opt.lwa4],
+		&w[w_fil.ly]);
 
-	if (OP.info == 0) {
-	    /* 'MINPACK : improper input parameters */
+	if (OP.info == 0) { /* 'MINPACK : improper input parameters */
 	    MinPck.iminpk = 10;
 	    ret_val = machfd_.fltmax;
 	    filtfd_.wnv = machfd_.fltmax;
 	    filtfd_.cllf = -machfd_.fltmax;
 	    return ret_val;
 	}
-	if (OP.info == 5) { MinPck.jminpk = 5;
-	/* 'MINPACK : function evaluation limit reached' */
-	}
-	if (OP.info == 6) { MinPck.jminpk = 6;
-	/* 'MINPACK : ftol is too small' */
-	}
-	if (OP.info == 7) { MinPck.jminpk = 7;
-	/* 'MINPACK : xtol is too small' */
-	}
-	if (OP.info == 8) { MinPck.jminpk = 8;
-	/* 'MINPACK : gtol is too small' */
-	}
+	if(OP.info== 5) MinPck.jminpk = 5; /* MINPACK : function evaluation limit reached */
+	if(OP.info== 6) MinPck.jminpk = 6; /* MINPACK : ftol is too small */
+
+	if(OP.info== 7) MinPck.jminpk = 7; /* MINPACK : xtol is too small */
+
+	if(OP.info== 8) MinPck.jminpk = 8; /* MINPACK : gtol is too small */
+
 
 /*     call daxpy( npq, (-one), w(lpq), 1, w(lqp), 1
      delpq  = sqrt(ddot( npq, w(lqp), 1, w(lqp), 1))
      pqnorm = sqrt(ddot( npq, w(lpq), 1, w(lpq), 1)) */
-	filtfd_.wnv = tolsfd_.fnorm * tolsfd_.fnorm / (double) (Dims.nm - 1);
+
+	filtfd_.wnv = fd_min_fnorm * fd_min_fnorm / (double) (Dims.nm - 1);
     }
     u = t * (log(filtfd_.wnv) + 2.8378) + slogvk;
     ret_val = u / 2.;
-    bic = u + (double) (Dims.np + Dims.nq + 1) * log(t);
+    /* unused: BIC = u + (double) (Dims.p + Dims.q + 1) * log(t); */
     filtfd_.cllf = -ret_val;
     return ret_val;
 } /* End pqopt() */
@@ -783,7 +776,7 @@ fdfilt(double *x, double d__,
 	s += t;
 	y[k] = t;
     }
-    if (Dims.npq == 0) {
+    if (Dims.pq == 0) {
 	return;
     }
     t = (double) Dims.n;
@@ -833,14 +826,14 @@ ajqp_(double *qp, double *a, double *ajac, int *lajac, int *iflag, double *y)
     for (k = Dims.maxpq1; k <= (Dims.n); ++k) {
 	km = k - Dims.maxpq;
 	t = 0.;
-	if (Dims.np != 0) {
-	    for (l = 1; l <= (Dims.np); ++l) {
-		t -= qp[Dims.nq + l] * y[k - l];
+	if (Dims.p != 0) {
+	    for (l = 1; l <= (Dims.p); ++l) {
+		t -= qp[Dims.q + l] * y[k - l];
 	    }
 	}
 	s = 0.;
-	if (Dims.nq != 0) {
-	    for (l = 1; l <= (Dims.nq); ++l) {
+	if (Dims.q != 0) {
+	    for (l = 1; l <= (Dims.q); ++l) {
 		if (km <= l)
 		    break;
 		s += qp[l] * a[km - l];
@@ -860,26 +853,26 @@ L200:
 
 /*  jacobian calculation */
 
-    for (i = 1; i <= (Dims.npq); ++i) {
+    for (i = 1; i <= (Dims.pq); ++i) {
 	for (k = Dims.maxpq1; k <= (Dims.n); ++k) {
 	    km = k - Dims.maxpq;
 	    t = 0.;
-	    if (Dims.nq != 0) {
-		for (l = 1; l <= (Dims.nq); ++l) {
+	    if (Dims.q != 0) {
+		for (l = 1; l <= (Dims.q); ++l) {
 		    if (km <= l)
 			break;
 		    t += qp[l] * ajac[km - l + i * ajac_dim1];
 		}
 	    }
 
-	    if (i <= Dims.nq) {
+	    if (i <= Dims.q) {
 		if (km > i) {
 		    s = a[km - i] + t;
 		} else {
 		    s = t;
 		}
 	    } else {
-		s = -y[k - (i - Dims.nq)] + t;
+		s = -y[k - (i - Dims.q)] + t;
 	    }
 	    if (fabs(s) <= mauxfd_.bignum) {
 		ajac[km + i * ajac_dim1] = s;
@@ -916,16 +909,16 @@ ajp_(double *p, double *a, double *ajac, int *lajac, int *iflag, double *y)
 
     if (*iflag == 1) { /*  objective calculation */
 
-	if (Dims.np == 0) {
+	if (Dims.p == 0) {
 	    return 0;
 	}
 
-	for (k = Dims.np + 1; k <= (Dims.n); ++k) {
+	for (k = Dims.p + 1; k <= (Dims.n); ++k) {
 	    double t = 0;
-	    for (i = 1; i <= (Dims.np); ++i)
+	    for (i = 1; i <= (Dims.p); ++i)
 		t -= p[i] * y[k - i];
 
-	    a[k - Dims.np] = y[k] + t;
+	    a[k - Dims.p] = y[k] + t;
 	}
     }
     else if (*iflag == 2) { /*  jacobian calculation */
@@ -935,9 +928,9 @@ ajp_(double *p, double *a, double *ajac, int *lajac, int *iflag, double *y)
 	int ajac_dim1 =  *lajac;
 	ajac -= (1 + ajac_dim1);
 
-	for (i = 1; i <= Dims.np; ++i)
-	    for (k = Dims.np + 1; k <= (Dims.n); ++k)
-		ajac[k - Dims.np + i * ajac_dim1] = - y[k - i];
+	for (i = 1; i <= Dims.p; ++i)
+	    for (k = Dims.p + 1; k <= (Dims.n); ++k)
+		ajac[k - Dims.p + i * ajac_dim1] = - y[k - i];
     }
     return 0;
 } /* ajp_
@@ -964,20 +957,20 @@ ajq_(double *qp, double *a, double *ajac, int *lajac, int *iflag, double *y)
 
     if (*iflag == 1) { /*---  objective calculation ---*/
 
-	if (Dims.nq == 0)
+	if (Dims.q == 0)
 	    return 0;
 
 	for (k = Dims.maxpq1; k <= (Dims.n); ++k) {
 	    km = k - Dims.maxpq;
 	    t = 0.;
-	    if (Dims.np != 0) {
-		for (l = 1; l <= (Dims.np); ++l) {
-		    t -= qp[Dims.nq + l] * y[k - l];
+	    if (Dims.p != 0) {
+		for (l = 1; l <= (Dims.p); ++l) {
+		    t -= qp[Dims.q + l] * y[k - l];
 		}
 	    }
 	    s = 0.;
-	    if (Dims.nq != 0) {
-		for (l = 1; l <= (Dims.nq); ++l) {
+	    if (Dims.q != 0) {
+		for (l = 1; l <= (Dims.q); ++l) {
 		    if (km <= l)
 			break;
 		    s += qp[l] * a[km - l];
@@ -994,25 +987,25 @@ ajq_(double *qp, double *a, double *ajac, int *lajac, int *iflag, double *y)
 	int ajac_dim1 =  *lajac;
 	ajac -= (1 + ajac_dim1);
 
-	for (i = 1; i <= (Dims.npq); ++i) {
+	for (i = 1; i <= (Dims.pq); ++i) {
 	    for (k = Dims.maxpq1; k <= (Dims.n); ++k) {
 		km = k - Dims.maxpq;
 		t = 0.;
-		if (Dims.nq != 0) {
-		    for (l = 1; l <= (Dims.nq); ++l) {
+		if (Dims.q != 0) {
+		    for (l = 1; l <= (Dims.q); ++l) {
 			if (km <= l)
 			    break;
 			t += qp[l] * ajac[km - l + i * ajac_dim1];
 		    }
 		}
-		if (i <= Dims.nq) {
+		if (i <= Dims.q) {
 		    if (km > i) {
 			ajac[km + i * ajac_dim1] = a[km - i] + t;
 		    } else {
 			ajac[km + i * ajac_dim1] = t;
 		    }
 		} else {
-		    ajac[km + i * ajac_dim1] = -y[k - (i - Dims.nq)] + t;
+		    ajac[km + i * ajac_dim1] = -y[k - (i - Dims.q)] + t;
 		}
 	    }
 	}
