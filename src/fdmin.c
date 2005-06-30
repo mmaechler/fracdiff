@@ -54,25 +54,6 @@ int lmder1_(S_fp fcn, int *m, int *n, double *x,
 	    int *nfev, int *njev, int *ipvt, double *qtf,
 	    double *wa1, double *wa2, double *wa3, double *wa4, double *y)
 {
-    /* Initialized data */
-
-    static double one = 1.;
-    static double p1 = .1;
-    static double p5 = .5;
-    static double p25 = .25;
-    static double p75 = .75;
-    static double p0001 = 1e-4;
-    static double zero = 0.;
-
-    /* System generated locals */
-    int fjac_dim1, fjac_offset;
-    double d__1, d__2;
-
-    /* Local variables */
-    int i__, j, l, iter, iflag, nprint;
-    double par, sum, temp, temp1, temp2;
-    double ratio, enorm_n, xnorm, fnorm1, actred, dirder, prered;
-
 /*     **********
 
      subroutine lmder
@@ -84,154 +65,154 @@ int lmder1_(S_fp fcn, int *m, int *n, double *x,
 
      the subroutine statement is
        subroutine lmder(fcn,m,n,x,fvec,fjac,ldfjac,ftol,xtol,gtol,
-                        maxfev,diag,mode,factor,nprint,info,nfev,
-                        njev,ipvt,qtf,wa1,wa2,wa3,wa4)
+			maxfev,diag,mode,factor,nprint,info,nfev,
+			njev,ipvt,qtf,wa1,wa2,wa3,wa4)
 
      where
 
        fcn is the name of the user-supplied subroutine which
-         calculates the functions and the jacobian. fcn must
-         be declared in an external statement in the user
-         calling program, and should be written as follows.
+	 calculates the functions and the jacobian. fcn must
+	 be declared in an external statement in the user
+	 calling program, and should be written as follows.
 
-         subroutine fcn(m,n,x,fvec,fjac,ldfjac,iflag)
-         int m,n,ldfjac,iflag
-         double precision x(n),fvec(m),fjac(ldfjac,n)
-         ----------
-         if iflag = 1 calculate the functions at x and
-         return this vector in fvec. do not alter fjac.
-         if iflag = 2 calculate the jacobian at x and
-         return this matrix in fjac. do not alter fvec.
-         ----------
-         return
-         end
+	 subroutine fcn(m, n, x,fvec,fjac, ldfjac,iflag)
+	 int m,n, ldfjac,iflag
+	 double precision x(n), fvec(m), fjac(ldfjac,n)
+	 ----------
+	 if iflag = 1 calculate the functions at x and
+		      return this vector in fvec. do not alter fjac.
+	 if iflag = 2 calculate the jacobian at x and
+		      return this matrix in fjac. do not alter fvec.
+	 ----------
+	 return
+	 end
 
-         the value of iflag should not be changed by fcn unless
-         the user wants to terminate execution of lmder.
-         in this case set iflag to a negative int.
+	 the value of iflag should not be changed by fcn unless
+	 the user wants to terminate execution of lmder.
+	 in this case set iflag to a negative int.
 
        m is a positive int input variable set to the number
-         of functions.
+	 of functions.
 
        n is a positive int input variable set to the number
-         of variables. n must not exceed m.
+	 of variables. n must not exceed m.
 
        x is an array of length n. on input x must contain
-         an initial estimate of the solution vector. on output x
-         contains the final estimate of the solution vector.
+	 an initial estimate of the solution vector. on output x
+	 contains the final estimate of the solution vector.
 
        fvec is an output array of length m which contains
-         the functions evaluated at the output x.
+	 the functions evaluated at the output x.
 
        fjac is an output m by n array. the upper n by n submatrix
-         of fjac contains an upper triangular matrix r with
-         diagonal elements of nonincreasing magnitude such that
+	 of fjac contains an upper triangular matrix r with
+	 diagonal elements of nonincreasing magnitude such that
 
-                t     t           t
-               p *(jac *jac)*p = r *r,
+		t     t		  t
+	       p *(jac *jac)*p = r *r,
 
-         where p is a permutation matrix and jac is the final
-         calculated jacobian. column j of p is column ipvt(j)
-         (see below) of the identity matrix. the lower trapezoidal
-         part of fjac contains information generated during
-         the computation of r.
+	 where p is a permutation matrix and jac is the final
+	 calculated jacobian. column j of p is column ipvt(j)
+	 (see below) of the identity matrix. the lower trapezoidal
+	 part of fjac contains information generated during
+	 the computation of r.
 
        ldfjac is a positive int input variable not less than m
-         which specifies the leading dimension of the array fjac.
+	 which specifies the leading dimension of the array fjac.
 
        ftol is a nonnegative input variable. termination
-         occurs when both the actual and predicted relative
-         reductions in the sum of squares are at most ftol.
-         therefore, ftol measures the relative error desired
-         in the sum of squares.
+	 occurs when both the actual and predicted relative
+	 reductions in the sum of squares are at most ftol.
+	 therefore, ftol measures the relative error desired
+	 in the sum of squares.
 
        xtol is a nonnegative input variable. termination
-         occurs when the relative error between two consecutive
-         iterates is at most xtol. therefore, xtol measures the
-         relative error desired in the approximate solution.
+	 occurs when the relative error between two consecutive
+	 iterates is at most xtol. therefore, xtol measures the
+	 relative error desired in the approximate solution.
 
        gtol is a nonnegative input variable. termination
-         occurs when the cosine of the angle between fvec and
-         any column of the jacobian is at most gtol in absolute
-         value. therefore, gtol measures the orthogonality
-         desired between the function vector and the columns
-         of the jacobian.
+	 occurs when the cosine of the angle between fvec and
+	 any column of the jacobian is at most gtol in absolute
+	 value. therefore, gtol measures the orthogonality
+	 desired between the function vector and the columns
+	 of the jacobian.
 
        maxfev is a positive int input variable. termination
-         occurs when the number of calls to fcn with iflag = 1
-         has reached maxfev.
+	 occurs when the number of calls to fcn with iflag = 1
+	 has reached maxfev.
 
        diag is an array of length n. if mode = 1 (see
-         below), diag is internally set. if mode = 2, diag
-         must contain positive entries that serve as
-         multiplicative scale factors for the variables.
+	 below), diag is internally set. if mode = 2, diag
+	 must contain positive entries that serve as
+	 multiplicative scale factors for the variables.
 
        mode is an int input variable. if mode = 1, the
-         variables will be scaled internally. if mode = 2,
-         the scaling is specified by the input diag. other
-         values of mode are equivalent to mode = 1.
+	 variables will be scaled internally. if mode = 2,
+	 the scaling is specified by the input diag. other
+	 values of mode are equivalent to mode = 1.
 
        factor is a positive input variable used in determining the
-         initial step bound. this bound is set to the product of
-         factor and the euclidean norm of diag*x if nonzero, or else
-         to factor itself. in most cases factor should lie in the
-         interval (.1,100.).100. is a generally recommended value.
+	 initial step bound. this bound is set to the product of
+	 factor and the euclidean norm of diag*x if nonzero, or else
+	 to factor itself. in most cases factor should lie in the
+	 interval (.1,100.).100. is a generally recommended value.
 
        nprint is an int input variable that enables controlled
-         printing of iterates if it is positive. in this case,
-         fcn is called with iflag = 0 at the beginning of the first
-         iteration and every nprint iterations thereafter and
-         immediately prior to return, with x, fvec, and fjac
-         available for printing. fvec and fjac should not be
-         altered. if nprint is not positive, no special calls
-         of fcn with iflag = 0 are made.
+	 printing of iterates if it is positive. in this case,
+	 fcn is called with iflag = 0 at the beginning of the first
+	 iteration and every nprint iterations thereafter and
+	 immediately prior to return, with x, fvec, and fjac
+	 available for printing. fvec and fjac should not be
+	 altered. if nprint is not positive, no special calls
+	 of fcn with iflag = 0 are made.
 
        info is an int output variable. if the user has
-         terminated execution, info is set to the (negative)
-         value of iflag. see description of fcn. otherwise,
-         info is set as follows.
+	 terminated execution, info is set to the (negative)
+	 value of iflag. see description of fcn. otherwise,
+	 info is set as follows.
 
-         info = 0  improper input parameters.
+	 info = 0  improper input parameters.
 
-         info = 1  both actual and predicted relative reductions
-                   in the sum of squares are at most ftol.
+	 info = 1  both actual and predicted relative reductions
+		   in the sum of squares are at most ftol.
 
-         info = 2  relative error between two consecutive iterates
-                   is at most xtol.
+	 info = 2  relative error between two consecutive iterates
+		   is at most xtol.
 
-         info = 3  conditions for info = 1 and info = 2 both hold.
+	 info = 3  conditions for info = 1 and info = 2 both hold.
 
-         info = 4  the cosine of the angle between fvec and any
-                   column of the jacobian is at most gtol in
-                   absolute value.
+	 info = 4  the cosine of the angle between fvec and any
+		   column of the jacobian is at most gtol in
+		   absolute value.
 
-         info = 5  number of calls to fcn with iflag = 1 has
-                   reached maxfev.
+	 info = 5  number of calls to fcn with iflag = 1 has
+		   reached maxfev.
 
-         info = 6  ftol is too small. no further reduction in
-                   the sum of squares is possible.
+	 info = 6  ftol is too small. no further reduction in
+		   the sum of squares is possible.
 
-         info = 7  xtol is too small. no further improvement in
-                   the approximate solution x is possible.
+	 info = 7  xtol is too small. no further improvement in
+		   the approximate solution x is possible.
 
-         info = 8  gtol is too small. fvec is orthogonal to the
-                   columns of the jacobian to machine precision.
+	 info = 8  gtol is too small. fvec is orthogonal to the
+		   columns of the jacobian to machine precision.
 
        nfev is an int output variable set to the number of
-         calls to fcn with iflag = 1.
+	 calls to fcn with iflag = 1.
 
        njev is an int output variable set to the number of
-         calls to fcn with iflag = 2.
+	 calls to fcn with iflag = 2.
 
        ipvt is an int output array of length n. ipvt
-         defines a permutation matrix p such that jac*p = q*r,
-         where jac is the final calculated jacobian, q is
-         orthogonal (not stored), and r is upper triangular
-         with diagonal elements of nonincreasing magnitude.
-         column j of p is column ipvt(j) of the identity matrix.
+	 defines a permutation matrix p such that jac*p = q*r,
+	 where jac is the final calculated jacobian, q is
+	 orthogonal (not stored), and r is upper triangular
+	 with diagonal elements of nonincreasing magnitude.
+	 column j of p is column ipvt(j) of the identity matrix.
 
        qtf is an output array of length n which contains
-         the first n elements of the vector (q transpose)*fvec.
+	 the first n elements of the vector (q transpose)*fvec.
 
        wa1, wa2, and wa3 are work arrays of length n.
 
@@ -248,14 +229,30 @@ int lmder1_(S_fp fcn, int *m, int *n, double *x,
      argonne national laboratory. minpack project. march 1980.
      burton s. garbow, kenneth e. hillstrom, jorge j. more
 
-     **********
-     double precision dpmpar,enorm
-
      epsmch is the machine precision.
-
      epsmch = dpmpar(1)
+*/
 
-     Parameter adjustments */
+    /* Initialized data */
+    static double one = 1.;
+    static double p1 = .1;
+    static double p5 = .5;
+    static double p25 = .25;
+    static double p75 = .75;
+    static double p0001 = 1e-4;
+    static double zero = 0.;
+
+    /* System generated locals */
+    int fjac_dim1, fjac_offset;
+    double d__1;
+
+    /* Local variables */
+    int i__, j, l, iter, iflag, nprint;
+    double par, sum, temp, temp1, temp2,
+	ratio, enorm_n, xnorm, fnorm1, actred, dirder, prered,
+	T_gnorm, delta;
+
+    /* Parameter adjustments */
     --wa4;
     --fvec;
     --wa3;
@@ -265,10 +262,8 @@ int lmder1_(S_fp fcn, int *m, int *n, double *x,
     --ipvt;
     --diag;
     --x;
-    fjac_dim1 = *ldfjac;
-    fjac_offset = 1 + fjac_dim1;
-    fjac -= fjac_offset;
     --y;
+    fjac_dim1 = *ldfjac; fjac_offset = 1 + fjac_dim1;	fjac -= fjac_offset;
 
     /* Function Body */
     temp = 0.;
@@ -280,31 +275,23 @@ int lmder1_(S_fp fcn, int *m, int *n, double *x,
 /*     check the input parameters for errors. */
 
     if (*n <= 0 || *m < *n || *ldfjac < *m || *ftol < zero || *xtol < zero ||
-
-	    *gtol < zero || *maxfev <= 0 || *factor <= zero) {
+	*gtol < zero || *maxfev <= 0 || *factor <= zero) {
 	goto L300;
     }
-    if (*mode != 2) {
-	goto L20;
+    if (*mode == 2) { /* check diag[] */
+	for (j = 1; j <= *n; ++j)
+	    if (diag[j] <= zero) goto L300;
     }
-    for (j = 1; j <= *n; ++j) {
-	if (diag[j] <= zero) {
-	    goto L300;
-	}
-    }
-L20:
 
-/*     evaluate the function at the starting point
-     and calculate its norm. */
+/* evaluate the function at the starting point and calculate its norm. */
 
     iflag = 1;
     (*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], ldfjac, &iflag, &y[1]);
     *nfev = 1;
-    if (iflag < 0) {
+    if (iflag < 0)
 	goto L300;
-    }
 
-    tolsfd_.fnorm = fmin2(enorm_(m, &fvec[1]), mauxfd_1.bignum);
+    fd_min_fnorm = fmin2(enorm_(m, &fvec[1]), mauxfd_1.bignum);
 
 /*     initialize levenberg-marquardt parameter and iteration counter. */
 
@@ -315,133 +302,115 @@ L20:
 
 L30:
 
-/*        calculate the jacobian matrix. */
+/*	  calculate the jacobian matrix. */
 
     iflag = 2;
     (*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], ldfjac, &iflag, &y[1]);
     ++(*njev);
-    if (iflag < 0) {
+    if (iflag < 0)
 	goto L300;
-    }
 
-/*        if requested, call fcn to enable printing of iterates. */
+/*	  if requested, call fcn to enable printing of iterates. */
+    if (nprint > 0) {
+	iflag = 0;
+	if ((iter - 1) % nprint == 0)
+	    (*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], ldfjac, &iflag, &y[1]);
 
-    if (nprint <= 0) {
-	goto L40;
+	if (iflag < 0)
+	    goto L300;
     }
-    iflag = 0;
-    if ((iter - 1) % nprint == 0) {
-	(*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], ldfjac, &iflag, &y[1]);
-    }
-    if (iflag < 0) {
-	goto L300;
-    }
-L40:
+    /* L40: */
 
-/*        compute the qr factorization of the jacobian. */
+/*	  compute the qr factorization of the jacobian. */
 
     qrfac_(m, n, &fjac[fjac_offset], ldfjac, &c_true, &ipvt[1], n,
 	   &wa1[1], &wa2[1], &wa3[1]);
 
-/*        on the first iteration and if mode is 1, scale according
-        to the norms of the columns of the initial jacobian. */
+    /* on the first iteration -- do a some initializations : */
+    if (iter == 1) {
+	/* if mode is 1, scale according
+	   to the norms of the columns of the initial jacobian. */
+	if (*mode == 1) {
+	    for (j = 1; j <= *n; ++j)
+		diag[j] = ((wa2[j] != zero)? wa2[j] : one);
+	}
 
-    if (iter != 1) {
-	goto L80;
-    }
-    if (*mode == 2) {
-	goto L60;
-    }
-    for (j = 1; j <= *n; ++j) {
-	diag[j] = wa2[j];
-	if (wa2[j] == zero) {
-	    diag[j] = one;
+	/* calculate the norm of the scaled x and
+	   initialize the step bound delta. */
+
+	for (j = 1; j <= *n; ++j)
+	    wa3[j] = diag[j] * x[j];
+
+	xnorm = enorm_(n, &wa3[1]);
+	delta = *factor * xnorm;
+	if (delta == zero) {
+	    delta = *factor;
 	}
     }
-L60:
+    /* L80: */
 
-/*        on the first iteration, calculate the norm of the scaled x
-        and initialize the step bound delta. */
-
-    for (j = 1; j <= *n; ++j) {
-	wa3[j] = diag[j] * x[j];
-    }
-    xnorm = enorm_(n, &wa3[1]);
-    tolsfd_.delta = *factor * xnorm;
-    if (tolsfd_.delta == zero) {
-	tolsfd_.delta = *factor;
-    }
-L80:
-
-/*        form (q transpose)*fvec and store the first n components in
-        qtf. */
+/*	  form (q transpose)*fvec and store the first n components in qtf. */
 
     for (i__ = 1; i__ <= *m; ++i__) {
 	wa4[i__] = fvec[i__];
     }
     for (j = 1; j <= *n; ++j) {
-	if (fjac[j + j * fjac_dim1] == zero) {
-	    goto L120;
+	if (fjac[j + j * fjac_dim1] != zero) {
+	    sum = zero;
+	    for (i__ = j; i__ <= *m; ++i__)
+		sum += fjac[i__ + j * fjac_dim1] * wa4[i__];
+
+	    temp = -sum / fjac[j + j * fjac_dim1];
+	    for (i__ = j; i__ <= *m; ++i__)
+		wa4[i__] += fjac[i__ + j * fjac_dim1] * temp;
 	}
-	sum = zero;
-	for (i__ = j; i__ <= *m; ++i__) {
-	    sum += fjac[i__ + j * fjac_dim1] * wa4[i__];
-	}
-	temp = -sum / fjac[j + j * fjac_dim1];
-	for (i__ = j; i__ <= *m; ++i__) {
-	    wa4[i__] += fjac[i__ + j * fjac_dim1] * temp;
-	}
-L120:
+	/* L120: */
 	fjac[j + j * fjac_dim1] = wa1[j];
 	qtf[j] = wa4[j];
     }
 
-/*        compute the norm of the scaled gradient. */
+/*	  compute the norm of the scaled gradient. */
 
-    tolsfd_.gnorm = zero;
-    if (tolsfd_.fnorm == zero) {
-	goto L170;
-    }
-    for (j = 1; j <= *n; ++j) {
-	l = ipvt[j];
-	if (wa2[l] != zero) {
-	    sum = zero;
-	    for (i__ = 1; i__ <= j; ++i__) {
-		sum += fjac[i__ + j * fjac_dim1] * (qtf[i__] / tolsfd_.fnorm);
+    T_gnorm = zero;
+    if (fd_min_fnorm != zero) {
+	for (j = 1; j <= *n; ++j) {
+	    l = ipvt[j];
+	    if (wa2[l] != zero) {
+		sum = zero;
+		for (i__ = 1; i__ <= j; ++i__)
+		    sum += fjac[i__ + j * fjac_dim1] * (qtf[i__] / fd_min_fnorm);
+		T_gnorm = fmax2(T_gnorm, fabs(sum / wa2[l]));
 	    }
-	    tolsfd_.gnorm = fmax2(tolsfd_.gnorm, fabs(sum / wa2[l]));
 	}
     }
-L170:
+    /* L170: */
 
-/*        test for convergence of the gradient norm. */
+    /* test for convergence of the gradient norm. */
 
-    if (tolsfd_.gnorm <= *gtol) {
-	*info = 4;
-    }
-    if (*info != 0) {
+    if (T_gnorm <= *gtol)	*info = 4;
+
+    if (*info != 0)
 	goto L300;
+
+    /* rescale if necessary. */
+
+    if (*mode == 1) {
+	for (j = 1; j <= *n; ++j)
+	    diag[j] = fmax2(diag[j], wa2[j]);
+
     }
+    /* L190: */
 
-/*        rescale if necessary. */
-
-    if (*mode == 2) {
-	goto L190;
-    }
-    for (j = 1; j <= *n; ++j)
-	diag[j] = fmax2(diag[j], wa2[j]);
-
-L190:
-
-/*        beginning of the inner loop. */
+/*	  beginning of the inner loop. */
 
 L200:
-/*           determine the levenberg-marquardt parameter. */
+/*	     determine the levenberg-marquardt parameter. */
 
-    lmpar_(n, &fjac[fjac_offset], ldfjac, &ipvt[1], &diag[1], &qtf[1], &
-	    tolsfd_.delta, &par, &wa1[1], &wa2[1], &wa3[1], &wa4[1]);
+    lmpar_(n, &fjac[fjac_offset], ldfjac, &ipvt[1],
+	   &diag[1], &qtf[1], &delta, &par,
+	   &wa1[1], &wa2[1], &wa3[1], &wa4[1]);
 
-/*           store the direction p and x + p. calculate the norm of p. */
+/*	     store the direction p and x + p. calculate the norm of p. */
 
     for (j = 1; j <= *n; ++j) {
 	wa1[j] = -wa1[j];
@@ -450,34 +419,33 @@ L200:
     }
     enorm_n = enorm_(n, &wa3[1]);
 
-/*           on the first iteration, adjust the initial step bound. */
+/*	     on the first iteration, adjust the initial step bound. */
 
     if (iter == 1) {
-	tolsfd_.delta = min(tolsfd_.delta,enorm_n);
+	delta = min(delta,enorm_n);
     }
 
-/*           evaluate the function at x + p and calculate its norm. */
+/*	     evaluate the function at x + p and calculate its norm. */
 
     iflag = 1;
     (*fcn)(&wa2[1], &wa4[1], &fjac[fjac_offset], ldfjac, &iflag, &y[1]);
     ++(*nfev);
-    if (iflag < 0) {
+    if (iflag < 0)
 	goto L300;
-    }
+
     fnorm1 = fmin2(enorm_(m, &wa4[1]), mauxfd_1.bignum);
 
-/*           compute the scaled actual reduction. */
+/*	     compute the scaled actual reduction. */
 
     actred = -one;
-    if (p1 * fnorm1 < tolsfd_.fnorm) {
-/* Computing 2nd power */
-	d__1 = fnorm1 / tolsfd_.fnorm;
+    if (p1 * fnorm1 < fd_min_fnorm) {
+	d__1 = fnorm1 / fd_min_fnorm;
 	actred = one - d__1 * d__1;
     }
-/*          actred = (fnorm*fnorm - fnorm1*fnorm1)
+    /* actred = (fnorm*fnorm - fnorm1*fnorm1) */
 
-           compute the scaled predicted reduction and
-           the scaled directional derivative. */
+    /* compute the scaled predicted reduction and
+       the scaled directional derivative. */
 
     for (j = 1; j <= *n; ++j) {
 	wa3[j] = zero;
@@ -487,86 +455,78 @@ L200:
 	    wa3[i__] += fjac[i__ + j * fjac_dim1] * temp;
 	}
     }
-    temp1 = enorm_(n, &wa3[1]) / tolsfd_.fnorm;
-    temp2 = sqrt(par) * enorm_n / tolsfd_.fnorm;
-/* Computing 2nd power */
-    d__1 = temp1;
-/* Computing 2nd power */
-    d__2 = temp2;
-    prered = d__1 * d__1 + d__2 * d__2 / p5;
-/*           temp1  = enorm(n,wa3)
-           temp2  = (dsqrt(par)*enorm_n)
-           prered = (temp1**2 + 2.d0*temp2**2)
- Computing 2nd power */
-    d__1 = temp1;
-/* Computing 2nd power */
-    d__2 = temp2;
-    dirder = -(d__1 * d__1 + d__2 * d__2);
+    temp1 = enorm_(n, &wa3[1]) / fd_min_fnorm;
+    temp2 = sqrt(par) * enorm_n / fd_min_fnorm;
 
-/*           compute the ratio of the actual to the predicted
-           reduction. */
+    prered = temp1 * temp1 + temp2 * temp2 / p5;
+/*	     temp1  = enorm(n,wa3)
+	   temp2  = (dsqrt(par)*enorm_n)
+	   prered = (temp1**2 + 2.d0*temp2**2)
+*/
+    dirder = -(temp1 * temp1 + temp2 * temp2);
 
-    ratio = zero;
-    if (prered != zero) {
+    /* compute the ratio of the actual to the predicted reduction. */
+
+    if (prered != zero)
 	ratio = actred / prered;
-    }
+    else
+	ratio = zero;
 
-/*           update the step bound. */
+/*	     update the step bound. */
 
-    if (ratio > p25) {
-	goto L240;
-    }
-    if (actred >= zero) {
-	temp = p5;
-    }
-    if (actred < zero) {
-	temp = p5 * dirder / (dirder + p5 * actred);
-    }
-    if (p1 * fnorm1 >= tolsfd_.fnorm || temp < p1) {
-	temp = p1;
-    }
-    tolsfd_.delta = temp * fmin2(tolsfd_.delta, enorm_n / p1);
-    par /= temp;
-    goto L260;
-L240:
-    if (par != zero && ratio < p75) {
-	goto L250;
-    }
-    tolsfd_.delta = enorm_n / p5;
-    par = p5 * par;
-L250:
-L260:
+    if (ratio <= p25) {
+	if (actred >= zero)
+	    temp = p5;
+	else /* (actred < zero) */
+	    temp = p5 * dirder / (dirder + p5 * actred);
 
-/*           test for successful iteration. */
+	if (p1 * fnorm1 >= fd_min_fnorm || temp < p1)
+	    temp = p1;
+
+	delta = temp * fmin2(delta, enorm_n / p1);
+	par /= temp;
+    }
+    else { /* ratio > p25 */
+
+	if (par == zero || ratio >= p75) {
+	    delta = enorm_n / p5;
+	    par = p5 * par;
+	}
+    }
+    /* L260: */
+
+/*	     test for successful iteration. */
 
     if (ratio < p0001) {
 	goto L290;
     }
 
-/*           successful iteration. update x, fvec, and their norms. */
+/*	     successful iteration. update x, fvec, and their norms. */
 
 
     for (j = 1; j <= *n; ++j) {
 	x[j] = wa2[j];
 	wa2[j] = diag[j] * x[j];
     }
-    for (i__ = 1; i__ <= *m; ++i__) {
+    for (i__ = 1; i__ <= *m; ++i__)
 	fvec[i__] = wa4[i__];
-    }
+
     xnorm = enorm_(n, &wa2[1]);
-    tolsfd_.fnorm = fnorm1;
+    fd_min_fnorm = fnorm1;
     ++iter;
 
-L290: /*           tests for convergence. */
+L290: /*	   tests for convergence. */
 
     if((abs(actred) <= *ftol && prered <= *ftol && p5 * ratio <= one) ||
-       (tolsfd_.fnorm <= *ftol))
-					*info = 1;
+       (fd_min_fnorm <= *ftol))
+						*info = 1;
 
-    if (tolsfd_.delta <= *xtol) {
-					*info = 2;
-	if (abs(actred) <= *ftol && prered <= *ftol && p5 * ratio <= one)
-	    				*info = 3;
+    if (delta <= *xtol) {
+						*info = 2;
+	if (fabs(actred) <= *ftol &&
+	    prered	 <= *ftol &&
+	    p5 * ratio <= one)
+						*info = 3;
     }
 
     if (*info != 0)
@@ -578,24 +538,24 @@ L290: /*           tests for convergence. */
     if (*nfev >= *maxfev)			*info = 5;
 
     if (fabs(actred) <= machfd_.epsmax &&
-	prered       <= machfd_.epsmax &&
+	prered	     <= machfd_.epsmax &&
 	p5 * ratio <= one)			*info = 6;
 
-    if (tolsfd_.delta <= machfd_.epsmax)	*info = 7;
+    if (delta <= machfd_.epsmax)		*info = 7;
 
-    if (tolsfd_.gnorm <= machfd_.epsmax)	*info = 8;
+    if (T_gnorm <= machfd_.epsmax)		*info = 8;
 
     if (*info != 0)
 	goto L300;
 
 
-/*           end of the inner loop. repeat if iteration unsuccessful. */
+/*	     end of the inner loop. repeat if iteration unsuccessful. */
 
     if (ratio < p0001) {
 	goto L200;
     }
 
-/*        end of the outer loop. */
+/*	  end of the outer loop. */
     goto L30;
 
 L300:
@@ -953,31 +913,10 @@ L100:
 } /* qrfac_ */
 
 /* Subroutine */
-int lmpar_(int *n, double *r__, int *ldr,
-	   int *ipvt, double *diag, double *qtb, double *delta,
-	   double *par, double *x, double *sdiag,
-	   double *wa1, double *wa2)
+int lmpar_(int *n, double *r__, int *ldr, int *ipvt,
+	   double *diag, double *qtb, double *delta, double *par,
+	   double *x, double *sdiag, double *wa1, double *wa2)
 {
-    /* Initialized data */
-
-    static double p1 = .1;
-    static double p001 = .001;
-    static double zero = 0.;
-
-    /* System generated locals */
-    int r_dim1, r_offset;
-    double d__1, d__2;
-
-    /* Local variables */
-    static int i__, j, k, l;
-    static double fp;
-    static int jm1, jp1;
-    static double sum, parc, parl;
-    static int iter;
-    static double temp, paru, dwarf;
-    static int nsing;
-    static double gnorm, dxnorm;
-
 /*     **********
 
      subroutine lmpar
@@ -1071,9 +1010,22 @@ int lmpar_(int *n, double *r__, int *ldr,
      argonne national laboratory. minpack project. march 1980.
      burton s. garbow, kenneth e. hillstrom, jorge j. more
 
-     **********
-     double precision dpmpar,enorm
-     Parameter adjustments */
+***********/
+
+    /* Initialized data */
+    static double p1 = .1;
+    static double p001 = .001;
+    static double zero = 0.;
+
+    /* System generated locals */
+    int r_dim1, r_offset;
+    double d__1, d__2;
+
+    /* Local variables */
+    int i__, j, k, l, jm1, jp1, iter, nsing;
+    double fp, sum, parc, parl, temp, paru, dwarf, gnorm, dxnorm;
+
+    /* Parameter adjustments */
     --wa2;
     --wa1;
     --sdiag;
