@@ -57,7 +57,6 @@ void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
     /* Local variables */
     int i, j, k;
     double dj, vk, dk1, amk, sum, dk1d, temp;
-    int bug = 0;
 
     /*	   Parameter adjustments */
     --y;
@@ -136,32 +135,13 @@ void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
 
     for (k = 1; k <= *n; ++k) {
 	sum = 0.;
-
-/* correct Fortran :
-          do i = 1, ip
-	    if (k .le. i) go to 10
-	    sum = sum + ar(i)*s(k-i)
-          end do
-*/
 	/* j = imin2(*ip,k); */
 	for (i = 0; i < *ip; ++i) {
 	    if (i >= k-1) break;
 	    sum += ar[i] * s[k - i - 1];
 	}
-	if(!bug && fabs(sum) > 1000.) {
-	    bug = 1;
-	    REprintf("k = %d: after AR, sum = %g is large: p=%d\n",
-		     k, sum, *ip);
-	    if(k == 1)
-		REprintf("ar[0] = %g, s[: after AR, sum = %g is large: p=%d\n",
-			 k, sum, *ip);
-	}
 	for (j = 0; j < *iq; ++j)
 	    sum -= ma[j] * y[k + *iq - j - 1];
-	if(!bug && fabs(sum) > 1000.) {
-	    bug = 1;
-	    REprintf("  after MA: sum = %g is large: k=%d\n", sum, k);
-	}
 	s[k] = sum + y[k + *iq];
     }
     /* now add the global mean */
