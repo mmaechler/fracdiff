@@ -135,11 +135,9 @@ void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
 
     for (k = 1; k <= *n; ++k) {
 	sum = 0.;
-	/* j = imin2(*ip,k); */
-	for (i = 0; i < *ip; ++i) {
-	    if (i >= k-1) break;
+	j = imin2(*ip, k-1); /* i < j <= k-1 ==> (k - i - 1) >= 1 */
+	for (i = 0; i < j; ++i)
 	    sum += ar[i] * s[k - i - 1];
-	}
 	for (j = 0; j < *iq; ++j)
 	    sum -= ma[j] * y[k + *iq - j - 1];
 	s[k] = sum + y[k + *iq];
