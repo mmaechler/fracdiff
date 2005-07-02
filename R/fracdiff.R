@@ -203,7 +203,10 @@ fracdiff.sim <- function(n, ar = NULL, ma = NULL, d, rand.gen = rnorm,
     q <- length(ma)
     if(p) {
         minroots <- min(Mod(polyroot(c(1, -ar))))
-        if(minroots <= 1) warning("'ar' part of model is not stationary")
+        if(minroots <= 1) {
+            warning("'ar' part of fracdiff model is not stationary!!")
+            minroots <- 1.01 # -> n.start= 603 by default
+        }
     }
     if(is.na(n.start))
         n.start <- p + q + ifelse(p > 0, ceiling(6/log(minroots)), 0)
