@@ -17,12 +17,13 @@ extern double dgamma_(double *);
 #include "mach_comm.h"
 #include "gamm_comm.h"
 
-/* Subroutine */
+
 void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
 	   double *d__, double *mu, double *y, double *s,
 	   double *flmin, double *flmax, double *epmin, double *epmax)
 {
-/*  generates a random time series for use with fracdf
+/* Generates a random time series ``for use with fracdif'',
+ * i.e., filters a white noise series y[] into an ARIMA(p,d,q) series s[]
 
   Input :
 
@@ -32,7 +33,7 @@ void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
   ar	 float	  (ip) autoregressive parameters
   ma	 float	  (iq) moving average parameters
   d	 float	   fractional differencing parameter
-  rmu	 float	   time series mean
+  mu	 float	   time series mean
   y	 float	  (n+iq) 1st n : normalized random numbers
   s	 float	  (n+iq) workspace
 
@@ -45,7 +46,7 @@ void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
 	with fractional d (0 < d < 0.5).
 
  -----------------------------------------------------------------------------
-     float		 ar(ip), ma(iq), d, rmu
+     float		 ar(ip), ma(iq), d, mu
      float		 y(n+iq), s(n+iq)
  --------------------------------------------------------------------------
  */
@@ -56,6 +57,7 @@ void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
     /* Local variables */
     int i, j, k;
     double dj, vk, dk1, amk, sum, dk1d, temp;
+    int bug = 0;
 
     /*	   Parameter adjustments */
     --y;
@@ -91,7 +93,7 @@ void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
 
     y[1] *= sqrt(vk);
 
-/*	 Generate y(2) and initialise vk,phi(j) */
+    /*	 Generate y(2) and initialise vk,phi(j) */
 
     temp = *d__ / (1. - *d__);
     vk *= 1. - temp * temp;
@@ -99,7 +101,7 @@ void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
     s[1] = temp;
     y[2] = amk + y[2] * sqrt(vk);
 
-/*	 Generate y(3),...,y(n+iq) */
+    /*	 Generate y(3),...,y(n+iq) */
 
     for (k = 3; k <= (*n + *iq); ++k) {
 	dk1 = (double) k - 1.;
@@ -129,16 +131,37 @@ void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
     }
 
 /* We now have an ARIMA (0,d,0) realisation of length n+iq in
-  y(k), k=1,n+iq. We now run this through an inverse ARMA(p,q)
-	 filter to get the final output in s(k), k=1,n. */
+ * y[k], k=1,..,n+iq. We now run this through an inverse ARMA(p,q)
+	 filter to get the final output in s[k], k=1,..,n. */
 
     for (k = 1; k <= *n; ++k) {
 	sum = 0.;
-	j = imin2(*ip,k);
-	for (i = 0; i < j; ++i)
+
+/* correct Fortran :
+          do i = 1, ip
+	    if (k .le. i) go to 10
+	    sum = sum + ar(i)*s(k-i)
+          end do
+*/
+	/* j = imin2(*ip,k); */
+	for (i = 0; i < *ip; ++i) {
+	    if (i >= k-1) break;
 	    sum += ar[i] * s[k - i - 1];
+	}
+	if(!bug && fabs(sum) > 1000.) {
+	    bug = 1;
+	    REprintf("k = %d: after AR, sum = %g is large: p=%d\n",
+		     k, sum, *ip);
+	    if(k == 1)
+		REprintf("ar[0] = %g, s[: after AR, sum = %g is large: p=%d\n",
+			 k, sum, *ip);
+	}
 	for (j = 0; j < *iq; ++j)
 	    sum -= ma[j] * y[k + *iq - j - 1];
+	if(!bug && fabs(sum) > 1000.) {
+	    bug = 1;
+	    REprintf("  after MA: sum = %g is large: k=%d\n", sum, k);
+	}
 	s[k] = sum + y[k + *iq];
     }
     /* now add the global mean */
