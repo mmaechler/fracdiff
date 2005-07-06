@@ -307,8 +307,8 @@ void hesspq_(double *qp, double *a, double *ajac,
 	i2 = Dims.q;
 	i3 = Dims.n;
 	for (i = 1; i <= i1; ++i) {
-	    u = g[Dims.q + i];
 	    int i_aj = (Dims.q + i)* ajac_dim1;
+	    u = g[Dims.q + i];
 	    for (j = 1; j <= i2; ++j) {
 		u *= g[j];
 		for (k = Dims.maxpq1; k <= i3; ++k) {
@@ -334,11 +334,11 @@ void hesspq_(double *qp, double *a, double *ajac,
 	i1 = Dims.q;
 	i3 = Dims.n;
 	for (i = 1; i <= i1; ++i) {
-	    u = g[i];
 	    int i_aj = i * ajac_dim1;
+	    u = g[i];
 	    for (j = i; j <= i1; ++j) {
-		u *= g[j];
 		int j_aj = j * ajac_dim1;
+		u *= g[j];
 		for (k = Dims.maxpq1; k <= i3; ++k) {
 		    km = k - Dims.maxpq;
 		    t = 0.;
