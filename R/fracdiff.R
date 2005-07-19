@@ -53,29 +53,28 @@ fracdiff <- function(x, nar = 0, nma = 0,
     ## if dtol < 0: the fortran code will choose defaults
     x <- as.double(x)
 
-    ## this also initializes "common blocks" that are used
-    ## in .Fortran(.) calls :
-    result <- .Fortran("fracdf",
-                       x,
-                       n,
-                       as.integer(M),
-                       as.integer(nar),
-                       as.integer(nma),
-                       dtol = as.double(dtol),
-                       drange = as.double(drange),
-                       hood = double(1),
-                       d = double(1),
-                       ar = as.double(ar),
-                       ma = as.double(ma),
-                       w = double(lenw),
-                       lenw = lenw,
-                       iw = integer(npq),## <<< new int-work array
-                       info = integer(1),
-                       .Machine$double.xmin,
-                       .Machine$double.xmax,
-                       .Machine$double.neg.eps,
-                       .Machine$double.eps,
-                       PACKAGE = "fracdiff")
+    ## this also initializes "common blocks" that are used in .C(.) calls :
+    result <- .C("fracdf",
+		 x,
+		 n,
+		 as.integer(M),
+		 as.integer(nar),
+		 as.integer(nma),
+		 dtol = as.double(dtol),
+		 drange = as.double(drange),
+		 hood = double(1),
+		 d = double(1),
+		 ar = as.double(ar),
+		 ma = as.double(ma),
+		 w = double(lenw),
+		 lenw = lenw,
+		 iw = integer(npq), ## <<< new int-work array
+		 info = integer(1),
+		 .Machine$double.xmin,
+		 .Machine$double.xmax,
+		 .Machine$double.neg.eps,
+		 .Machine$double.eps,
+		 PACKAGE = "fracdiff")
     if(result$info)
         switch(result$info,
                stop("insufficient workspace; need ", result$lenw,
