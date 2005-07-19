@@ -19,11 +19,11 @@ extern double dgamr_(double *);
 extern double dgamma_(double *);
 
 /* Subroutine */
-void fracdf_(double *x, int *n, int *m, int *nar, int *nma,
-	     double *dtol, double *drange, double *hood,
-	     double *d__, double *ar, double *ma, double *w,
-	     int *lenw, int *iw, int *inform__,
-	     double *flmin, double *flmax, double *epmin, double *epmax);
+void fracdf(double *x, int *n, int *m, int *nar, int *nma,
+	    double *dtol, double *drange, double *hood,
+	    double *d__, double *ar, double *ma, double *w,
+	    int *lenw, int *iw, int *inform__,
+	    double *flmin, double *flmax, double *epmin, double *epmax);
 
 static
 double dopt(double *x, double *dinit, double *drange,
@@ -74,12 +74,12 @@ static double c__1 = 1.;
 
 /*****************************************************************************
  ******************************************************************************/
-void fracdf_(double *x, int *n, int *m, int *nar, int *nma,
-	     double *dtol, double *drange, double *hood,
-	     double *d__, double *ar, double *ma,
-	     double *w, int *lenw, int *iw,
-	     int *inform__,
-	     double *flmin, double *flmax, double *epmin, double *epmax)
+void fracdf(double *x, int *n, int *m, int *nar, int *nma,
+	    double *dtol, double *drange, double *hood,
+	    double *d__, double *ar, double *ma,
+	    double *w, int *lenw, int *iw,
+	    int *inform__,
+	    double *flmin, double *flmax, double *epmin, double *epmax)
 {
 /* ----------------------------------------------------------------------------
    Input :
@@ -138,8 +138,8 @@ void fracdf_(double *x, int *n, int *m, int *nar, int *nma,
  and               lvk+M = 1 + npq + 2(n + M)
  */
 
-    lwfree = imax2(372, imax2(w_fil.lvk + *m, lfree));
-/*                                 ^^^^^^^ MM: where is this needed? */
+    lwfree = imax2((12*31), imax2(w_fil.lvk + *m, lfree));
+/*                 ^^^^^^^ MM: where is this needed? */
     if (lwfree > *lenw + 1) {
 	limsfd_.ilimit = lwfree - *lenw;
 /*       write( 6, *) 'insufficient storage : ',
@@ -222,17 +222,10 @@ double dopt(double *x, double *dinit, double *drange,
 {
 /*     float              x(n) */
 
-    /* Initialized data */
-
-/*  cc is the squared inverse of the golden ratio:
-    cc = half*(three-sqrt(5.0d0))
-*/
+    /* cc is the squared inverse of the golden ratio, cc := (3-sqrt(5.))/2 : */
     static double cc = .38196601125011;
 
-    /* System generated locals */
-    double ret_val, d__1;
-
-    /* Local variables */
+    double ret_val = -1. /* -Wall */;
     static double d__, aa, bb, fa, dd, fb, ee, hh, fu, fv, fw, fx, rr, ss,
 	     tt, uu, vv, ww, xx, eps, tol, tol1, tol2, tol3;
 
@@ -241,15 +234,10 @@ double dopt(double *x, double *dinit, double *drange,
  ------------------------------------------------------------------------------
 */
 
-
-/* eps is approximately the square root of the relative machine
-  precision. */
+    /* eps is approximately the square root of the relative machine precision. */
     eps = machfd_.epsmax;
     tol1 = eps + 1.;
     eps = sqrt(eps);
-/* -Wall: */
-    ret_val = -1.;
-    dd = 0.;
 
     aa = drange[0];
     bb = drange[1];
@@ -262,13 +250,14 @@ double dopt(double *x, double *dinit, double *drange,
     ww = vv;
     xx = vv;
     uu = xx;
+    dd = 0.;
     ee = 0.;
     OP.nopt = 1;
     fx = pqopt(x, xx, w, iw);
 /*       ===== */
     fv = fx;
     fw = fx;
-    tol = fmax2(TOL.d,0.);
+    tol = fmax2(TOL.d, 0.);
     tol3 = tol / 3.;
 
 /*  main loop starts here */
@@ -285,15 +274,17 @@ L10:
 
 /*  check stopping criterion */
 
-    *delta = (d__1 = xx - hh, fabs(d__1)) + (bb - aa) * .5;
-/*     if (abs(xx-hh) .le. (tol2-half*(bb-aa))) goto 100 */
+    *delta = fabs(xx - hh) + (bb - aa) * .5;
+    /*     if (abs(xx-hh) .le. (tol2-half*(bb-aa))) goto 100 */
     if (*delta <= tol2) {
 	goto L100;
     }
     if (OP.nopt >= OP.maxopt) {
 	goto L100;
     }
-/*     if (delpq <= EPSMAX*(one+pqnorm)) goto 100 */
+    /* Maybe another check :
+     *     if (delpq <= EPSMAX*(one+pqnorm)) goto 100 */
+
     rr = 0.;
     ss = 0.;
     tt = 0.;
@@ -785,7 +776,7 @@ fdfilt(double *x, double d__,
 	y[k] -= u;
 
     return;
-} /* fdfilt_ */
+} /* fdfilt */
 
 
 /****************************************************************************
