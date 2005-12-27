@@ -29,11 +29,12 @@
   \item{sd.reg}{standard error deviation}
 }
 
-\references{see those in \code{\link{Sperio}}.}
+\references{see those in \code{\link{Sperio}}.
+}
 
-\author{Valderio A. Reisen (valderio@cce.ufes.br) and Artur J. Lemonte}
+\author{Valderio A. Reisen and Artur J. Lemonte}
 
-\seealso{Sperio, fracdiff}
+\seealso{\code{\link{Sperio}}, \code{\link{fracdiff}}}
 
 \examples{
 memory.long <- fracdiff.sim(1500, d = 0.3)
