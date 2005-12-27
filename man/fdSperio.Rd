@@ -1,13 +1,10 @@
 \name{Sperio}
 \alias{Sperio}
 
-\title{Estimate the fractional parameter in the ARFIMA(p,d,q) model using
-  the smoothed periodogram function
-}
-
+\title{Sperio Estimate for 'd' in ARFIMA(p,d,q)}
 \description{
   This function makes use Reisen (1994) estimator to estimate the memory
-  parameter d in the ARFIMA model. It is based on the regression
+  parameter d in the ARFIMA(p,d,q) model.  It is based on the regression
   equation using the smoothed peridogram function as an estimate of the
   spectral density.
 }
@@ -21,15 +18,18 @@
 }
 
 \details{
-  \item{The function also provides the asymptotic standard deviation and the standard
-        error deviation of the fractional estimator}
-  \item{band = trunc(n^(alpha)), where 0 < alpha < 1 and n is the sample size.
-        Default alpha = 0.5}
-  \item{beta = trunc(n^(beta)), where 0 < beta < 1 and n is the sample size.
-        Default beta = 0.9}
-        }
+  The function also provides the asymptotic standard deviation and the
+  standard error deviation of the fractional estimator.
+
+  \code{band = trunc(n^(alpha))}, where 0 < alpha < 1 and n is the sample size.
+    Default alpha = 0.5.
+
+  \code{beta = trunc(n^(beta))}, where 0 < beta < 1 and n is the sample
+  size. Default beta = 0.9.
+}
 
 \value{
+  a list with components
   \item{d}{Sperio estimate}
   \item{sd.as}{asymptotic standard deviation}
   \item{sd.reg}{standard error deviation}
@@ -51,10 +51,12 @@
 }
 \author{Valderio A. Reisen \email{valderio@cce.ufes.br} and Artur J. Lemonte}
 
-\seealso{GPH, fracdiff}
+\seealso{\code{\link{GPH}}, \code{\link{fracdiff}}
+}
 
 \examples{
 memory.long <- fracdiff.sim(1500, d = 0.3)
-Sperio(memory.long$series)
+spm <- Sperio(memory.long$series)
+str(spm, digits=6)
 }
 \keyword{ts}
