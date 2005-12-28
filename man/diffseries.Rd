@@ -21,12 +21,12 @@
 \references{
   See those in \code{\link{Sperio}}; additionally
 
-  Reisen, V. A. and Lopes, S. (1999).
+  Reisen, V. A. and Lopes, S. (1999)
   Some simulations and applications
   of forecasting long-memory time series  models;
   \emph{Journal of Statistical Planning and Inference} \bold{80}, 269--287.
 
-  Reisen, V. A. Cribari-Neto, F. and Jensen, M.J. (2003).
+  Reisen, V. A. Cribari-Neto, F. and Jensen, M.J. (2003)
   Long Memory Inflationary Dynamics. The case of Brazil.
   \emph{Studies in Nonlinear Dynamics and Econometrics} \bold{7}(3), 1--16.
 }
