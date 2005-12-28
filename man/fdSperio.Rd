@@ -39,12 +39,12 @@
   The estimation and application of long memory time series models.
   \emph{Journal of Time Series Analysis} \bold{4}(4), 221--238.
 
-  Reisen, V. A. (1994).
+  Reisen, V. A. (1994)
   Estimation of the fractional difference parameter in the ARFIMA(p,d,q)
   model using the smoothed periodogram.
   \emph{Journal Time Series Analysis}, \bold{15}(1), 335--350.
 
-  Reisen, V. A., B. Abraham, and E. M. M. Toscano (2001).
+  Reisen, V. A., B. Abraham, and E. M. M. Toscano (2001)
   Parametric and semiparametric estimations of stationary univariate
   ARFIMA model.
   \emph{Brazilian Journal of Probability and Statistics} \bold{14}, 185--206.
