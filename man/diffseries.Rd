@@ -1,22 +1,22 @@
 \name{diffseries}
 \alias{diffseries}
-
-\title{Differenciate the data using an estimate of the fractional parameter}
+\title{Fractionally Differenciate Data}
 
 \description{
-  This function differenciates the time series data using
+  Differenciates the time series data using
   the approximated binomial expression of the long-memory filter and an estimate of
   the memory parameter in the ARFIMA(p,d,q) model.
 }
-
-\usage{diffseries(x, d)}
-
+\usage{
+diffseries(x, d)
+}
 \arguments{
   \item{x}{numeric vector or univariate time series}.
   \item{d}{number specifiying the fractional difference order.}
 }
 
-\value{the fractionally differenced series \code{x}.}
+\value{the fractionally differenced series \code{x}.
+}
 
 \references{
   See those in \code{\link{Sperio}}; additionally
@@ -39,6 +39,6 @@
 memory.long <- fracdiff.sim(80, d = 0.3)
 mGPH <- GPH(memory.long$series)
 r <- diffseries(memory.long$series, d = mGPH$d)
-acf(r) # shouldn't show structure - ideally
+#acf(r) # shouldn't show structure - ideally
 }
 \keyword{ts}
