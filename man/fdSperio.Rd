@@ -8,24 +8,23 @@
   equation using the smoothed peridogram function as an estimate of the
   spectral density.
 }
-
-\usage{Sperio(x, band = NULL, beta = NULL)}
-
-\arguments{
-  \item{x}{The univariate time series data}
-  \item{band}{The bandwidth used in the regression equation}
-  \item{beta}{The bandwidth used in the lag Parzen window}
+\usage{
+Sperio(x, bandw.exp = 0.5, beta = 0.9)
 }
-
+\arguments{
+  \item{x}{univariate time series data.}
+  \item{bandw.exp}{numeric: exponent of the bandwidth used in the regression equation.}
+  \item{beta}{numeric: exponent of the bandwidth used in the lag Parzen window.}
+}
 \details{
   The function also provides the asymptotic standard deviation and the
   standard error deviation of the fractional estimator.
 
-  \code{band = trunc(n^(alpha))}, where 0 < alpha < 1 and n is the sample size.
-    Default alpha = 0.5.
-
-  \code{beta = trunc(n^(beta))}, where 0 < beta < 1 and n is the sample
-  size. Default beta = 0.9.
+  The bandwidths are \code{bw = trunc(n ^ bandw.exp)}, where 0 < bandw.exp < 1
+  and n is the sample size.  Default \code{bandw.exp= 0.5};
+  \cr
+  and \code{bw2 = trunc(n ^ beta)}, where 0 < beta < 1 and n is the
+  sample size.  Default \code{beta = 0.9}.
 }
 
 \value{
