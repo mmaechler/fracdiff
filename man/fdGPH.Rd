@@ -1,5 +1,5 @@
-\name{GPH}
-\alias{GPH}
+\name{fdGPH}
+\alias{fdGPH}
 \title{Geweke and Porter-Hudak Estimator for ARFIMA(p,d,q)}
 
 \description{
@@ -9,7 +9,7 @@
   peridogram function as an estimate of the spectral density.
 }
 \usage{
-GPH(x, bandw.exp = 0.5)
+fdGPH(x, bandw.exp = 0.5)
 }
 \arguments{
   \item{x}{univariate time series}
@@ -30,15 +30,15 @@ GPH(x, bandw.exp = 0.5)
   \item{sd.reg}{standard error deviation}
 }
 
-\references{see those in \code{\link{Sperio}}.
+\references{see those in \code{\link{fdSperio}}.
 }
 
 \author{Valderio A. Reisen and Artur J. Lemonte}
 
-\seealso{\code{\link{Sperio}}, \code{\link{fracdiff}}}
+\seealso{\code{\link{fdSperio}}, \code{\link{fracdiff}}}
 
 \examples{
 memory.long <- fracdiff.sim(1500, d = 0.3)
-GPH(memory.long$series)
+fdGPH(memory.long$series)
 }
 \keyword{ts}
