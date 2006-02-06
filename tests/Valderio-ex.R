@@ -1,9 +1,9 @@
 library(fracdiff)
 
 set.seed(1)
-##  examples(Sperio)
+##  examples(fdSperio)
 mem.long <- fracdiff.sim(1500, d = 0.3)
-spm <- Sperio(mem.long$series)
+spm <- fdSperio(mem.long$series)
 str(spm, digits=6)
 
 set.seed(8)
