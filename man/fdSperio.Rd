@@ -1,5 +1,5 @@
-\name{Sperio}
-\alias{Sperio}
+\name{fdSperio}
+\alias{fdSperio}
 
 \title{Sperio Estimate for 'd' in ARFIMA(p,d,q)}
 \description{
@@ -9,7 +9,7 @@
   spectral density.
 }
 \usage{
-Sperio(x, bandw.exp = 0.5, beta = 0.9)
+fdSperio(x, bandw.exp = 0.5, beta = 0.9)
 }
 \arguments{
   \item{x}{univariate time series data.}
@@ -50,12 +50,12 @@ Sperio(x, bandw.exp = 0.5, beta = 0.9)
 }
 \author{Valderio A. Reisen \email{valderio@cce.ufes.br} and Artur J. Lemonte}
 
-\seealso{\code{\link{GPH}}, \code{\link{fracdiff}}
+\seealso{\code{\link{fdGPH}}, \code{\link{fracdiff}}
 }
 
 \examples{
 memory.long <- fracdiff.sim(1500, d = 0.3)
-spm <- Sperio(memory.long$series)
+spm <- fdSperio(memory.long$series)
 str(spm, digits=6)
 }
 \keyword{ts}
