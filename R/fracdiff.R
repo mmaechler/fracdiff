@@ -32,6 +32,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
     ##
     ## ########################################################################
 
+    cl <- match.call()
     if(any(is.na(x)))
         stop("missing values not allowed in time series")
     if(is.matrix(x) && ncol(x) > 2)
@@ -103,12 +104,19 @@ fracdiff <- function(x, nar = 0, nma = 0,
                result$w,
                info = integer(1),
                PACKAGE = "fracdiff")
-    if(temp$info)
-        switch(temp$info,
-               warning("warning in gamma function"),
-               warning("singular Hessian"),
-               warning("unable to compute correlation matrix"),
-               stop("error in gamma function"))
+    if(temp$info) {
+        msg <-
+            switch(temp$info,
+                   "warning in gamma function",
+                   "singular Hessian",
+                   "unable to compute correlation matrix",
+                   stop("error in gamma function"))
+        warning(msg)
+	result$msg <- msg
+    } else {
+	result$msg <- "ok"
+    }
+    se.ok <- temp$info != 0 || temp$info < 3 ## FIXME -- illogical!!
     if(npq == 0) {
         result$ar <- NULL
         result$ma <- NULL
@@ -119,18 +127,17 @@ fracdiff <- function(x, nar = 0, nma = 0,
     hess <- matrix(hess, nrow = npq1, ncol = npq1, dimnames = list(nam, nam))
     hess[1, ] <- temp$hd
     hess[row(hess) > col(hess)] <- hess[row(hess) < col(hess)]
-    se.ok <- temp$info != 0 || temp$info < 3
-    structure(
-    list(log.likelihood = result$hood,
-         d = result$d, ar = result$ar, ma = result$ma,
-         covariance.dpq  = array(temp$cov, c(npq1, npq1), list(nam, nam)),
-         stderror.dpq    = if(se.ok) temp$se, # else NULL
-         correlation.dpq = if(se.ok) array(temp$cor, c(npq1, npq1)),
-         h = temp$h, d.tol = result$dtol, M = M, hessian.dpq = hess,
-         length.w = lenw)
-              , class = "fracdiff")
+    structure(list(log.likelihood = result$hood, n = n, msg = result$msg,
+		   d = result$d, ar = result$ar, ma = result$ma,
+		   covariance.dpq = array(temp$cov, c(npq1,npq1), list(nam,nam)),
+		   stderror.dpq	  = if(se.ok) temp$se, # else NULL
+		   correlation.dpq= if(se.ok) array(temp$cor, c(npq1, npq1)),
+		   h = temp$h, d.tol = result$dtol, M = M, hessian.dpq = hess,
+		   length.w = lenw, call = cl),
+	      class = "fracdiff")
 }
 
+### FIXME [modularity]: a lot of this is "cut & paste" also in fracdiff() itselff
 fracdiff.var <- function(x, fracdiff.out, h)
 {
     if(!is.numeric(h))
@@ -173,19 +180,25 @@ fracdiff.var <- function(x, fracdiff.out, h)
                            rep(0, lwork))),
                info = integer(1),
                PACKAGE = "fracdiff")
-    if(temp$info)
-        switch(temp$info,
-               warning("warning in gamma function"),
-               warning("singular Hessian"),
-               warning("unable to compute correlation matrix"),
-               stop("error in gamma function"))
+    if(temp$info) {
+	msg <-
+	    switch(temp$info,
+		   "warning in gamma function",
+		   "singular Hessian",
+		   "unable to compute correlation matrix",
+		   stop("error in gamma function"))
+	warning(msg)
+	fracdiff.out$msg <- msg
+    } else {
+	fracdiff.out$msg <- "ok"
+    }
+    se.ok <- temp$info != 0 || temp$info < 3 ## << FIXME -- illogical!!
     nam <- "d"
     if(p) nam <- c(nam, paste("ar", 1:p, sep = ""))
     if(q) nam <- c(nam, paste("ma", 1:q, sep = ""))
     fracdiff.out$h <- temp$h
     fracdiff.out$covariance.dpq <-
         matrix(temp$cov, nrow = npq1, ncol = npq1, dimnames = list(nam, nam))
-    se.ok <- temp$info != 0 || temp$info < 3 ## << FIXME -- illogical!!
     fracdiff.out$stderror.dpq    <- if(se.ok) temp$se # else NULL
     fracdiff.out$correlation.dpq <- if(se.ok) array(temp$cor, c(npq1, npq1))
     fracdiff.out$hessian.dpq[1, ] <- temp$hd
