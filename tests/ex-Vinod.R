@@ -51,3 +51,4 @@ fr1
 ## E-Mail: Vinod@fordham.edu
 ## Web page:  http://www.fordham.edu/economics/vinod
 
+summary(fr1)
