@@ -39,7 +39,8 @@ fracdiff(x, nar = 0, nma = 0,
     and Raftery 1989).}
 }
 \value{
-  a list containing the following elements :
+  an object of S3 \code{\link{class}} \code{"fracdiff"}, which is
+  a list with components:
   \item{log.likelihood}{logarithm of the maximum likelihood}
   \item{d}{optimal fractional-differencing parameter}
   \item{ar}{vector of optimal autoregressive parameters}
@@ -82,6 +83,8 @@ fracdiff(x, nar = 0, nma = 0,
   Applied Mathematics Division, Argonne National Laboratory.
 }
 \seealso{
+  \code{\link{coef.fracdiff}} and other methods for \code{"fracdiff"}
+  objects;
   \code{\link{fracdiff.sim}}
 }
 \examples{
