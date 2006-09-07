@@ -120,6 +120,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
     hess[1, ] <- temp$hd
     hess[row(hess) > col(hess)] <- hess[row(hess) < col(hess)]
     se.ok <- temp$info != 0 || temp$info < 3
+    structure(
     list(log.likelihood = result$hood,
          d = result$d, ar = result$ar, ma = result$ma,
          covariance.dpq  = array(temp$cov, c(npq1, npq1), list(nam, nam)),
@@ -127,6 +128,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
          correlation.dpq = if(se.ok) array(temp$cor, c(npq1, npq1)),
          h = temp$h, d.tol = result$dtol, M = M, hessian.dpq = hess,
          length.w = lenw)
+              , class = "fracdiff")
 }
 
 fracdiff.var <- function(x, fracdiff.out, h)
