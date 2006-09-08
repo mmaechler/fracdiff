@@ -8,11 +8,10 @@ vcov.fracdiff      <- function(object, ...) object$covariance.dpq
 residuals.fracdiff <- function(object, ...) .NotYetImplemented()
 fitted.fracdiff    <- function(object, ...) .NotYetImplemented()
 
-logLik.summary.fracdiff <-
 logLik.fracdiff <- function(object, ...)
 {
     r <- object$log.likelihood
-    attr(r, "df") <- length(coef(object)) + 1 # "+ 1" : sigma^2
+    attr(r, "df") <- length(coef(object)) + 1:1 # "+ 1" : sigma^2
     attr(r, "nobs") <- attr(r, "nall") <- object$n
     class(r) <- "logLik"
     r
@@ -20,10 +19,11 @@ logLik.fracdiff <- function(object, ...)
 
 print.fracdiff <- function(x, digits = getOption("digits"), ...)
 {
-    cat("\nCall:\n ", deparse(x$call), "\n\nCoefficients:\n")
+    cat("\nCall:\n ", deparse(x$call), "\n")
+    if(x$msg != "ok") cat("\n*** Warning during fit:", x$msg,"\n")
+    cat("\nCoefficients:\n")
     print(coef(x), digits = digits, ...)
     ## print.default(x, digits = digits, ...)too cheap to be true
-    if(x$msg != "ok") cat("*** Warning during fit:", x$msg,"\n")
     cat("a list with components:\n")
     print(names(x), ...)
     invisible(x)
@@ -38,9 +38,12 @@ summary.fracdiff <- function(object, symbolic.cor = FALSE, ...)
                 "Std. Error"= se, "z value" = cf / se,
                 "Pr(>|z|)" = 2 * pnorm(-abs(cf / se)))
     object$coef <- cf
-    object$symbolic.cor <- symbolic.cor
     ## remove those components we have in 'coef' anyway
     object$d <- object$ar <- object$ma <- object$stderror.dpq <- NULL
+    logl <- logLik(object)
+    object$df <- attr(logl, "df")
+    object$aic <- AIC(logl)
+    object$symbolic.cor <- symbolic.cor
     class(object) <- "summary.fracdiff"
     object
 }
@@ -51,14 +54,15 @@ print.summary.fracdiff <-
              symbolic.cor = x$symbolic.cor,
              signif.stars = getOption("show.signif.stars"), ...)
 {
-    cat("\nCall:\n ", deparse(x$call), "\n\nCoefficients:\n")
+    cat("\nCall:\n ", deparse(x$call), "\n")
+    if(x$msg != "ok") cat("\n*** Warning during fit:", x$msg,"\n")
+    cat("\nCoefficients:\n")
     printCoefmat(x$coef, digits = digits, signif.stars = signif.stars, ...)
-    if(x$msg != "ok")
-	cat("*** Warning during fit:", x$msg,"\n")
     cat("[d.tol = ", formatC(x$d.tol),", M = ", x$M,", h = ",formatC(x$h),
 	## really not much informative: "length.w = ", x$length.w,
 	"]\n", sep='')
-    print(logLik(x), digits = digits, ...)
+    cat("Log likelihood: ", formatC(x$log.likelihood, digits=digits),
+	" ==> AIC = ", x$aic," [", x$df," deg.freedom]\n", sep='')
     if (correlation && !is.null(correl <- x$correlation.dpq)) {
         p <- NCOL(correl)
         if (p > 1) {
