@@ -111,7 +111,7 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
   ar      double   optimal autoregressive parameters
   ma      double   optimal moving average parameters
 
- ------------------------------------------------------------------------------
+  ----------------------------------------------------------------------------
   copyright 1991 Department of Statistics, University of Washington
   written by Chris Fraley
   ----------------------------------------------------------------------------*/
@@ -133,8 +133,8 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
     fdcom(n, m, nar, nma, &c_m99, flmin, flmax, epmin, epmax);
 
     lfree = w_opt.lwa4 + *n - Dims.minpq;
-/* 	= 1+ ipvt + 5.5*npq + n - minpq
- 	= 2+ 6.5*npq + 3*n - 2*minpq + (n-maxpq)*npq
+/*	= 1+ ipvt + 5.5*npq + n - minpq
+	= 2+ 6.5*npq + 3*n - 2*minpq + (n-maxpq)*npq
  and               lvk+M = 1 + npq + 2(n + M)
  */
 
