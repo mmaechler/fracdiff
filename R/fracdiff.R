@@ -6,8 +6,10 @@
 ### Patched by Friedrich.Leisch, for use with R, 22.1.1997
 ### fixed & changed by Martin Maechler, since Dec 2003
 
-".First.lib" <- function(lib, pkg) library.dynam("fracdiff", pkg, lib)
+## no longer, with useDynLib() in ../NAMESPACE
+## no ".First.lib" <- function(lib, pkg) library.dynam("fracdiff", pkg, lib)
 
+p0 <- function(...) paste(..., sep="")
 
 fracdiff <- function(x, nar = 0, nma = 0,
                      ar = rep(NA, max(nar, 1)), ma = rep(NA, max(nma, 1)),
@@ -86,9 +88,9 @@ fracdiff <- function(x, nar = 0, nma = 0,
                stop("invalid MINPACK input"),		# 3
                warning("warning in gamma function"),	# 4
                warning("C fracdf() optimization failure",
-                       call.=FALSE, immediate. = TRUE)  # 5
-
-               warning("optimization limit reached"))	# 6
+                       call.=FALSE, immediate. = TRUE), # 5
+               warning("C fracdf() optimization limit reached",
+                       call.=FALSE, immediate. = TRUE))	# 6
 
     hess <- .C("fdhpq",
                hess = double(npq1 * npq1),
@@ -127,8 +129,8 @@ fracdiff <- function(x, nar = 0, nma = 0,
         result$ma <- NULL
     }
     nam <- "d"
-    if(nar) nam <- c(nam, paste("ar", 1:nar, sep = ""))
-    if(nma) nam <- c(nam, paste("ma", 1:nma, sep = ""))
+    if(nar) nam <- c(nam, p0("ar", 1:nar))
+    if(nma) nam <- c(nam, p0("ma", 1:nma))
     hess <- matrix(hess, nrow = npq1, ncol = npq1, dimnames = list(nam, nam))
     hess[1, ] <- temp$hd
     hess[row(hess) > col(hess)] <- hess[row(hess) < col(hess)]
@@ -195,11 +197,11 @@ fracdiff.var <- function(x, fracdiff.out, h)
                        "unable to compute correlation matrix",
                        stop("error in gamma function"))
             warning(msg)
-        } "ok"
+        } else "ok"
     se.ok <- temp$info != 0 || temp$info < 3 ## << FIXME -- illogical!!
     nam <- "d"
-    if(p) nam <- c(nam, paste("ar", 1:p, sep = ""))
-    if(q) nam <- c(nam, paste("ma", 1:q, sep = ""))
+    if(p) nam <- c(nam, p0("ar", 1:p))
+    if(q) nam <- c(nam, p0("ma", 1:q))
     fracdiff.out$h <- temp$h
     fracdiff.out$covariance.dpq <-
         matrix(temp$cov, nrow = npq1, ncol = npq1, dimnames = list(nam, nam))
