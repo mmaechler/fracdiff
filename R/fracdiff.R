@@ -87,7 +87,6 @@ fracdiff <- function(x, nar = 0, nma = 0,
                warning("optimization limit reached"))
 
     hess <- .C("fdhpq",
-               ## x,
                hess = double(npq1 * npq1),
                npq1,
                result$w,
@@ -104,18 +103,16 @@ fracdiff <- function(x, nar = 0, nma = 0,
                result$w,
                info = integer(1),
                PACKAGE = "fracdiff")
-    if(temp$info) {
-        msg <-
-            switch(temp$info,
-                   "warning in gamma function",
-                   "singular Hessian",
-                   "unable to compute correlation matrix",
-                   stop("error in gamma function"))
-        warning(msg)
-	result$msg <- msg
-    } else {
-	result$msg <- "ok"
-    }
+    result$msg <-
+        if(temp$info) {
+            msg <-
+                switch(temp$info,
+		       "fdcov problem in gamma function",	# 1
+		       "singular Hessian",			# 2
+		       "unable to compute correlation matrix",	# 3
+		       stop("error in gamma function"))		# 4
+            warning(msg)
+        } else "ok"
     se.ok <- temp$info != 0 || temp$info < 3 ## FIXME -- illogical!!
     if(npq == 0) {
         result$ar <- NULL
@@ -137,7 +134,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
 	      class = "fracdiff")
 }
 
-### FIXME [modularity]: a lot of this is "cut & paste" also in fracdiff() itselff
+### FIXME [modularity]: a lot of this is "cut & paste" also in fracdiff() itself
 fracdiff.var <- function(x, fracdiff.out, h)
 {
     if(!is.numeric(h))
