@@ -24,5 +24,9 @@ SEXP poly_mult(SEXP a, SEXP b)
 {
     SEXP prod;
 
+    /* TODO: implement  polynomial multiplication */
+
+    prod = a; /* -Wall : for now */
+
     return prod;
 }
