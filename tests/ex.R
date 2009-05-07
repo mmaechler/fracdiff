@@ -28,7 +28,7 @@ summary(fd2)
 
 fd2. <- fracdiff.var(x2$series, fd2, h = fd2$h / 2)
 sapply(fd2.[fdCOVcomp], signif, digits = 4)
-fd2u <- fracdiff.var(x2$series, fd2, h = fd2$h * 8)
+fd2u <- fracdiff.var(x2$series, fd2, h = fd2$h * 8)#-> warning, unable .. corr...
 sapply(fd2u[fdCOVcomp], signif, digits = 4)
 
 ## Last Line:
