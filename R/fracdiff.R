@@ -76,21 +76,27 @@ fracdiff <- function(x, nar = 0, nma = 0,
 		 .Machine$double.neg.eps,
 		 .Machine$double.eps,
 		 PACKAGE = "fracdiff")
+## FIXME: In the case of just warning,  the warning must be *KEPT*
+## -----  and/or be re-issued  by summary.fracdiff() etc
     if(result$info)
         switch(result$info,
                stop("insufficient workspace; need ", result$lenw,
-                    " instead of just ", lenw),
-               stop("error in gamma function"),
-               stop("invalid MINPACK input"),
-               warning("warning in gamma function"),
-               warning("optimization failure"),
-               warning("optimization limit reached"))
+                    " instead of just ", lenw),		# 1
+               stop("error in gamma function"),		# 2
+               stop("invalid MINPACK input"),		# 3
+               warning("warning in gamma function"),	# 4
+               warning("C fracdf() optimization failure",
+                       call.=FALSE, immediate. = TRUE)  # 5
+
+               warning("optimization limit reached"))	# 6
 
     hess <- .C("fdhpq",
                hess = double(npq1 * npq1),
                npq1,
                result$w,
                PACKAGE = "fracdiff")$hess
+
+    ## Note that the following can be "redone" using fracdiff.var() :
 
     temp <- .C("fdcov",
                x,
@@ -109,7 +115,9 @@ fracdiff <- function(x, nar = 0, nma = 0,
                 switch(temp$info,
 		       "fdcov problem in gamma function",	# 1
 		       "singular Hessian",			# 2
-		       "unable to compute correlation matrix",	# 3
+                       ## FIXME? improve: different reasons for info = 3 :
+		       "unable to compute correlation matrix; maybe change 'h'",
+                                        			# 3
 		       stop("error in gamma function"))		# 4
             warning(msg)
         } else "ok"
@@ -177,18 +185,17 @@ fracdiff.var <- function(x, fracdiff.out, h)
                            rep(0, lwork))),
                info = integer(1),
                PACKAGE = "fracdiff")
-    if(temp$info) {
-	msg <-
-	    switch(temp$info,
-		   "warning in gamma function",
-		   "singular Hessian",
-		   "unable to compute correlation matrix",
-		   stop("error in gamma function"))
-	warning(msg)
-	fracdiff.out$msg <- msg
-    } else {
-	fracdiff.out$msg <- "ok"
-    }
+## FIXME: should be *automatically* same messages as inside fracdiff() above!
+    fracdiff.out$msg <-
+        if(temp$info) {
+            msg <-
+                switch(temp$info,
+                       "warning in gamma function",
+                       "singular Hessian",
+                       "unable to compute correlation matrix",
+                       stop("error in gamma function"))
+            warning(msg)
+        } "ok"
     se.ok <- temp$info != 0 || temp$info < 3 ## << FIXME -- illogical!!
     nam <- "d"
     if(p) nam <- c(nam, paste("ar", 1:p, sep = ""))
