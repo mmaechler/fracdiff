@@ -88,9 +88,9 @@ void fdhpq(double *h, int *lh, double *w)
 /*******************************************************************************
  *******************************************************************************/
 
-void fdcov(double *x, double *d__, double *hh,
-	   double *hd, double *cov, int *lcov, double *cor,
-	   int *lcor, double *se, double *w, int *info)
+void fdcov(double *x, double *d__, double *hh, double *hd,
+	   double *cov, int *lcov,
+	   double *cor, int *lcor, double *se, double *w, int *info)
 {
 /* float		x(n)
    double precision	d, hh, hd(pq1), cov(lcov,pq1), cor(lcor,pq1),
@@ -178,7 +178,7 @@ void fdcov(double *x, double *d__, double *hh,
 	    d__1 = 1. / se[j];
 	    F77_CALL(dscal)(&j, &d__1, &cor[j * cor_dim1 + 1], &c__1);
 	}
-    } else {
+    } else { /* cov() contains non-positive diagonal entry */
 	hessfd_.kcor = 1;
 	for (j = 1; j <= pq1; ++j) {
 	    F77_CALL(dcopy)(&pq1, &c_0d, &c__0,
@@ -192,7 +192,7 @@ void fdcov(double *x, double *d__, double *hh,
     if (gammfd_.igamma != 0) *info = 4;
     if (gammfd_.jgamma != 0) *info = 1;
     /* if (hessfd_.ksvd != 0)   *info = 3; */
-    if (hessfd_.kcov != 0)   *info = 2;
+    if (hessfd_.kcov != 0)   *info = 2; /* error in invsvd() */
     if (hessfd_.kcor != 0)   *info = 3;
     return;
 } /* fdcov */
@@ -412,13 +412,15 @@ hesdpq(double *x, double d_, double *hh, double *hd, double *w)
 	    ajqp_(&w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac],
 		  &Dims.nm, &c__2, &w[w_fil.ly]);
 	    gradpq(&w[w_opt.lwa1], &w[w_opt.la], &w[w_opt.lajac],Dims.nm);
-	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[w_opt.la], &c__1,
+	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, 
+					 &w[w_opt.la], &c__1,
 					 &w[w_opt.la], &c__1);
 	    d__1 = 1. / filtfd_.wnv;
 	    F77_CALL(dscal)(&Dims.pq, &d__1, &w[w_opt.lwa1], &c__1);
 	    filtfd_.wnv /= (Dims.nm - 1);
 	} else {
-	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[w_fil.ly], &c__1,
+	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, 
+					 &w[w_fil.ly], &c__1,
 					 &w[w_fil.ly], &c__1) / (Dims.nm - 1);
 	}
 	fa = -(Dims.n * (log(filtfd_.wnv) + 2.8378) + slogvk) / 2.;
@@ -433,13 +435,15 @@ hesdpq(double *x, double d_, double *hh, double *hd, double *w)
 		      &Dims.nm, &c__2, &w[w_fil.ly]);
 		gradpq(&w[w_opt.lwa2], &w[w_opt.la], &w[w_opt.lajac],
 		       Dims.nm);
-		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[w_opt.la], &c__1,
+		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, 
+					     &w[w_opt.la], &c__1,
 					     &w[w_opt.la], &c__1);
 		d__1 = 1. / filtfd_.wnv;
 		F77_CALL(dscal)(&Dims.pq, &d__1, &w[w_opt.lwa2], &c__1);
 		filtfd_.wnv /= (Dims.nm - 1);
 	    } else {
-		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[w_fil.ly], &c__1,
+		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, 
+					     &w[w_fil.ly], &c__1,
 					     &w[w_fil.ly], &c__1) / (Dims.nm - 1);
 	    }
 	    fb = -(Dims.n * (log(filtfd_.wnv) + 2.8378) + slogvk)/ 2.;
@@ -456,13 +460,15 @@ hesdpq(double *x, double d_, double *hh, double *hd, double *w)
 		      &Dims.nm, &c__2, &w[w_fil.ly]);
 		gradpq(&w[w_opt.lwa2], &w[w_opt.la], &w[w_opt.lajac],
 		       Dims.nm);
-		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[w_opt.la], &c__1,
+		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, 
+					     &w[w_opt.la], &c__1,
 					     &w[w_opt.la], &c__1);
 		d__1 = 1. / filtfd_.wnv;
 		F77_CALL(dscal)(&Dims.pq, &d__1, &w[w_opt.lwa2], &c__1);
 		filtfd_.wnv /= (Dims.nm - 1);
 	    } else {
-		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[w_fil.ly], &c__1,
+		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, 
+					     &w[w_fil.ly], &c__1,
 					     &w[w_fil.ly], &c__1) / (Dims.nm - 1);
 	    }
 	    fb = -(Dims.n * (log(filtfd_.wnv) + 2.8378) + slogvk) / 2.;
