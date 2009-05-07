@@ -32,8 +32,9 @@ fracdiff(x, nar = 0, nma = 0,
     \code{clff := log. max.likelihood} (as returned) and
     \code{eps.5 := sqrt(.Machine$double.neg.eps)} (typically 1.05e-8).
 
-    This only influences the cov, cor, and std.error computations;
-    see also \code{\link{fracdiff.var}}.
+    This is used to compute a finite difference approximation to the
+    Hessian, and hence only influences the cov, cor, and std.error
+    computations; see also \code{\link{fracdiff.var}}.
   }
   \item{M}{number of terms in the likelihood approximation (see Haslett
     and Raftery 1989).}
@@ -50,10 +51,15 @@ fracdiff(x, nar = 0, nma = 0,
   \item{stderror.dpq}{standard errors of the parameter estimates  c(d, ar, ma).}
   \item{correlation.dpq}{correlation matrix of the parameter estimates
     (order : d, ar, ma).}
-  \item{h}{size of interval used for numerical derivatives.}
-  \item{dtol}{interval of uncertainty for d.}
+  \item{h}{interval used for numerical derivatives, see \code{h} argument.}
+  \item{dtol}{interval of uncertainty for d; possibly altered from input
+    \code{dtol}.}
   \item{M}{as input.}
-  \item{hessian.dpq}{......}% FIXME (missing from original docu)
+  \item{hessian.dpq}{the approximate Hessian matrix \eqn{H} of 2nd order
+    partial derivatives of the likelihood with respect to the
+    parameters; this is (internally) used to compute
+    \code{covariance.dpq}, the approximate asymptotic covariance matrix as
+    \eqn{C = (-H)^{-1}}.}
 }
 \note{
   Ordinarily, \code{nar} and \code{nma} should not be too large (say < 10)
