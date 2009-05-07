@@ -21,14 +21,14 @@
 #endif
 
 /* called from R : */
+void fdhpq(double *h, int *lh, double *w);
 
 void fdcov(double *x, double *d__, double *hh,
 	   double *hd, double *cov, int *lcov, double *cor,
 	   int *lcor, double *se, double *w, int *info);
+/*-----------------------------------------------------------
 
-void fdhpq(/*double *x, */double *h__, int *lh, double *w);
-
-/* local to this file: */
+ * local to this file: */
 static
 void hesdpq(double *, double, double *, double *, double *);
 static
@@ -45,19 +45,21 @@ void gradpq(double *g, double a[], double ajac[], int l_ajac);
 
 /* Common Block Declarations --- included as "extern" */
 #define FD_EXTERNAL extern
-
 #include "mach_comm.h"
+/*-> machfd_ */
 #include "maux_comm.h"
-
+/*-> mauxfd_ */
 #include "gamm_comm.h"
+/*-> gammfd_ */
 #include "hess_comm.h"
+/*-> Dims, filtfd_, hessfd_, w_fil, w_opt */
+
 
 
 /* Table of constant values */
 static int c__0 = 0;
 static int c__1 = 1;
 static int c__2 = 2;
-static int c__11 = 11;
 
 static double c_0d = 0.;
 static double c_m1 = -1.;
@@ -65,66 +67,60 @@ static double c_m1 = -1.;
 /*******************************************************************************
  *******************************************************************************/
 
-void fdhpq(/*double *x, */double *h__, int *lh, double *w)
+/* Called from R:  Analytic Hessian with respect to p and q variables : */
+void fdhpq(double *h, int *lh, double *w)
 {
 /* double precision	H(lH, pq1)
-*/
 
-/*  copyright 1991 Department of Statistics, University of Washington
+  copyright 1991 Department of Statistics, University of Washington
   written by Chris Fraley
  -----------------------------------------------------------------------------
      Parameter adjustments */
     --w;
 
-    /* Function Body */
     hesspq_(&w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac], &Dims.nm,
-	    h__, lh, &w[w_opt.lwa4], &w[w_opt.lwa1]);
+	    h, lh, &w[w_opt.lwa4], &w[w_opt.lwa1]);
 /*     call dcopy( pq1, zero, 0, H(1,1), lH) */
 /*     call dcopy( pq , zero, 0, H(2,1), 1) */
     return;
 } /* fdhpq */
 
 /*******************************************************************************
- ****************************************************************************** */
+ *******************************************************************************/
 
 void fdcov(double *x, double *d__, double *hh,
 	   double *hd, double *cov, int *lcov, double *cor,
 	   int *lcor, double *se, double *w, int *info)
 {
-    /* System generated locals */
-    int cov_dim1, cov_offset, cor_dim1, cor_offset, pq1, i2;
-    double d__1;
+/* float		x(n)
+   double precision	d, hh, hd(pq1), cov(lcov,pq1), cor(lcor,pq1),
+                        se(pq1), w(*)
 
-    /* Local variables */
-    int i, j, k, le, ls, lu, lv, lwork;
-    double temp;
-
-/*     float		   x(n)
-     double precision	d, hh, hd(pq1), cov(lcov,pq1),
-    *			cor(lcor,pq1), se(pq1)
   copyright 1991 Department of Statistics, University of Washington
   written by Chris Fraley
   ----------------------------------------------------------------------------*/
 
+    const int c__11 = 11;
+    int i, j, k, le, ls, lu, lv, lwork, pq1 = Dims.pq1;
+    double temp;
+
     /* Parameter adjustments */
+    int cov_dim1, cov_offset, cor_dim1, cor_offset;
     cov_dim1 = *lcov;    cov_offset = 1 + cov_dim1;    cov -= cov_offset;
     cor_dim1 = *lcor;    cor_offset = 1 + cor_dim1;    cor -= cor_offset;
     --se;
     --w;
 
-    /* Function Body */
-    pq1 = Dims.pq1;
-
     hesdpq(x, *d__, hh, hd, &w[1]);
+/*  ======              ^^ */
     F77_CALL(dcopy)(&pq1, hd, &c__1, &cov[cov_offset], lcov);
 
     gammfd_.igamma = 0;
     gammfd_.jgamma = 0;
-    hessfd_.ksvd = 0;
+/*     hessfd_.ksvd = 0; */
     hessfd_.kcov = 0;
     hessfd_.kcor = 0;
     *info = 0;
-    temp = 1.;
 
     for (i = 1; i <= pq1; ++i) {
 	for (j = i + 1; j <= pq1; ++j) {
@@ -136,17 +132,19 @@ void fdcov(double *x, double *d__, double *hh,
     lv = lu + pq1 * pq1;
     le = lv + pq1 * pq1;
     lwork = le + pq1;
-/*	lfree = lwork + pq1 */
+/*  lfree = lwork + pq1 */
+
+    /*Linpack: dsvdc(x, ldx, n,p, s,  e,u,ldu, v,ldv, work,  job,info) */
     F77_CALL(dsvdc)(&cov[cov_offset], lcov, &pq1, &pq1, &w[ls],
 		    &w[le], &w[lu], &pq1, &w[lv], &pq1, &w[lwork],
-		    &c__11, info);
+		    (int*)&c__11, info);
     if (*info != 0) {
 	F77_CALL(dcopy)(&pq1, &c_0d, &c__0, &se[1], &c__1);
 	for (j = 1; j <= pq1; ++j) {
 	    F77_CALL(dcopy)(&pq1, &c_0d, &c__0,
-			    &cov[j * cov_dim1 + 1], & c__1);
+			    &cov[j * cov_dim1 + 1], &c__1);
 	}
-	hessfd_.ksvd = 1;
+/* 	hessfd_.ksvd = 1; */
 	*info = 3;
 	return;
     }
@@ -166,12 +164,13 @@ void fdcov(double *x, double *d__, double *hh,
 	}
     }
     if (temp == 1.) {
+	double d__1;
 	for (k = 1; k <= pq1; ++k) {
 	    F77_CALL(dcopy)(&k, &cov[k * cov_dim1 + 1], &c__1,
 				&cor[k * cor_dim1 + 1], &c__1);
 	}
 	for (i = 1; i <= pq1; ++i) {
-	    i2 = pq1 - i + 1;
+	    int i2 = pq1 - i + 1;
 	    d__1 = 1. / se[i];
 	    F77_CALL(dscal)(&i2, &d__1, &cor[i + i * cor_dim1], lcor);
 	}
@@ -192,7 +191,7 @@ void fdcov(double *x, double *d__, double *hh,
 
     if (gammfd_.igamma != 0) *info = 4;
     if (gammfd_.jgamma != 0) *info = 1;
-    if (hessfd_.ksvd != 0)   *info = 3;
+    /* if (hessfd_.ksvd != 0)   *info = 3; */
     if (hessfd_.kcov != 0)   *info = 2;
     if (hessfd_.kcor != 0)   *info = 3;
     return;
@@ -204,7 +203,8 @@ void fdcov(double *x, double *d__, double *hh,
 invsvd_(double *s, double *u, int *lu,
 	double *v, int *lv, double *cov, int *lcov)
 {
-/*     double precision   s(pq1), u(lu,pq1), v(lv,pq1), cov(lcov,pq1)
+/* double precision   s(pq1), u(lu,pq1), v(lv,pq1), cov(lcov,pq1)
+
  copyright 1991 Department of Statistics, University of Washington
  written by Chris Fraley
  ---------------------------------------------------------------------------*/
@@ -271,78 +271,67 @@ L100:
  ******************************************************************************
  *****************************************************************************/
 
-void hesspq_(double *qp, double *a, double *ajac,
-	     int *lajac, double *h__, int *lh, double *aij, double *g)
+/*  analytic Hessian with respect to p and q variables */
+void hesspq_(double *qp, double *a, double *ajac, int *lajac,
+	     /* output:  h[.,.], aij[.], g[.] : */
+	     double *h__, int *lh, double *aij, double *g)
 {
 /*   double precision	qp(pq), a(nm), ajac(nm,pq)
      double precision	H(lH,pq1), aij(nm), g(pq)
 
- analytic Hessian with respect to p and q variables
  copyright 1991 Department of Statistics, University of Washington
  written by Chris Fraley
  ----------------------------------------------------------------------------*/
 
-    /* System generated locals */
-    int ajac_dim1 = *lajac, ajac_offset;
-    int h_dim1 = *lh;
-    int i1, i2, i3;
-
-    /* Local variables */
     int i, j, k, l, km;
     double s, t, u, fac;
+    int n = Dims.n, p = Dims.p, q = Dims.q;
 
     /* Parameter adjustments */
+    int ajac_dim1 = *lajac, ajac_offset;
+    int h_dim1 = *lh;
     --qp;
     ajac_offset = 1 + ajac_dim1; ajac -= ajac_offset;
     --aij;
     --g;
 
     fac = 1. / (filtfd_.wnv * (double) (Dims.nm - 1));
-    if (Dims.q != 0 && Dims.p != 0) {
+    if (q != 0 && p != 0) {
 	for (k = 1; k <= Dims.pq; ++k) {
 	    g[k] = F77_CALL(ddot)(&Dims.nm, a, &c__1,
 				  &ajac[k * ajac_dim1 + 1], &c__1);
 	}
-	i1 = Dims.p;
-	i2 = Dims.q;
-	i3 = Dims.n;
-	for (i = 1; i <= i1; ++i) {
-	    int i_aj = (Dims.q + i)* ajac_dim1;
-	    u = g[Dims.q + i];
-	    for (j = 1; j <= i2; ++j) {
+	for (i = 1; i <= p; ++i) {
+	    int i_aj = (q + i)* ajac_dim1;
+	    u = g[q + i];
+	    for (j = 1; j <= q; ++j) {
 		u *= g[j];
-		for (k = Dims.maxpq1; k <= i3; ++k) {
+		for (k = Dims.maxpq1; k <= n; ++k) {
 		    km = k - Dims.maxpq;
 		    t = 0.;
-		    for (l = 1; l < km && l <= i2; ++l)
+		    for (l = 1; l < km && l <= q; ++l)
 			t += qp[l] * aij[km - l];
 
-		    if (km > j)
-			aij[km] = ajac[km - j + i_aj] + t;
-		    else
-			aij[km] = t;
+		    aij[km] = (km > j) ? ajac[km - j + i_aj] + t : t;
 		}
 		s = F77_CALL(ddot)(&Dims.nm, &ajac[i_aj + 1], &c__1,
 				   &ajac[j * ajac_dim1 + 1], &c__1);
 		t = F77_CALL(ddot)(&Dims.nm, a, &c__1, &aij[1], &c__1);
-		h__[i + (Dims.p + j) * h_dim1] =
-		    - Dims.n * (s + t - 2 * fac * u) * fac;
+		h__[i + (p + j) * h_dim1] = - n * (s + t - 2 * fac * u) * fac;
 	    }
 	}
     }
-    if (Dims.q != 0) {
-	i1 = Dims.q;
-	i3 = Dims.n;
-	for (i = 1; i <= i1; ++i) {
+    if (q != 0) {
+	for (i = 1; i <= q; ++i) {
 	    int i_aj = i * ajac_dim1;
 	    u = g[i];
-	    for (j = i; j <= i1; ++j) {
+	    for (j = i; j <= q; ++j) {
 		int j_aj = j * ajac_dim1;
 		u *= g[j];
-		for (k = Dims.maxpq1; k <= i3; ++k) {
+		for (k = Dims.maxpq1; k <= n; ++k) {
 		    km = k - Dims.maxpq;
 		    t = 0.;
-		    for (l = 1; l < km && l <= i1; ++l)
+		    for (l = 1; l < km && l <= q; ++l)
 			t += qp[l] * aij[km - l];
 
 		    s = 0.;
@@ -354,17 +343,16 @@ void hesspq_(double *qp, double *a, double *ajac,
 		s = F77_CALL(ddot)(&Dims.nm, &ajac[i_aj + 1], &c__1,
 				   &ajac[j_aj + 1], &c__1);
 		t = F77_CALL(ddot)(&Dims.nm, a, &c__1, &aij[1], &c__1);
-		h__[Dims.p + i + (Dims.p + j) * h_dim1] =
-			-Dims.n * (s + t - 2 * fac * u) * fac;
+		h__[p + i + (p + j) * h_dim1] =
+			-n * (s + t - 2 * fac * u) * fac;
 	    }
 	}
     }
-    if (Dims.p != 0) {
-	i1 = Dims.p;
-	for (i = 1; i <= i1; ++i) {
-	    u = g[Dims.q + i];
-	    for (j = i; j <= i1; ++j) {
-		u = g[Dims.q + j] * u;
+    if (p != 0) {
+	for (i = 1; i <= p; ++i) {
+	    u = g[q + i];
+	    for (j = i; j <= p; ++j) {
+		u = g[q + j] * u;
 /*	      do k = maxpq1, n */
 /*		km  =  k - maxpq */
 /*		t  = zero */
@@ -379,12 +367,12 @@ void hesspq_(double *qp, double *a, double *ajac,
 /*	      end do */
 
 		/* t = ddot( nm, a , 1, aij , 1) */
-		s = F77_CALL(ddot)(&Dims.nm, &ajac[(Dims.q+i)*ajac_dim1 + 1],
-				   &c__1, &ajac[(Dims.q + j) * ajac_dim1 + 1],
-				   &c__1);
+		s = F77_CALL(ddot)(&Dims.nm,
+				   &ajac[(q+ i)*ajac_dim1 + 1], &c__1,
+				   &ajac[(q+ j)*ajac_dim1 + 1], &c__1);
 
 		/* H(i+1,j+1) = -dble(n)*((s + t) - two*fac*u)*fac */
-		h__[i + (j) * h_dim1] = - Dims.n * (s - 2 * fac * u) * fac;
+		h__[i + (j) * h_dim1] = - n * (s - 2 * fac * u) * fac;
 	    }
 	}
     }
@@ -404,10 +392,7 @@ hesdpq(double *x, double d_, double *hh, double *hd, double *w)
    written by Chris Fraley
    ---------------------------------------------------------------------------*/
 
-    /* System generated locals */
-    double d__1;
-    /* Local variables */
-    double fa, fb, slogvk;
+    double fa, fb, slogvk, d__1;
 
     /* Parameter adjustments */
     --w;
