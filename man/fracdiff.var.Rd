@@ -16,14 +16,15 @@ fracdiff.var(x, fracdiff.out, h)
   covariance estimate for \code{fracdiff}.
 }
 \value{
-  a list with the same elements as the output to fracdiff, but with
-  possibly different values for the hessian, covariance, and correlation
-  matrices and for standard error, as well as for \code{h}.
+  an object of S3 \code{\link{class}} \code{"fracdiff"}, i.e., basically
+  a list with the same elements as the result from
+  \code{\link{fracdiff}}, but with possibly different values for the
+  hessian, covariance, and correlation matrices and for standard error,
+  as well as for \code{h}.
 }
 \seealso{
-  \code{fracdiff}
+  \code{fracdiff}, also for references.
 }
-
 \examples{
 ## Generate a fractionally-differenced ARIMA(1,d,1) model :
 ts.test <- fracdiff.sim(10000, ar = .2, ma = .4, d = .3)
@@ -31,6 +32,10 @@ ts.test <- fracdiff.sim(10000, ar = .2, ma = .4, d = .3)
 fd.out <- fracdiff(ts.test$ser, nar= 1, nma = 1)
 
 ## Modify the covariance estimate by changing the finite-difference interval
-fracdiff.var(ts.test$series, fd.out, h = .0001)
+(fd.o2 <- fracdiff.var(ts.test$series, fd.out, h = .0001))
+## looks identical as  print(fd.out),
+## however these (e.g.) differ :
+vcov(fd.out)
+vcov(fd.o2)
 }
 \keyword{ts}
