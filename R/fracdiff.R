@@ -1,4 +1,4 @@
-####-*- mode: R; kept-old-versions: 12;  kept-new-versions: 20; -*-
+####-*- mode: R; kept-old-versions: 15;  kept-new-versions: 30; -*-
 
 ### Original file:
 ### copyright 1991 Department of Statistics, Univeristy of Washington
@@ -41,7 +41,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
         stop("multivariate time series not allowed")
     n <- length(x)
     if(round(nar) != nar || nar < 0 || round(nma) != nma || nma < 0)
-        stop("'nar' and 'nma' must be non-negative integers")
+        stop("'nar' and 'nma' must be non-negative integer numbers")
     npq <- as.integer(nar + nma)
     npq1 <- as.integer(npq + 1:1)
     lenw <- max(npq + 2*(n + M),
@@ -57,32 +57,33 @@ fracdiff <- function(x, nar = 0, nma = 0,
     x <- as.double(x)
 
     ## this also initializes "common blocks" that are used in .C(.) calls :
-    result <- .C("fracdf",
-		 x,
-		 n,
-		 as.integer(M),
-		 as.integer(nar),
-		 as.integer(nma),
-		 dtol = as.double(dtol),
-		 drange = as.double(drange),
-		 hood = double(1),
-		 d = double(1),
-		 ar = as.double(ar),
-		 ma = as.double(ma),
-		 w = double(lenw),
-		 lenw = lenw,
-		 iw = integer(npq), ## <<< new int-work array
-		 info = integer(1),
-		 .Machine$double.xmin,
-		 .Machine$double.xmax,
-		 .Machine$double.neg.eps,
-		 .Machine$double.eps,
-		 PACKAGE = "fracdiff")
+    fdf <- .C("fracdf",
+              x,
+              n,
+              as.integer(M),
+              as.integer(nar),
+              as.integer(nma),
+              dtol = as.double(dtol),
+              drange = as.double(drange),
+              hood = double(1),
+              d = double(1),
+              ar = as.double(ar),
+              ma = as.double(ma),
+              w = double(lenw),
+              lenw = lenw,
+              iw = integer(npq), ## <<< new int-work array
+              info = integer(1),
+              .Machine$double.xmin,
+              .Machine$double.xmax,
+              .Machine$double.neg.eps,
+              .Machine$double.eps,
+              PACKAGE = "fracdiff")
+
 ## FIXME: In the case of just warning,  the warning must be *KEPT*
 ## -----  and/or be re-issued  by summary.fracdiff() etc
-    if(result$info)
-        switch(result$info,
-               stop("insufficient workspace; need ", result$lenw,
+    if(fdf$info)
+        switch(fdf$info,
+               stop("insufficient workspace; need ", fdf$lenw,
                     " instead of just ", lenw),		# 1
                stop("error in gamma function"),		# 2
                stop("invalid MINPACK input"),		# 3
@@ -93,28 +94,31 @@ fracdiff <- function(x, nar = 0, nma = 0,
                        call.=FALSE, immediate. = TRUE))	# 6
 
     hess <- .C("fdhpq",
-               hess = double(npq1 * npq1),
+               hess = matrix(double(1), npq1, npq1),
                npq1,
-               result$w,
+               fdf$w,
                PACKAGE = "fracdiff")$hess
+
+### FIXME:  MM remains utterly confused, that this 'hess' result seems
+### -----   *UN*used for .fdcov() below, even though Cov == (-H)^{-1} == solve(-H)
 
     ## Note that the following can be "redone" using fracdiff.var() :
 
-    temp <- .C("fdcov",
+    fdc <- .C("fdcov",
                x,
-               result$d,
+               fdf$d,
                h = as.double(if(missing(h)) -1 else h),
                hd = double(npq1),
                cov = hess, npq1,
                cor = hess, npq1,
                se = double(npq1),
-               result$w,
+               fdf$w,
                info = integer(1),
                PACKAGE = "fracdiff")
-    result$msg <-
-        if(temp$info) {
+    fdf$msg <-
+        if(fdc$info) {
             msg <-
-                switch(temp$info,
+                switch(fdc$info,
 		       "fdcov problem in gamma function",	# 1
 		       "singular Hessian",			# 2
                        ## FIXME? improve: different reasons for info = 3 :
@@ -123,23 +127,23 @@ fracdiff <- function(x, nar = 0, nma = 0,
 		       stop("error in gamma function"))		# 4
             warning(msg)
         } else "ok"
-    se.ok <- temp$info != 0 || temp$info < 3 ## FIXME -- illogical!!
+    se.ok <- fdc$info != 0 || fdc$info < 3 ## FIXME -- illogical!!
     if(npq == 0) {
-        result$ar <- NULL
-        result$ma <- NULL
+        fdf$ar <- NULL
+        fdf$ma <- NULL
     }
     nam <- "d"
     if(nar) nam <- c(nam, p0("ar", 1:nar))
     if(nma) nam <- c(nam, p0("ma", 1:nma))
     hess <- matrix(hess, nrow = npq1, ncol = npq1, dimnames = list(nam, nam))
-    hess[1, ] <- temp$hd
+    hess[1, ] <- fdc$hd
     hess[row(hess) > col(hess)] <- hess[row(hess) < col(hess)]
-    structure(list(log.likelihood = result$hood, n = n, msg = result$msg,
-		   d = result$d, ar = result$ar, ma = result$ma,
-		   covariance.dpq = array(temp$cov, c(npq1,npq1), list(nam,nam)),
-		   stderror.dpq	  = if(se.ok) temp$se, # else NULL
-		   correlation.dpq= if(se.ok) array(temp$cor, c(npq1, npq1)),
-		   h = temp$h, d.tol = result$dtol, M = M, hessian.dpq = hess,
+    structure(list(log.likelihood = fdf$hood, n = n, msg = fdf$msg,
+		   d = fdf$d, ar = fdf$ar, ma = fdf$ma,
+		   covariance.dpq = array(fdc$cov, c(npq1,npq1), list(nam,nam)),
+		   stderror.dpq	  = if(se.ok) fdc$se, # else NULL
+		   correlation.dpq= if(se.ok) array(fdc$cor, c(npq1, npq1)),
+		   h = fdc$h, d.tol = fdf$dtol, M = M, hessian.dpq = hess,
 		   length.w = lenw, call = cl),
 	      class = "fracdiff")
 }
@@ -172,7 +176,7 @@ fracdiff.var <- function(x, fracdiff.out, h)
        .Machine$double.eps,
        PACKAGE = "fracdiff")
     ## Re compute Covariance Matrix:
-    temp <- .C("fdcov",
+    fdc <- .C("fdcov",
                as.double(x),
                as.double(fracdiff.out$d),
                h = as.double(h),
@@ -189,28 +193,27 @@ fracdiff.var <- function(x, fracdiff.out, h)
                PACKAGE = "fracdiff")
 ## FIXME: should be *automatically* same messages as inside fracdiff() above!
     fracdiff.out$msg <-
-        if(temp$info) {
+        if(fdc$info) {
             msg <-
-                switch(temp$info,
+                switch(fdc$info,
                        "warning in gamma function",
                        "singular Hessian",
                        "unable to compute correlation matrix",
                        stop("error in gamma function"))
             warning(msg)
         } else "ok"
-    se.ok <- temp$info != 0 || temp$info < 3 ## << FIXME -- illogical!!
+    se.ok <- fdc$info != 0 || fdc$info < 3 ## << FIXME -- illogical!!
     nam <- "d"
     if(p) nam <- c(nam, p0("ar", 1:p))
     if(q) nam <- c(nam, p0("ma", 1:q))
-    fracdiff.out$h <- temp$h
-    fracdiff.out$covariance.dpq <-
-        matrix(temp$cov, nrow = npq1, ncol = npq1, dimnames = list(nam, nam))
-    fracdiff.out$stderror.dpq    <- if(se.ok) temp$se # else NULL
-    fracdiff.out$correlation.dpq <- if(se.ok) array(temp$cor, c(npq1, npq1))
-    fracdiff.out$hessian.dpq[1, ] <- temp$hd
-    fracdiff.out$hessian.dpq[, 1] <- temp$hd
+    fracdiff.out$h <- fdc$h
+    fracdiff.out$covariance.dpq <- array(fdc$cov, c(npq1,npq1), list(nam,nam))
+    fracdiff.out$stderror.dpq    <- if(se.ok) fdc$se # else NULL
+    fracdiff.out$correlation.dpq <- if(se.ok) array(fdc$cor, c(npq1, npq1))
+    fracdiff.out$hessian.dpq[1, ] <- fdc$hd
+    fracdiff.out$hessian.dpq[, 1] <- fdc$hd
     fracdiff.out
-}
+}## end{ fracdiff.var() }
 
 ## MM:  Added things for more  arima.sim() compatibility.
 ##      really, 'mu' is nonsense since can be done separately (or via 'innov').
