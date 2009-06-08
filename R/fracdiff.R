@@ -11,43 +11,44 @@
 
 p0 <- function(...) paste(..., sep="")
 
-.fdcov <- function(x, d, h, nar, nma, fdf.work)
+.fdcov <- function(x, d, h, nar, nma, hess, fdf.work)
 {
     npq <- as.integer(nar + nma)
     npq1 <- npq + 1L # integer, too
-    cMat <- matrix(double(1), npq1, npq1)
+    stopifnot(length(d <- dim(hess)) == 2, d == c(npq1, npq1))
     fdc <- .C("fdcov", ## --> ../src/fdhess.c
                x,
                d, # fdf$d
                h = as.double(if(missing(h)) -1 else h),
                hd = double(npq1),
-               cov = cMat, npq1,
-               cor = cMat, npq1,
+               cov = hess, npq1,
+               cor = hess, npq1,
                se = double(npq1),
                fdf.work, # fdf$w
                info = integer(1),
                PACKAGE = "fracdiff")
 
     f.msg <-
-        if(fdc$info) {
-            msg <-
-                switch(fdc$info,
+	if(fdc$info) {
+	    msg <-
+		switch(fdc$info,
 		       "fdcov problem in gamma function",	# 1
 		       "singular Hessian",			# 2
-                       ## FIXME improve: different reasons for info = 3 :
+		       ## FIXME improve: different reasons for info = 3 :
 		       "unable to compute correlation matrix; maybe change 'h'",
-                                        			# 3
+								# 3
 		       stop("error in gamma function"))		# 4
-            warning(msg)
-        } else "ok"
+	    warning(msg, call. = FALSE)
+	    msg
+	} else "ok"
     se.ok <- fdc$info != 0 || fdc$info < 3 ## FIXME -- illogical!!
     ## better?  se.ok <- fdc$info %in% 0:2
     nam <- "d"
     if(nar) nam <- c(nam, p0("ar", 1:nar))
     if(nma) nam <- c(nam, p0("ma", 1:nma))
 
-    dimnames(fdc$cov) <- list(nam, nam)
-
+    dimnames(fdc$cov) <- dn <- list(nam, nam)
+    if(se.ok) dimnames(fdc$cor) <- dn
     list(msg = f.msg, d = d, nam = nam,
 	 h = fdc$h, hd = fdc$hd, se.ok = se.ok,
 	 covariance.dpq = fdc$cov,
@@ -123,19 +124,22 @@ fracdiff <- function(x, nar = 0, nma = 0,
               .Machine$double.eps,
               PACKAGE = "fracdiff")
 
-## FIXME: In the case of just warning,  the warning must be *KEPT*
-## -----  and/or be re-issued  by summary.fracdiff() etc
-    if(fdf$info)
-        switch(fdf$info,
-               stop("insufficient workspace; need ", fdf$lenw,
-                    " instead of just ", lenw),		# 1
-               stop("error in gamma function"),		# 2
-               stop("invalid MINPACK input"),		# 3
-               warning("warning in gamma function"),	# 4
-               warning("C fracdf() optimization failure",
-                       call.=FALSE, immediate. = TRUE), # 5
-               warning("C fracdf() optimization limit reached",
-                       call.=FALSE, immediate. = TRUE))	# 6
+    fd.msg <-
+        if(fdf$info) {
+	    msg <-
+                switch(fdf$info,
+                       stop("insufficient workspace; need ", fdf$lenw,
+                            " instead of just ", lenw),		# 1
+                       stop("error in gamma function"),		# 2
+                       stop("invalid MINPACK input"),		# 3
+                       "warning in gamma function",		# 4
+                       "C fracdf() optimization failure",	# 5
+                       "C fracdf() optimization limit reached") # 6
+            ## otherwise
+            ## stop("unknown .C(fracdf, *) info -- should not happen")
+	    warning(msg, call. = FALSE, immediate = TRUE)
+	    msg
+	} else "ok"
 
     ## FIXME? is this really useful?  why not keep these as  numeric(0) ??
     if(npq == 0) {
@@ -149,53 +153,25 @@ fracdiff <- function(x, nar = 0, nma = 0,
                fdf$w,
                PACKAGE = "fracdiff")$hess
 
-### FIXME: MM remains utterly confused, that this 'hess' result seems
-### ----- *UN*used for .fdcov() below, even though Cov == (-H)^{-1} == solve(-H)
+    ## NOTA BENE: The above  hess[.,.]  is further "transformed",
+    ##            well, added to  and inverted  in fdcov :
+    ## Cov == (-H)^{-1} == solve(-H)
 
     ## Note that the following can be "redone" using fracdiff.var() :
 
-### New code -- TODO --
-##     fdc <- .fdcov(x, fdf$d, h,
-##                   nar = nar, nma = nma, fdf.work = fdf$w)
+    fdc <- .fdcov(x, fdf$d, h,
+                  nar=nar, nma=nma, hess=hess, fdf.work = fdf$w)
 
-    fdc <- .C("fdcov", ## --> ../src/fdhess.c
-               x,
-               fdf$d,
-               h = as.double(if(missing(h)) -1 else h),
-               hd = double(npq1),
-               cov = hess, npq1,
-               cor = hess, npq1,
-               se = double(npq1),
-               fdf$w,
-               info = integer(1),
-               PACKAGE = "fracdiff")
-    fdf$msg <-
-        if(fdc$info) {
-            msg <-
-                switch(fdc$info,
-		       "fdcov problem in gamma function",	# 1
-		       "singular Hessian",			# 2
-                       ## FIXME? improve: different reasons for info = 3 :
-		       "unable to compute correlation matrix; maybe change 'h'",
-                                        			# 3
-		       stop("error in gamma function"))		# 4
-            warning(msg)
-        } else "ok"
-    se.ok <- fdc$info != 0 || fdc$info < 3 ## FIXME -- illogical!!
-    nam <- "d"
-    if(nar) nam <- c(nam, p0("ar", 1:nar))
-    if(nma) nam <- c(nam, p0("ma", 1:nma))
-
-### --- end new code {TODO}
-
-    hess <- matrix(hess, nrow = npq1, ncol = npq1, dimnames = list(nam, nam))
+    dimnames(hess) <- dimnames(fdc$covariance.dpq)
     hess[1, ] <- fdc$hd
     hess[row(hess) > col(hess)] <- hess[row(hess) < col(hess)]
-    structure(list(log.likelihood = fdf$hood, n = n, msg = fdf$msg,
+
+    structure(list(log.likelihood = fdf$hood, n = n,
+                   msg = paste(unique(c(fd.msg, fdc$msg)), collapse="\n"),
 		   d = fdf$d, ar = fdf$ar, ma = fdf$ma,
-		   covariance.dpq = array(fdc$cov, c(npq1,npq1), list(nam,nam)),
-		   stderror.dpq	  = if(se.ok) fdc$se, # else NULL
-		   correlation.dpq= if(se.ok) array(fdc$cor, c(npq1, npq1)),
+		   covariance.dpq = fdc$covariance.dpq,
+		   stderror.dpq	  = if(fdc$se.ok) fdc$stderror.dpq, # else NULL
+		   correlation.dpq= if(fdc$se.ok) fdc$correlation.dpq,
 		   h = fdc$h, d.tol = fdf$dtol, M = M, hessian.dpq = hess,
 		   length.w = lenw, call = cl),
 	      class = "fracdiff")
