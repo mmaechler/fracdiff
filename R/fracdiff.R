@@ -104,26 +104,27 @@ fracdiff <- function(x, nar = 0, nma = 0,
 
     ## this also initializes "common blocks" that are used in .C(.) calls :
     fdf <- .C("fracdf",
-              x,
-              n,
-              as.integer(M),
-              as.integer(nar),
-              as.integer(nma),
-              dtol = as.double(dtol),
-              drange = as.double(drange),
-              hood = double(1),
-              d = double(1),
-              ar = as.double(ar),
-              ma = as.double(ma),
-              w = double(lenw),
-              lenw = lenw,
-              iw = integer(npq), ## <<< new int-work array
-              info = integer(1),
-              .Machine$double.xmin,
-              .Machine$double.xmax,
-              .Machine$double.neg.eps,
-              .Machine$double.eps,
-              PACKAGE = "fracdiff")
+	      x,
+	      n,
+	      as.integer(M),
+	      as.integer(nar),
+	      as.integer(nma),
+	      dtol = as.double(dtol),
+	      drange = as.double(drange),
+	      hood = double(1),
+	      d = double(1),
+	      ar = as.double(ar),
+	      ma = as.double(ma),
+	      w = double(lenw),
+	      lenw = lenw,
+	      iw = integer(npq), ## <<< new int-work array
+	      info = integer(1),
+	      .Machine$double.xmin,
+	      .Machine$double.xmax,
+	      .Machine$double.neg.eps,
+	      .Machine$double.eps,
+	      PACKAGE = "fracdiff")[c("dtol","drange","hood",
+	      "d", "ar", "ma", "w", "lenw", "info")]
 
     fd.msg <-
         if(fdf$info) {
@@ -138,15 +139,12 @@ fracdiff <- function(x, nar = 0, nma = 0,
                        "C fracdf() optimization limit reached") # 6
             ## otherwise
             ## stop("unknown .C(fracdf, *) info -- should not happen")
-	    warning(msg, call. = FALSE, immediate = TRUE)
+	    warning(msg, call. = FALSE, immediate. = TRUE)
 	    msg
 	} else "ok"
 
-    ## FIXME? is this really useful?  why not keep these as  numeric(0) ??
-    if(npq == 0) {
-        fdf$ar <- NULL
-        fdf$ma <- NULL
-    }
+    if(nar == 0) fdf$ar <- numeric(0)
+    if(nma == 0) fdf$ma <- numeric(0)
 
     hess <- .C("fdhpq",
                hess = matrix(double(1), npq1, npq1),
@@ -168,7 +166,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
     hess[row(hess) > col(hess)] <- hess[row(hess) < col(hess)]
 
     structure(list(log.likelihood = fdf$hood, n = n,
-                   msg = paste(unique(c(fd.msg, fdc$msg)), collapse="\n"),
+		   msg = c(fracdf = fd.msg, fdconv = fdc$msg),
 		   d = fdf$d, ar = fdf$ar, ma = fdf$ma,
 		   covariance.dpq = fdc$covariance.dpq,
 		   stderror.dpq	  = if(fdc$se.ok) fdc$stderror.dpq, # else NULL
@@ -179,6 +177,8 @@ fracdiff <- function(x, nar = 0, nma = 0,
 }
 
 ### FIXME [modularity]: a lot of this is "cut & paste" also in fracdiff() itself
+### ----- NOTABLY, now use  .fdcov() !
+
 fracdiff.var <- function(x, fracdiff.out, h)
 {
     if(!is.numeric(h))
