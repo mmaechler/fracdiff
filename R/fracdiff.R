@@ -15,18 +15,18 @@ p0 <- function(...) paste(..., sep="")
 {
     npq <- as.integer(nar + nma)
     npq1 <- npq + 1L # integer, too
-    stopifnot(length(d <- dim(hess)) == 2, d == c(npq1, npq1))
+    stopifnot(length(di <- dim(hess)) == 2, di == c(npq1, npq1))
     fdc <- .C("fdcov", ## --> ../src/fdhess.c
-               x,
-               d, # fdf$d
-               h = as.double(if(missing(h)) -1 else h),
-               hd = double(npq1),
-               cov = hess, npq1,
-               cor = hess, npq1,
-               se = double(npq1),
-               fdf.work, # fdf$w
-               info = integer(1),
-               PACKAGE = "fracdiff")
+	       x,
+	       d, # fdf$d
+	       h = as.double(if(missing(h)) -1 else h),
+	       hd = double(npq1),
+	       cov = hess, npq1,
+	       cor = hess, npq1,
+	       se = double(npq1),
+	       fdf.work, # fdf$w
+	       info = integer(1),
+	       PACKAGE = "fracdiff")[c("h","hd", "cov","cor", "se", "info")]
 
     f.msg <-
 	if(fdc$info) {
@@ -41,8 +41,9 @@ p0 <- function(...) paste(..., sep="")
 	    warning(msg, call. = FALSE)
 	    msg
 	} else "ok"
-    se.ok <- fdc$info != 0 || fdc$info < 3 ## FIXME -- illogical!!
-    ## better?  se.ok <- fdc$info %in% 0:2
+    ## se.ok <- fdc$info != 0 || fdc$info < 3 ## FIXME -- illogical!!
+    ## better?
+    se.ok <- fdc$info %in% 0:2
     nam <- "d"
     if(nar) nam <- c(nam, p0("ar", 1:nar))
     if(nma) nam <- c(nam, p0("ma", 1:nma))
