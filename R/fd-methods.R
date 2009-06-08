@@ -20,7 +20,9 @@ logLik.fracdiff <- function(object, ...)
 print.fracdiff <- function(x, digits = getOption("digits"), ...)
 {
     cat("\nCall:\n ", deparse(x$call), "\n")
-    if(x$msg != "ok") cat("\n*** Warning during fit:", x$msg,"\n")
+    if(any(not.ok <- x$msg != "ok"))
+        cat(sprintf("\n*** Warning during (%s) fit: %30s\n",
+                    names(x$msg)[not.ok], x$msg[not.ok]))
     cat("\nCoefficients:\n")
     print(coef(x), digits = digits, ...)
     ## print.default(x, digits = digits, ...)too cheap to be true
@@ -55,7 +57,9 @@ print.summary.fracdiff <-
              signif.stars = getOption("show.signif.stars"), ...)
 {
     cat("\nCall:\n ", deparse(x$call), "\n")
-    if(x$msg != "ok") cat("\n*** Warning during fit:", x$msg,"\n")
+    if(any(not.ok <- x$msg != "ok"))
+        cat(sprintf("\n*** Warning during (%s) fit: %30s\n",
+                    names(x$msg)[not.ok], x$msg[not.ok]))
     cat("\nCoefficients:\n")
     printCoefmat(x$coef, digits = digits, signif.stars = signif.stars, ...)
     cat("[d.tol = ", formatC(x$d.tol),", M = ", x$M,", h = ",formatC(x$h),
