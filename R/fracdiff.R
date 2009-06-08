@@ -11,6 +11,50 @@
 
 p0 <- function(...) paste(..., sep="")
 
+.fdcov <- function(x, d, h, nar, nma, fdf.work)
+{
+    npq <- as.integer(nar + nma)
+    npq1 <- npq + 1L # integer, too
+    cMat <- matrix(double(1), npq1, npq1)
+    fdc <- .C("fdcov", ## --> ../src/fdhess.c
+               x,
+               d, # fdf$d
+               h = as.double(if(missing(h)) -1 else h),
+               hd = double(npq1),
+               cov = cMat, npq1,
+               cor = cMat, npq1,
+               se = double(npq1),
+               fdf.work, # fdf$w
+               info = integer(1),
+               PACKAGE = "fracdiff")
+
+    f.msg <-
+        if(fdc$info) {
+            msg <-
+                switch(fdc$info,
+		       "fdcov problem in gamma function",	# 1
+		       "singular Hessian",			# 2
+                       ## FIXME improve: different reasons for info = 3 :
+		       "unable to compute correlation matrix; maybe change 'h'",
+                                        			# 3
+		       stop("error in gamma function"))		# 4
+            warning(msg)
+        } else "ok"
+    se.ok <- fdc$info != 0 || fdc$info < 3 ## FIXME -- illogical!!
+    ## better?  se.ok <- fdc$info %in% 0:2
+    nam <- "d"
+    if(nar) nam <- c(nam, p0("ar", 1:nar))
+    if(nma) nam <- c(nam, p0("ma", 1:nma))
+
+    dimnames(fdc$cov) <- list(nam, nam)
+
+    list(msg = f.msg, d = d, nam = nam,
+	 h = fdc$h, hd = fdc$hd, se.ok = se.ok,
+	 covariance.dpq = fdc$cov,
+	 stderror.dpq	= if(se.ok) fdc$se, # else NULL
+	 correlation.dpq= if(se.ok) fdc$cor)
+}## end{.fdcov}
+
 fracdiff <- function(x, nar = 0, nma = 0,
                      ar = rep(NA, max(nar, 1)), ma = rep(NA, max(nma, 1)),
                      dtol = NULL, drange = c(0, 0.5), h, M = 100)
@@ -43,7 +87,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
     if(round(nar) != nar || nar < 0 || round(nma) != nma || nma < 0)
         stop("'nar' and 'nma' must be non-negative integer numbers")
     npq <- as.integer(nar + nma)
-    npq1 <- as.integer(npq + 1:1)
+    npq1 <- npq + 1L # integer, too
     lenw <- max(npq + 2*(n + M),
                 3*n + (n+6)*npq + npq %/% 2 + 1,
                 31 * 12, ## << added because checked in ../src/fdcore.f
@@ -93,18 +137,28 @@ fracdiff <- function(x, nar = 0, nma = 0,
                warning("C fracdf() optimization limit reached",
                        call.=FALSE, immediate. = TRUE))	# 6
 
+    ## FIXME? is this really useful?  why not keep these as  numeric(0) ??
+    if(npq == 0) {
+        fdf$ar <- NULL
+        fdf$ma <- NULL
+    }
+
     hess <- .C("fdhpq",
                hess = matrix(double(1), npq1, npq1),
                npq1,
                fdf$w,
                PACKAGE = "fracdiff")$hess
 
-### FIXME:  MM remains utterly confused, that this 'hess' result seems
-### -----   *UN*used for .fdcov() below, even though Cov == (-H)^{-1} == solve(-H)
+### FIXME: MM remains utterly confused, that this 'hess' result seems
+### ----- *UN*used for .fdcov() below, even though Cov == (-H)^{-1} == solve(-H)
 
     ## Note that the following can be "redone" using fracdiff.var() :
 
-    fdc <- .C("fdcov",
+### New code -- TODO --
+##     fdc <- .fdcov(x, fdf$d, h,
+##                   nar = nar, nma = nma, fdf.work = fdf$w)
+
+    fdc <- .C("fdcov", ## --> ../src/fdhess.c
                x,
                fdf$d,
                h = as.double(if(missing(h)) -1 else h),
@@ -128,13 +182,12 @@ fracdiff <- function(x, nar = 0, nma = 0,
             warning(msg)
         } else "ok"
     se.ok <- fdc$info != 0 || fdc$info < 3 ## FIXME -- illogical!!
-    if(npq == 0) {
-        fdf$ar <- NULL
-        fdf$ma <- NULL
-    }
     nam <- "d"
     if(nar) nam <- c(nam, p0("ar", 1:nar))
     if(nma) nam <- c(nam, p0("ma", 1:nma))
+
+### --- end new code {TODO}
+
     hess <- matrix(hess, nrow = npq1, ncol = npq1, dimnames = list(nam, nam))
     hess[1, ] <- fdc$hd
     hess[row(hess) > col(hess)] <- hess[row(hess) < col(hess)]
