@@ -17,16 +17,16 @@ p0 <- function(...) paste(..., sep="")
     npq1 <- npq + 1L # integer, too
     stopifnot(length(di <- dim(hess)) == 2, di == c(npq1, npq1))
     fdc <- .C("fdcov", ## --> ../src/fdhess.c
-	       x,
-	       d, # fdf$d
-	       h = as.double(if(missing(h)) -1 else h),
-	       hd = double(npq1),
-	       cov = hess, npq1,
-	       cor = hess, npq1,
-	       se = double(npq1),
-	       fdf.work, # fdf$w
-	       info = integer(1),
-	       PACKAGE = "fracdiff")[c("h","hd", "cov","cor", "se", "info")]
+	      x,
+	      d,
+	      h = as.double(if(missing(h)) -1 else h),
+	      hd = double(npq1),
+	      cov = hess, npq1,
+	      cor = hess, npq1,
+	      se = double(npq1),
+	      fdf.work,
+	      info = integer(1),
+	      PACKAGE = "fracdiff")[c("h","hd", "cov","cor", "se", "info")]
 
     f.msg <-
 	if(fdc$info) {
@@ -41,8 +41,6 @@ p0 <- function(...) paste(..., sep="")
 	    warning(msg, call. = FALSE)
 	    msg
 	} else "ok"
-    ## se.ok <- fdc$info != 0 || fdc$info < 3 ## FIXME -- illogical!!
-    ## better?
     se.ok <- fdc$info %in% 0:2
     nam <- "d"
     if(nar) nam <- c(nam, p0("ar", 1:nar))
@@ -166,7 +164,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
     hess[row(hess) > col(hess)] <- hess[row(hess) < col(hess)]
 
     structure(list(log.likelihood = fdf$hood, n = n,
-		   msg = c(fracdf = fd.msg, fdconv = fdc$msg),
+		   msg = c(fracdf = fd.msg, fdcov = fdc$msg),
 		   d = fdf$d, ar = fdf$ar, ma = fdf$ma,
 		   covariance.dpq = fdc$covariance.dpq,
 		   stderror.dpq	  = if(fdc$se.ok) fdc$stderror.dpq, # else NULL
