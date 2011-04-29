@@ -118,7 +118,7 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
 
     /* Local variables */
     double delta;
-    int lfree, lwfree, lenthw;
+    int lfree, lwfree;
 
     /* Parameter adjustments */
     --w;
@@ -149,7 +149,6 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
 	*lenw = lwfree;
 	return;
     }
-    lenthw = *lenw;
     OP.maxopt = 100;
     OP.maxfun = 100;
 /* set error and warning flags */
@@ -226,7 +225,7 @@ double dopt(double *x, double *dinit, double *drange,
     static double cc = .38196601125011;
 
     double ret_val = -1. /* -Wall */;
-    static double d__, aa, bb, fa, dd, fb, ee, hh, fu, fv, fw, fx, rr, ss,
+    static double aa, bb, dd, ee, hh, fu, fv, fw, fx, rr, ss,
 	     tt, uu, vv, ww, xx, eps, tol, tol1, tol2, tol3;
 
 /*  copyright 1991 Department of Statistics, University of Washington
@@ -264,7 +263,6 @@ double dopt(double *x, double *dinit, double *drange,
 
 L10:
     if (gammfd_.igamma != 0 || MinPck.iminpk != 0) {
-	d__ = uu;
 	*hood = machfd_.fltmax;
 	return ret_val;
     }
@@ -350,10 +348,8 @@ L10:
     if (fx >= fu) {
 	if (uu >= xx) {
 	    aa = xx;
-	    fa = fx;
 	} else {
 	    bb = xx;
-	    fb = fx;
 	}
 	vv = ww;
 	fv = fw;
@@ -364,10 +360,8 @@ L10:
     } else {
 	if (uu >= xx) {
 	    bb = uu;
-	    fb = fu;
 	} else {
 	    aa = uu;
-	    fa = fu;
 	}
 	if (fu > fw && ww != xx) {
 	    if (fu <= fv || vv == xx || vv == ww) {
