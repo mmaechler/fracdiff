@@ -1,0 +1,28 @@
+0. After F2c'ing, and declaring things, I now get the compiler warnings
+
+  fdcore.c: In function `pqopt_':
+  fdcore.c:561: warning: passing arg 18 of `lmder1_' from incompatible pointer type
+  fdcore.c:573: warning: passing arg 18 of `lmder1_' from incompatible pointer type
+  fdcore.c:583: warning: passing arg 18 of `lmder1_' from incompatible pointer type
+
+  and indeed, the argument passed is   &w[woptfd_1.ipvt]
+  but this is internally treated as  *integer*  '*ipvt'
+
+  ===> reason for occasional seg.faults !?
+
+  fracdf() -> dopt() -> pqopt()
+	   really should pass a double w[]  PLUS an  int iw[]
+
+  ___ DONE, 2004-10-xx (MM) ___
+
+1b. fracdiff.sim() improved, now allowing non-Gaussian innovations.
+
+2. Translate to C,
+  ___ DONE, 2004-09-18 (MM) ___
+
+5. Jan de Leeuw cannot link things on Mac OSX using "flat namespaces"
+   (because the Common Blocks look like having multiple definitions)
+   --> start cleaning up common blocks in general.  2005-06-29
+   mostly finished; at least CRAN-checks are fine now.
+
+
