@@ -12,7 +12,7 @@
 \usage{
 fracdiff(x, nar = 0, nma = 0,
          ar = rep(NA, max(nar, 1)), ma = rep(NA, max(nma, 1)),
-         dtol = NULL, drange = c(0, 0.5), h, M = 100)
+         dtol = NULL, drange = c(0, 0.5), h, M = 100, trace = 0)
 }
 \arguments{
   \item{x}{time series (numeric vector) for the ARIMA model}
@@ -38,6 +38,9 @@ fracdiff(x, nar = 0, nma = 0,
   }
   \item{M}{number of terms in the likelihood approximation (see Haslett
     and Raftery 1989).}
+  \item{trace}{optional integer, specifying a trace level.  If positive,
+    currently the \dQuote{outer loop} iterations produce one line of
+    diagnostic output.}
 }
 \value{
   an object of S3 \code{\link{class}} \code{"fracdiff"}, which is
@@ -95,6 +98,14 @@ fracdiff(x, nar = 0, nma = 0,
 }
 \examples{
 ts.test <- fracdiff.sim( 5000, ar = .2, ma = -.4, d = .3)
-fracdiff( ts.test$series, nar = length(ts.test$ar), nma = length(ts.test$ma))
+fd. <- fracdiff( ts.test$series,
+                 nar = length(ts.test$ar), nma = length(ts.test$ma))
+fd.
+## Confidence intervals
+confint(fd.)
+
+## with iteration output
+fd2 <- fracdiff(ts.test$series, nar = 1, nma = 1, trace = 1)
+all.equal(fd., fd2)
 }
 \keyword{ts}
