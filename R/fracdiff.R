@@ -57,7 +57,7 @@ p0 <- function(...) paste(..., sep="")
 
 fracdiff <- function(x, nar = 0, nma = 0,
                      ar = rep(NA, max(nar, 1)), ma = rep(NA, max(nma, 1)),
-                     dtol = NULL, drange = c(0, 0.5), h, M = 100)
+                     dtol = NULL, drange = c(0, 0.5), h, M = 100, trace = 0)
 {
     ## #########################################################################
     ##
@@ -116,7 +116,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
 	      w = double(lenw),
 	      lenw = lenw,
 	      iw = integer(npq), ## <<< new int-work array
-	      info = integer(1),
+	      info = as.integer(trace > 0),## <- "verbose" [input]
 	      .Machine$double.xmin,
 	      .Machine$double.xmax,
 	      .Machine$double.neg.eps,
@@ -163,11 +163,13 @@ fracdiff <- function(x, nar = 0, nma = 0,
     hess[1, ] <- fdc$hd
     hess[row(hess) > col(hess)] <- hess[row(hess) < col(hess)]
 
-    structure(list(log.likelihood = fdf$hood.etc[1],
+    hstat <- fdf[["hood.etc"]]
+    structure(list(log.likelihood = hstat[1],
                    n = n,
 		   msg = c(fracdf = fd.msg, fdcov = fdc$msg),
 		   d = fdf$d, ar = fdf$ar, ma = fdf$ma,
 		   covariance.dpq = fdc$covariance.dpq,
+		   fnormMin = hstat[2], wnv = hstat[3],
 		   stderror.dpq	  = if(fdc$se.ok) fdc$stderror.dpq, # else NULL
 		   correlation.dpq= if(fdc$se.ok) fdc$correlation.dpq,
 		   h = fdc$h, d.tol = fdf$dtol, M = M, hessian.dpq = hess,
