@@ -7,13 +7,8 @@
  */
 
 #include <Rmath.h>
-// for warning():
+// for warning(), and "monitoring" output
 #include <R.h>
-
-// activate for MM:
-#ifdef DEBUG_q
-# define DEBUG_dopt
-#endif
 
 
 /* dcopy() and ddot() only:*/
@@ -29,11 +24,11 @@ extern double dgamma_(double *);
 void fracdf(double *x, int *n, int *m, int *nar, int *nma,
 	    double *dtol, double *drange, double *hood_etc,
 	    double *d__, double *ar, double *ma, double *w,
-	    int *lenw, int *iw, int *inform__,
+	    int *lenw, int *iw, int *inform, // <- also use as input
 	    double *flmin, double *flmax, double *epmin, double *epmax);
 
 static
-double dopt(double *x, double dinit, double *drange,
+double dopt(double *x, double dinit, double *drange, int verbose,
 	    double *hood, double *delta, double *w, int *iw, double *min_fnorm);
 
 static
@@ -86,7 +81,7 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
 	    double *dtol, double *drange, double *hood_etc,
 	    double *d__, double *ar, double *ma,
 	    double *w, int *lenw, int *iw,
-	    int *inform__,
+	    int *inform, // <- also use as input for verbose
 	    double *flmin, double *flmax, double *epmin, double *epmax)
 {
 /* ----------------------------------------------------------------------------
@@ -94,7 +89,7 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
 
   x(n)    double   time series for the ARIMA model
   n       int  length of the time series
-  M       int  number of terms in the likelihood approximation
+  m       int  number of terms in the likelihood approximation
                    suggested value 100 (see Haslett and Raftery 1989)
   nar     int  number of autoregressive parameters
   nma     int  number of moving average parameters
@@ -131,12 +126,9 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
 
     /* Local variables */
     double delta;
-    int lfree, lwfree;
-
-    /* Parameter adjustments */
-    --w;
-
-    /* Function Body */
+    int lfree, lwfree,
+	verbose = inform[0],
+	w_lqp = w_opt.lqp - 1;// '-1' : so we do *not* need 'w--'
 
     if (*m <= 0) /* default: */
 	*m = 100;
@@ -155,17 +147,17 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
 /*                 ^^^^^^^ MM: where is this needed? */
     if (lwfree > *lenw + 1) {
 	limsfd_.ilimit = lwfree - *lenw;
-/*       write( 6, *) 'insufficient storage : ',
-    *               'increase length of w by at least', ILIMIT */
-	*inform__ = 1;
-/* 	return the *desired* workspace storage: */
+	REprintf("** Insufficient storage : Increase length of w by at least %d\n",
+		 limsfd_.ilimit);
+	*inform = 1;
+	/* return the *desired* workspace storage: */
 	*lenw = lwfree;
 	return;
     }
     OP.maxopt = 100;
     OP.maxfun = 100;
 /* set error and warning flags */
-    *inform__ = 0;
+    *inform = 0;
     gammfd_.igamma = 0;
     MinPck.iminpk = 0;
     limsfd_.ilimit = 0;
@@ -187,15 +179,17 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
     *dtol = TOL.d;
 /*     if (npq != 0) call dcopy( npq, zero, 0, w(lqp), 1) */
     if (Dims.pq != 0) {
-	F77_CALL(dcopy)(&Dims.p, ar, &ic__1, &w[w_opt.lqp + Dims.q], &ic__1);
-	F77_CALL(dcopy)(&Dims.q, ma, &ic__1, &w[w_opt.lqp], &ic__1);
+	F77_CALL(dcopy)(&Dims.p, ar, &ic__1, &w[w_lqp + Dims.q], &ic__1);
+	F77_CALL(dcopy)(&Dims.q, ma, &ic__1, &w[w_lqp], &ic__1);
     }
     OP.nopt = 0;
     OP.nfun = 0;
     OP.ngrd = 0;
 /* 	   ==== */
-    *d__ = dopt(x, *d__, drange, &hood_etc[0], &delta, &w[1], iw, /* min_fnorm = */&hood_etc[1]);
-/* 	   ==== */
+    *d__ = dopt(x, *d__, drange, verbose,
+/* 	   ===*/
+		&hood_etc[0], &delta, w, iw, /* min_fnorm = */&hood_etc[1]);
+
     hood_etc[2] = filtfd_.wnv;
     if (OP.nopt >= OP.maxopt) {
 	limsfd_.jlimit = 1;
@@ -208,15 +202,15 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
 	F77_CALL(dcopy)(&Dims.p, &machfd_.fltmax, &ic__0, ar, &ic__1);
 	F77_CALL(dcopy)(&Dims.q, &machfd_.fltmax, &ic__0, ma, &ic__1);
 
-	if (gammfd_.igamma != 0) { *inform__ = 2; return; }
-	if (MinPck.iminpk != 0) { *inform__ = 3; return; }
+	if (gammfd_.igamma != 0) { *inform = 2; return; }
+	if (MinPck.iminpk != 0) { *inform = 3; return; }
     }
-    F77_CALL(dcopy)(&Dims.p, &w[w_opt.lqp + Dims.q], &ic__1, ar, &ic__1);
-    F77_CALL(dcopy)(&Dims.q, &w[w_opt.lqp],          &ic__1, ma, &ic__1);
+    F77_CALL(dcopy)(&Dims.p, &w[w_lqp + Dims.q], &ic__1, ar, &ic__1);
+    F77_CALL(dcopy)(&Dims.q, &w[w_lqp],          &ic__1, ma, &ic__1);
 
-    if (gammfd_.jgamma != 0) { *inform__ = 4; return; }
-    if (MinPck.jminpk != 0) { *inform__ = 5; return; }
-    if (limsfd_.jlimit != 0) { *inform__ = 6; }
+    if (gammfd_.jgamma != 0) { *inform = 4; return; }
+    if (MinPck.jminpk != 0) { *inform = 5; return; }
+    if (limsfd_.jlimit != 0) { *inform = 6; }
     return;
 /* 900  format( 4h itr, 14h     d          ,   14h    est mean  ,
      *                16h     white noise,  17h     log likelihd,
@@ -231,7 +225,7 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
  optimization with respect to d based on Brent's fmin algorithm */
 
 static
-double dopt(double *x, double dinit, double *drange,
+double dopt(double *x, double dinit, double *drange, int verbose,
 	    double *hood, double *delta, double *w, int *iw, double *min_fnorm)
 
 {
@@ -269,10 +263,13 @@ double dopt(double *x, double dinit, double *drange,
     OP.nopt = 1;
     fx = pqopt(x, xx, w, iw, min_fnorm);
 /*       ===== */
-#ifdef DEBUG_dopt
-    REprintf("dopt() debugging: dinit = %g ==> xx = %g, fx = pqopt(x[], xx) = %g; min_fnorm = %g\n",
-	     dinit, xx, fx, *min_fnorm);
-#endif
+    if(verbose) {
+	REprintf("dopt() debugging: dinit = %g ==> xx = %g, fx = pqopt(x[], xx) = %g; min_fnorm = %g\n",
+		 dinit, xx, fx, *min_fnorm);
+	REprintf("                 it. |           uu |    pqopt(uu) |      delta |\n");
+	//                             | 123456789012 | 123456789012 | 1234567890 |\n",
+//      REprintf(" .. DBG dopt() [%2d]:| %12g | %12g | %10.6e |\n",
+    }
     fv = fx;
     fw = fx;
     tol = fmax2(TOL.d, 0.);
@@ -294,11 +291,9 @@ L10:
 
     *delta = fabs(xx - hh) + (bb - aa) * .5;
     /*     if (abs(xx-hh) .le. (tol2-half*(bb-aa))) goto 100 */
-#ifdef DEBUG_dopt
-    if(OP.nopt > 1)
-	REprintf(" .. DBG dopt() [%d]: uu, pqopt(uu), delta = %15g %15g %15g\n",
+    if(verbose && OP.nopt > 1)
+	REprintf(" .. DBG dopt() [%2d]:| %12g | %12g | %10.6e |\n",
 		 OP.nopt, uu, fu, *delta);
-#endif
     if (*delta <= tol2) {
 	goto L_end;
     }
