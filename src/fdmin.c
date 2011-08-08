@@ -7,6 +7,8 @@
  */
 
 #include <Rmath.h>
+// for warning():
+#include <R.h>
 
 #include "fracdiff.h"
 
@@ -22,9 +24,9 @@
 /* Constant (used to pass pointer) */
 static /*logical*/int c_true = (1);
 
-static void qrfac_(int *, int *, double *, int *,
-		   /*logical*/int *, int *, int *,
-		   double *, double *, double *);
+static void qrfac(int *, int *, double *, int *,
+		  /*logical*/int *, int *, int *,
+		  double *, double *, double *);
 static void qrsolv(int, double *, int *, int *,
 		   double *, double *, double *, double *, double *);
 
@@ -265,7 +267,7 @@ double lmder1(S_fp fcn, int m, int n,
 
     if (n <= 0 || m < n || ldfjac < m || ftol < 0. || xtol < 0. ||
 	gtol < 0. || maxfev <= 0 || factor <= 0.) {
-	// FIXME: print warning
+	warning("lmder1(): invalid (scalar) input");
 	goto L_end;
     }
     if (mode == 2) { /* check diag[] */
@@ -276,10 +278,12 @@ double lmder1(S_fp fcn, int m, int n,
 /* evaluate the function at the starting point and calculate its norm. */
 
     iflag = 1;
-    (*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], &ldfjac, &iflag, &y[1]);
+    (*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], ldfjac, iflag, &y[1]);
     *nfev = 1;
-    if (iflag < 0)
+    if (iflag < 0) {
+	warning("lmder1(): problem in function evaluation at starting point");
 	goto L_end;
+    }
 
     fd_min_fnorm = fmin2(enorm(m, &fvec[1]), mauxfd_1.bignum);
 
@@ -294,7 +298,7 @@ L30:
 /*	  calculate the jacobian matrix. */
 
     iflag = 2;
-    (*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], &ldfjac, &iflag, &y[1]);
+    (*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], ldfjac, iflag, &y[1]);
     ++(*njev);
     if (iflag < 0)
 	goto L_end;
@@ -303,7 +307,7 @@ L30:
     if (nprint > 0) {
 	iflag = 0;
 	if ((iter - 1) % nprint == 0)
-	    (*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], &ldfjac, &iflag, &y[1]);
+	    (*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], ldfjac, iflag, &y[1]);
 
 	if (iflag < 0)
 	    goto L_end;
@@ -312,8 +316,8 @@ L30:
 
 /*	  compute the qr factorization of the jacobian. */
 
-    qrfac_(&m, &n, &fjac[fjac_offset], &ldfjac, &c_true, &ipvt[1], &n,
-	   &wa1[1], &wa2[1], &wa3[1]);
+    qrfac(&m, &n, &fjac[fjac_offset], &ldfjac, &c_true, &ipvt[1], &n,
+	  &wa1[1], &wa2[1], &wa3[1]);
 
     /* on the first iteration -- do a some initializations : */
     if (iter == 1) {
@@ -417,7 +421,7 @@ L30:
 /*	     evaluate the function at x + p and calculate its norm. */
 
 	iflag = 1;
-	(*fcn)(&wa2[1], &wa4[1], &fjac[fjac_offset], &ldfjac, &iflag, &y[1]);
+	(*fcn)(&wa2[1], &wa4[1], &fjac[fjac_offset], ldfjac, iflag, &y[1]);
 	++(*nfev);
 	if (iflag < 0)
 	    goto L_end;
@@ -546,7 +550,7 @@ L_end: //  termination, either normal or user imposed.
     }
     iflag = 0;
     if (nprint > 0) {
-	(*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], &ldfjac, &iflag, &y[1]);
+	(*fcn)(&x[1], &fvec[1], &fjac[fjac_offset], ldfjac, iflag, &y[1]);
     }
     return fd_min_fnorm;
 } /* lmder1 */
@@ -680,9 +684,9 @@ double enorm(int n, double *x)
 
 
 static
-void qrfac_(int *m, int *n, double *a, int *lda,
-	    /*logical*/int *pivot, int *ipvt, int *lipvt, double *rdiag,
-	    double *acnorm, double *wa)
+void qrfac(int *m, int *n, double *a, int *lda,
+	   /*logical*/int *pivot, int *ipvt, int *lipvt, double *rdiag,
+	   double *acnorm, double *wa)
 {
     /* Initialized data */
 
@@ -781,37 +785,31 @@ void qrfac_(int *m, int *n, double *a, int *lda,
     a -= a_offset;
     --ipvt;
 
-    /* Function Body
-     epsmch is the machine precision.
-
-     epsmch = dpmpar(1)
-
-     compute the initial column norms and initialize several arrays. */
+    // compute the initial column norms and initialize several arrays.
 
     for (j = 1; j <= *n; ++j) {
 	acnorm[j] = enorm(*m, &a[j * a_dim1 + 1]);
 	rdiag[j] = acnorm[j];
 	wa[j] = rdiag[j];
-	if (*pivot) {
-	    ipvt[j] = j;
-	}
+	if (*pivot) ipvt[j] = j;
     }
 
 /*     reduce a to r with householder transformations. */
 
     minmn = imin2(*m,*n);
     for (j = 1; j <= minmn; ++j) {
-	if (*pivot) { /*        bring the column of largest norm into the pivot position. */
+	if (*pivot) { // bring the column of largest norm into the pivot position.
 	    int kmax = j;
 	    for (k = j; k <= *n; ++k) {
 		if (rdiag[k] > rdiag[kmax])
 		    kmax = k;
 	    }
 	    if (kmax != j) {
+		// swap  a[,j]  and  a[,kmax] :
 		for (i__ = 1; i__ <= *m; ++i__) {
-		    temp = a[i__ + j * a_dim1];
+		    double t = a[i__ + j * a_dim1];
 		    a[i__ + j * a_dim1] = a[i__ + kmax * a_dim1];
-		    a[i__ + kmax * a_dim1] = temp;
+		    a[i__ + kmax * a_dim1] = t;
 		}
 		rdiag[kmax] = rdiag[j];
 		wa[kmax] = wa[j];
@@ -840,9 +838,6 @@ void qrfac_(int *m, int *n, double *a, int *lda,
         and update the norms. */
 
 	jp1 = j + 1;
-	if (*n < jp1) {
-	    goto L100;
-	}
 	for (k = jp1; k <= *n; ++k) {
 	    sum = 0.;
 	    for (i__ = j; i__ <= *m; ++i__) {
@@ -852,26 +847,22 @@ void qrfac_(int *m, int *n, double *a, int *lda,
 	    for (i__ = j; i__ <= *m; ++i__) {
 		a[i__ + k * a_dim1] -= temp * a[i__ + j * a_dim1];
 	    }
-	    if (! (*pivot) || rdiag[k] == 0.) {
-		goto L80;
+	    if (*pivot && rdiag[k] != 0.) {
+		temp = a[j + k * a_dim1] / rdiag[k];
+		rdiag[k] *= sqrt((fmax2(0., 1. - temp * temp)));
+		/* Computing 2nd power */
+		d__1 = rdiag[k] / wa[k];
+		if (p05 * (d__1 * d__1) < machfd_.epsmax) {
+		    rdiag[k] = enorm(*m - j, &a[jp1 + k * a_dim1]);
+		    wa[k] = rdiag[k];
+		}
 	    }
-	    temp = a[j + k * a_dim1] / rdiag[k];
-	    rdiag[k] *= sqrt((fmax2(0., 1. - temp * temp)));
-/* Computing 2nd power */
-	    d__1 = rdiag[k] / wa[k];
-	    if (p05 * (d__1 * d__1) > machfd_.epsmax) {
-		goto L80;
-	    }
-	    rdiag[k] = enorm(*m - j, &a[jp1 + k * a_dim1]);
-	    wa[k] = rdiag[k];
-L80:
-	    ;
 	}
 L100:
 	rdiag[j] = -ajnorm;
     }
     return;
-} /* qrfac_ */
+} /* qrfac */
 
 double lmpar(int n, double *r__, int *ldr, int *ipvt,
 	     double *diag, double *qtb, double *delta,
@@ -982,7 +973,7 @@ double lmpar(int n, double *r__, int *ldr, int *ipvt,
     int r_dim1, r_offset;
 
     /* Local variables */
-    int i__, j, k, l, jm1, jp1, iter, nsing;
+    int i__, j, k, l, jp1, iter, nsing;
     double fp, sum, parc, parl, temp, paru, dwarf, gnorm, dxnorm;
 
     /* Parameter adjustments */
@@ -997,10 +988,7 @@ double lmpar(int n, double *r__, int *ldr, int *ipvt,
     r_offset = 1 + r_dim1;
     r__ -= r_offset;
 
-    /* Function Body
-     dwarf is the smallest positive magnitude.
-
-     dwarf = dpmpar(2) */
+    // dwarf is the smallest positive magnitude :
     dwarf = machfd_.fltmin;
 
 /*     compute and store in x the gauss-newton direction. if the
@@ -1016,24 +1004,14 @@ double lmpar(int n, double *r__, int *ldr, int *ipvt,
 	    wa1[j] = 0.;
 	}
     }
-    if (nsing < 1) {
-	goto L50;
-    }
     for (k = 1; k <= nsing; ++k) {
 	j = nsing - k + 1;
 	wa1[j] /= r__[j + j * r_dim1];
 	temp = wa1[j];
-	jm1 = j - 1;
-	if (jm1 < 1) {
-	    goto L30;
-	}
-	for (i__ = 1; i__ <= jm1; ++i__) {
+	for (i__ = 1; i__ <= j-1; ++i__) {
 	    wa1[i__] -= r__[i__ + j * r_dim1] * temp;
 	}
-L30:
-	;
     }
-L50:
     for (j = 1; j <= n; ++j) {
 	l = ipvt[j];
 	x[l] = wa1[j];
@@ -1054,33 +1032,27 @@ L50:
     }
 
 /*     if the jacobian is not rank deficient, the newton
-     step provides a lower bound, parl, for the 0. of
-     the function. otherwise set this bound to 0.. */
+     step provides a lower bound, parl, for the zero of
+     the function. Otherwise set this bound to 0. */
 
     parl = 0.;
-    if (nsing < n) {
-	goto L120;
-    }
-    for (j = 1; j <= n; ++j) {
-	l = ipvt[j];
-	wa1[j] = diag[l] * (wa2[l] / dxnorm);
-    }
-    for (j = 1; j <= n; ++j) {
-	sum = 0.;
-	jm1 = j - 1;
-	if (jm1 < 1) {
-	    goto L100;
+    if (nsing >= n) {
+	for (j = 1; j <= n; ++j) {
+	    l = ipvt[j];
+	    wa1[j] = diag[l] * (wa2[l] / dxnorm);
 	}
-	for (i__ = 1; i__ <= jm1; ++i__) {
-	    sum += r__[i__ + j * r_dim1] * wa1[i__];
+	for (j = 1; j <= n; ++j) {
+	    sum = 0.;
+	    for (i__ = 1; i__ <= j-1; ++i__) {
+		sum += r__[i__ + j * r_dim1] * wa1[i__];
+	    }
+	    wa1[j] = (wa1[j] - sum) / r__[j + j * r_dim1];
 	}
-L100:
-	wa1[j] = (wa1[j] - sum) / r__[j + j * r_dim1];
+	temp = enorm(n, &wa1[1]);
+	parl = fp / *delta / temp / temp;
     }
-    temp = enorm(n, &wa1[1]);
-    parl = fp / *delta / temp / temp;
-L120:
 
+// L120:
 /*     calculate an upper bound, paru, for the 0. of the function. */
 
     for (j = 1; j <= n; ++j) {
@@ -1171,9 +1143,8 @@ L150:
 /*        end of an iteration. */
 
     goto L150;
-L220:
 
-/*     termination. */
+L220: //  termination.
 
     if (iter == 0) {
 	par = 0.;
