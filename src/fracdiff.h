@@ -1,4 +1,4 @@
-typedef /* Subroutine */ int (*S_fp)();
+typedef /* Subroutine */ void (*S_fp)();
 
 void fdcom(int *n, int *m, int *nar, int *nma,
 	   double *hood, double *flmin, double *flmax,
@@ -17,10 +17,11 @@ void fdsim(int *n, int *ip, int *iq, double *ar, double *ma,
 
 double lmder1(S_fp fcn, int m, int n,
 	      double *x, double *fvec, double *fjac, int ldfjac,
-	      double *ftol, double *xtol, double *gtol, int *maxfev, double *diag,
-	      int *mode, double *factor, int *info,
-	      int *nfev, int *njev, int *ipvt, double *qtf,
+	      double ftol, double xtol, double gtol, int maxfev, double *diag,
+	      int mode, double factor,
+	      int *info, int *nfev, int *njev,
+	      int *ipvt, double *qtf,
 	      double *wa1, double *wa2, double *wa3, double *wa4, double *y);
 
-int ajqp_(double *qp, double *a, double *ajac,
-	  int *lajac, int *iflag, double *y);
+void ajqp_(double *qp, double *a, double *ajac,
+	   int lajac, int op_code, double *y);
