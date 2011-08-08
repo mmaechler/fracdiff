@@ -408,18 +408,18 @@ hesdpq(double *x, double d_, double *hh, double *hd, double *w)
 	       &w[w_fil.lphi], &w[w_fil.lpi]);
 	if (Dims.pq != 0) {
 	    ajqp_(&w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac],
-		  &Dims.nm, &c__1, &w[w_fil.ly]);
+		  &Dims.nm, 1, &w[w_fil.ly]);
 	    ajqp_(&w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac],
-		  &Dims.nm, &c__2, &w[w_fil.ly]);
+		  &Dims.nm, 2, &w[w_fil.ly]);
 	    gradpq(&w[w_opt.lwa1], &w[w_opt.la], &w[w_opt.lajac],Dims.nm);
-	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, 
+	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm,
 					 &w[w_opt.la], &c__1,
 					 &w[w_opt.la], &c__1);
 	    d__1 = 1. / filtfd_.wnv;
 	    F77_CALL(dscal)(&Dims.pq, &d__1, &w[w_opt.lwa1], &c__1);
 	    filtfd_.wnv /= (Dims.nm - 1);
 	} else {
-	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, 
+	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm,
 					 &w[w_fil.ly], &c__1,
 					 &w[w_fil.ly], &c__1) / (Dims.nm - 1);
 	}
@@ -430,19 +430,19 @@ hesdpq(double *x, double d_, double *hh, double *hd, double *w)
 		   &w[w_fil.lphi], &w[w_fil.lpi]);
 	    if (Dims.pq != 0) {
 		ajqp_(&w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac],
-		      &Dims.nm, &c__1, &w[w_fil.ly]);
+		      &Dims.nm, 1, &w[w_fil.ly]);
 		ajqp_(&w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac],
-		      &Dims.nm, &c__2, &w[w_fil.ly]);
+		      &Dims.nm, 2, &w[w_fil.ly]);
 		gradpq(&w[w_opt.lwa2], &w[w_opt.la], &w[w_opt.lajac],
 		       Dims.nm);
-		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, 
+		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm,
 					     &w[w_opt.la], &c__1,
 					     &w[w_opt.la], &c__1);
 		d__1 = 1. / filtfd_.wnv;
 		F77_CALL(dscal)(&Dims.pq, &d__1, &w[w_opt.lwa2], &c__1);
 		filtfd_.wnv /= (Dims.nm - 1);
 	    } else {
-		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, 
+		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm,
 					     &w[w_fil.ly], &c__1,
 					     &w[w_fil.ly], &c__1) / (Dims.nm - 1);
 	    }
@@ -455,19 +455,19 @@ hesdpq(double *x, double d_, double *hh, double *hd, double *w)
 		   &w[w_fil.lphi], &w[w_fil.lpi]);
 	    if (Dims.pq != 0) {
 		ajqp_(&w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac],
-		      &Dims.nm, &c__1, &w[w_fil.ly]);
+		      &Dims.nm, 1, &w[w_fil.ly]);
 		ajqp_(&w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac],
-		      &Dims.nm, &c__2, &w[w_fil.ly]);
+		      &Dims.nm, 2, &w[w_fil.ly]);
 		gradpq(&w[w_opt.lwa2], &w[w_opt.la], &w[w_opt.lajac],
 		       Dims.nm);
-		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, 
+		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm,
 					     &w[w_opt.la], &c__1,
 					     &w[w_opt.la], &c__1);
 		d__1 = 1. / filtfd_.wnv;
 		F77_CALL(dscal)(&Dims.pq, &d__1, &w[w_opt.lwa2], &c__1);
 		filtfd_.wnv /= (Dims.nm - 1);
 	    } else {
-		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, 
+		filtfd_.wnv = F77_CALL(ddot)(&Dims.nm,
 					     &w[w_fil.ly], &c__1,
 					     &w[w_fil.ly], &c__1) / (Dims.nm - 1);
 	    }
@@ -482,9 +482,9 @@ hesdpq(double *x, double d_, double *hh, double *hd, double *w)
 	       &w[w_fil.lphi], &w[w_fil.lpi]);
 	if (Dims.pq != 0) {
 	    ajqp_(&w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac],
-		  &Dims.nm, &c__1, &w[w_fil.ly]);
+		  &Dims.nm, 1, &w[w_fil.ly]);
 	    ajqp_(&w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac],
-		  &Dims.nm, &c__2, &w[w_fil.ly]);
+		  &Dims.nm, 2, &w[w_fil.ly]);
 	    gradpq(&w[w_opt.lwa1], &w[w_opt.la], &w[w_opt.lajac],Dims.nm);
 	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[w_opt.la], &c__1,
 					 &w[w_opt.la], &c__1);
@@ -501,9 +501,9 @@ hesdpq(double *x, double d_, double *hh, double *hd, double *w)
 	       &w[w_fil.lphi], &w[w_fil.lpi]);
 	if (Dims.pq != 0) {
 	    ajqp_(&w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac],
-		  &Dims.nm, &c__1, &w[w_fil.ly]);
+		  &Dims.nm, 1, &w[w_fil.ly]);
 	    ajqp_(&w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac],
-		  &Dims.nm, &c__2, &w[w_fil.ly]);
+		  &Dims.nm, 2, &w[w_fil.ly]);
 	    gradpq(&w[w_opt.lwa1], &w[w_opt.la], &w[w_opt.lajac],Dims.nm);
 	    filtfd_.wnv = F77_CALL(ddot)(&Dims.nm, &w[w_opt.la], &c__1,
 					 &w[w_opt.la], &c__1);
