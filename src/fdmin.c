@@ -32,10 +32,12 @@ static void qrsolv(int, double *, int *, int *,
 
 /* --------- EXPORTS ------------------- */
 
-double enorm(int, double *);
-double lmpar(int, double *, int *, int *, double *, double *, double *,
-	     double,
-	     double *, double *, double *, double *);
+static double enorm(int, double *);
+
+static double
+lmpar(int, double *, int *, int *, double *, double *, double *,
+      double,
+      double *, double *, double *, double *);
 /* and this : */
 
 double lmder1(S_fp fcn, int m, int n,
