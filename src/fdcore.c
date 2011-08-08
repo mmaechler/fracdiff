@@ -16,16 +16,8 @@
 
 #include "fracdiff.h"
 
-
 extern double dgamr_(double *);
 extern double dgamma_(double *);
-
-/* Subroutine */
-void fracdf(double *x, int *n, int *m, int *nar, int *nma,
-	    double *dtol, double *drange, double *hood_etc,
-	    double *d__, double *ar, double *ma, double *w,
-	    int *lenw, int *iw, int *inform, // <- also use as input
-	    double *flmin, double *flmax, double *epmin, double *epmax);
 
 static
 double dopt(double *x, double dinit, double *drange, int verbose,
