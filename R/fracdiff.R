@@ -109,7 +109,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
 	      as.integer(nma),
 	      dtol = as.double(dtol),
 	      drange = as.double(drange),
-	      hood = double(1),
+	      hood.etc = double(3),
 	      d = double(1),
 	      ar = as.double(ar),
 	      ma = as.double(ma),
@@ -121,7 +121,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
 	      .Machine$double.xmax,
 	      .Machine$double.neg.eps,
 	      .Machine$double.eps,
-	      PACKAGE = "fracdiff")[c("dtol","drange","hood",
+	      PACKAGE = "fracdiff")[c("dtol","drange","hood.etc",
 	      "d", "ar", "ma", "w", "lenw", "info")]
 
     fd.msg <-
@@ -163,7 +163,8 @@ fracdiff <- function(x, nar = 0, nma = 0,
     hess[1, ] <- fdc$hd
     hess[row(hess) > col(hess)] <- hess[row(hess) < col(hess)]
 
-    structure(list(log.likelihood = fdf$hood, n = n,
+    structure(list(log.likelihood = fdf$hood.etc[1],
+                   n = n,
 		   msg = c(fracdf = fd.msg, fdcov = fdc$msg),
 		   d = fdf$d, ar = fdf$ar, ma = fdf$ma,
 		   covariance.dpq = fdc$covariance.dpq,
