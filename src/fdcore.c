@@ -7,13 +7,20 @@
  */
 
 #include <Rmath.h>
+// for warning():
+#include <R.h>
+
+// activate for MM:
+#ifdef DEBUG_q
+# define DEBUG_dopt
+#endif
+
 
 /* dcopy() and ddot() only:*/
 #include <R_ext/BLAS.h>
 
 #include "fracdiff.h"
 
-typedef int /* Unknown procedure type */ (*U_fp)();
 
 extern double dgamr_(double *);
 extern double dgamma_(double *);
@@ -26,14 +33,16 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
 	    double *flmin, double *flmax, double *epmin, double *epmax);
 
 static
-double dopt(double *x, double *dinit, double *drange,
+double dopt(double *x, double dinit, double *drange,
 	    double *hood, double *delta, double *w, int *iw, double *min_fnorm);
 
 static
 double pqopt(double *x, double d__, double *w, int *iw, double *min_fnorm);
 
 
-/* These + ajqp_(..)  are passed to LMDER1() to be optimized; hence 'int': */
+/* These + ajqp_(..)  are passed to LMDER1() to be optimized: */
+typedef void /* Unknown procedure type */ (*U_fp)();
+
 static void
 ajp_(double *p, double *a, double *ajac, int lajac, int op_code, double *y);
 
@@ -62,9 +71,6 @@ static struct { int ilimit, jlimit; } limsfd_;
 #include "gamm_comm.h"
 
 #include "hess_comm.h"
-
-// "The global" (yuck!)
-double fd_min_fnorm;
 
 
 /* Table of constant values (used as pointers) */
@@ -188,11 +194,12 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
     OP.nfun = 0;
     OP.ngrd = 0;
 /* 	   ==== */
-    *d__ = dopt(x, d__, drange, hood_etc, &delta, &w[1], iw, MIN_FNORM);
+    *d__ = dopt(x, *d__, drange, &hood_etc[0], &delta, &w[1], iw, /* min_fnorm = */&hood_etc[1]);
 /* 	   ==== */
-    NS_VAR = filtfd_.wnv;
+    hood_etc[2] = filtfd_.wnv;
     if (OP.nopt >= OP.maxopt) {
-	limsfd_.jlimit = 1; /* 'WARNING : optimization limit reached' */
+	limsfd_.jlimit = 1;
+	warning("fracdf(): optimization iteration limit %d reached", OP.maxopt);
     }
 
     if (gammfd_.igamma != 0 || MinPck.iminpk != 0) {
@@ -224,7 +231,7 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
  optimization with respect to d based on Brent's fmin algorithm */
 
 static
-double dopt(double *x, double *dinit, double *drange,
+double dopt(double *x, double dinit, double *drange,
 	    double *hood, double *delta, double *w, int *iw, double *min_fnorm)
 
 {
@@ -248,9 +255,9 @@ double dopt(double *x, double *dinit, double *drange,
 
     aa = drange[0];
     bb = drange[1];
-    if (*dinit > aa + TOL.d &&
-	*dinit < bb - TOL.d) {
-	vv = *dinit;
+    if (dinit > aa + TOL.d &&
+	dinit < bb - TOL.d) {
+	vv = dinit;
     } else {
 	vv = aa + cc * (bb - aa);
     }
@@ -262,6 +269,10 @@ double dopt(double *x, double *dinit, double *drange,
     OP.nopt = 1;
     fx = pqopt(x, xx, w, iw, min_fnorm);
 /*       ===== */
+#ifdef DEBUG_dopt
+    REprintf("dopt() debugging: dinit = %g ==> xx = %g, fx = pqopt(x[], xx) = %g; min_fnorm = %g\n",
+	     dinit, xx, fx, *min_fnorm);
+#endif
     fv = fx;
     fw = fx;
     tol = fmax2(TOL.d, 0.);
@@ -271,7 +282,9 @@ double dopt(double *x, double *dinit, double *drange,
 L10:
     if (gammfd_.igamma != 0 || MinPck.iminpk != 0) {
 	*hood = machfd_.fltmax;
-	return -1. /* error_indicator (FIXME?) */;
+	warning("** dopt() ERROR:  invalid gamma (%d) or Minpack (%d) codes",
+		gammfd_.igamma, MinPck.iminpk);
+	return -1.;
     }
     hh = (aa + bb) * .5;
     tol1 = eps * (fabs(xx) + 1.) + tol3;
@@ -281,6 +294,11 @@ L10:
 
     *delta = fabs(xx - hh) + (bb - aa) * .5;
     /*     if (abs(xx-hh) .le. (tol2-half*(bb-aa))) goto 100 */
+#ifdef DEBUG_dopt
+    if(OP.nopt > 1)
+	REprintf(" .. DBG dopt() [%d]: uu, pqopt(uu), delta = %15g %15g %15g\n",
+		 OP.nopt, uu, fu, *delta);
+#endif
     if (*delta <= tol2) {
 	goto L_end;
     }
@@ -493,6 +511,7 @@ double pqopt(double *x, double d__, double *w, int *iw, double *min_fnorm)
     if (gammfd_.igamma != 0) {
 	filtfd_.wnv  =  machfd_.fltmax;
 	filtfd_.cllf = -machfd_.fltmax;
+	warning("** pqopt() gamma error (%d)", gammfd_.igamma);
 	return machfd_.fltmax;
     }
     t = (double) Dims.n;
@@ -514,7 +533,8 @@ double pqopt(double *x, double d__, double *w, int *iw, double *min_fnorm)
 	    F77_CALL(dcopy)(&Dims.pq, &c__1, &ic__0,
 			    &w[w_opt.ldiag], &ic__1);
 	}
-	if (OP.nopt < 0) { // not keeping fd_min_fnorm here ...
+	if (OP.nopt < 0) { // (never used ??)
+	    REprintf("pqopt() -- nopt < 0 case --- should never happen.  Please report!");
 	    if (Dims.p != 0) {
 		int n_p = Dims.n - Dims.p;
 		lmder1((U_fp)ajp_, n_p, Dims.p,
@@ -562,7 +582,7 @@ double pqopt(double *x, double d__, double *w, int *iw, double *min_fnorm)
      delpq  = sqrt(ddot( npq, w(lqp), 1, w(lqp), 1))
      pqnorm = sqrt(ddot( npq, w(lpq), 1, w(lpq), 1)) */
 
-	filtfd_.wnv = fd_min_fnorm * fd_min_fnorm / (double) (Dims.nm - 1);
+	filtfd_.wnv = *min_fnorm * *min_fnorm / (double) (Dims.nm - 1);
     }
     u = t * (log(filtfd_.wnv) + 2.8378) + slogvk;
     /* unused: BIC = u + (double) (Dims.p + Dims.q + 1) * log(t); */
@@ -598,7 +618,7 @@ fdfilt(double *x, double d__,
           can be arranged so that phi, pi and vk share the same storage
 
  MM:  Which filtering exactly ????
- --   --> look at ./fdsim.f  which is similar (but simpler)
+ --   --> look at ./fdsim.c  which is similar (but simpler)
           and ../filters.R
 
 **************************************************************************
@@ -610,7 +630,7 @@ fdfilt(double *x, double d__,
     double d__1;
 
     /* Local variables */
-    int j, k, km, mcap, mcap1;
+    int j, k, km, mcap;
     double r__, s, t, u, v, z__, g0;
 
     /* Parameter adjustments */
@@ -623,8 +643,7 @@ fdfilt(double *x, double d__,
     --x;
 
     /* Function Body */
-    mcap = imin2(Dims.m,Dims.n);
-    mcap1 = mcap + 1;
+    mcap = imin2(Dims.m, Dims.n);
 
 /* calculate amk(k), vk(k), and ak(k) for k=1,n (see W522-4 for notation). */
 
@@ -702,7 +721,7 @@ fdfilt(double *x, double d__,
 	u = (double) mcap;
 	t = u * pi[mcap];
 
-	for (k = mcap1; k <= (Dims.n); ++k) {
+	for (k = mcap+1; k <= Dims.n; ++k) {
 	    km = k - mcap;
 	    z__ = 0.;
 	    for (j = 1; j <= mcap; ++j) {
@@ -853,7 +872,7 @@ void ajqp_(double *qp, double *a, double *ajac, int lajac, int op_code, double *
 	++OP.ngrd;
     }
     else { // invalid op_code
-	// FIXME: warning
+	warning("ajqp_(): invalid op_code = %d", op_code);
     }
     return;
 } /* ajqp_ */
