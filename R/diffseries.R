@@ -1,6 +1,6 @@
 #### by Valderio Reisen  -- Dec.2005
 
-## MM:  This is 'not optimal' -- and I may have better in ../filter.R ? <<< FIXME >>>
+## MM:  This is 'not optimal' -- and I may have better in ../filters.R ? <<< FIXME >>>
 diffseries <- function(x, d)
 {
     x <- as.data.frame(x)
