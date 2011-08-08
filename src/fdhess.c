@@ -16,9 +16,6 @@
 /* dsvdc: */
 #include <R_ext/Linpack.h>
 
-#ifndef min
-# define	min(a, b)		((a) > (b) ? (b) : (a))
-#endif
 
 /* called from R : */
 void fdhpq(double *h, int *lh, double *w);
