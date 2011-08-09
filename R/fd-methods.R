@@ -41,12 +41,12 @@ summary.fracdiff <- function(object, symbolic.cor = FALSE, ...)
                 "Std. Error"= se, "z value" = cf / se,
                 "Pr(>|z|)" = 2 * pnorm(-abs(cf / se)))
     object$coef <- cf
-    ## remove those components we have in 'coef' anyway
-    object$d <- object$ar <- object$ma <- object$stderror.dpq <- NULL
     logl <- logLik(object)
     object$df <- attr(logl, "df")
     object$aic <- AIC(logl)
     object$symbolic.cor <- symbolic.cor
+    ## remove those components we have in 'coef' anyway
+    object$d <- object$ar <- object$ma <- object$stderror.dpq <- NULL
     class(object) <- "summary.fracdiff"
     object
 }
