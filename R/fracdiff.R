@@ -161,12 +161,13 @@ fracdiff <- function(x, nar = 0, nma = 0,
     hess[row(hess) > col(hess)] <- hess[row(hess) < col(hess)]
 
     hstat <- fdf[["hood.etc"]]
+    var.WN <- hstat[3]
     structure(list(log.likelihood = hstat[1],
                    n = n,
 		   msg = c(fracdf = fd.msg, fdcov = fdc$msg),
 		   d = fdf$d, ar = fdf$ar, ma = fdf$ma,
 		   covariance.dpq = fdc$covariance.dpq,
-		   fnormMin = hstat[2], wnv = hstat[3],
+		   fnormMin = hstat[2], sigma = sqrt(var.WN),
 		   stderror.dpq	  = if(fdc$se.ok) fdc$stderror.dpq, # else NULL
 		   correlation.dpq= if(fdc$se.ok) fdc$correlation.dpq,
 		   h = fdc$h, d.tol = fdf$dtol, M = M, hessian.dpq = hess,
@@ -204,19 +205,19 @@ fracdiff.var <- function(x, fracdiff.out, h)
        .Machine$double.eps)
     ## Re compute Covariance Matrix:
     fdc <- .C(fdcov,
-               as.double(x),
-               as.double(fracdiff.out$d),
-               h = as.double(h),
-               hd = double(npq1),
-               cov = as.double(fracdiff.out$hessian.dpq),
-               as.integer(npq1),
-               cor = as.double(fracdiff.out$hessian.dpq),
-               as.integer(npq1),
-               se = double(npq1),
-               as.double(c(fracdiff.out$ma,
-                           fracdiff.out$ar,
-                           rep(0, lwork))),
-               info = integer(1))
+              as.double(x),
+              as.double(fracdiff.out$d),
+              h = as.double(h),
+              hd = double(npq1),
+              cov = as.double(fracdiff.out$hessian.dpq),
+              as.integer(npq1),
+              cor = as.double(fracdiff.out$hessian.dpq),
+              as.integer(npq1),
+              se = double(npq1),
+              as.double(c(fracdiff.out$ma,
+                          fracdiff.out$ar,
+                          rep(0, lwork))),
+              info = integer(1))
 ## FIXME: should be *automatically* same messages as inside fracdiff() above!
     fracdiff.out$msg <-
         if(fdc$info) {
