@@ -16,7 +16,7 @@ p0 <- function(...) paste(..., sep="")
     npq <- as.integer(nar + nma)
     npq1 <- npq + 1L # integer, too
     stopifnot(length(di <- dim(hess)) == 2, di == c(npq1, npq1))
-    fdc <- .C("fdcov", ## --> ../src/fdhess.c
+    fdc <- .C(fdcov, ## --> ../src/fdhess.c
 	      x,
 	      d,
 	      h = as.double(if(missing(h)) -1 else h),
@@ -25,8 +25,7 @@ p0 <- function(...) paste(..., sep="")
 	      cor = hess, npq1,
 	      se = double(npq1),
 	      fdf.work,
-	      info = integer(1),
-	      PACKAGE = "fracdiff")[c("h","hd", "cov","cor", "se", "info")]
+	      info = integer(1))[c("h","hd", "cov","cor", "se", "info")]
 
     f.msg <-
 	if(fdc$info) {
@@ -101,7 +100,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
     x <- as.double(x)
 
     ## this also initializes "common blocks" that are used in .C(.) calls :
-    fdf <- .C("fracdf",
+    fdf <- .C(fracdf,
 	      x,
 	      n,
 	      as.integer(M),
@@ -120,8 +119,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
 	      .Machine$double.xmin,
 	      .Machine$double.xmax,
 	      .Machine$double.neg.eps,
-	      .Machine$double.eps,
-	      PACKAGE = "fracdiff")[c("dtol","drange","hood.etc",
+	      .Machine$double.eps)[c("dtol","drange","hood.etc",
 	      "d", "ar", "ma", "w", "lenw", "info")]
 
     fd.msg <-
@@ -144,11 +142,10 @@ fracdiff <- function(x, nar = 0, nma = 0,
     if(nar == 0) fdf$ar <- numeric(0)
     if(nma == 0) fdf$ma <- numeric(0)
 
-    hess <- .C("fdhpq",
+    hess <- .C(fdhpq,
                hess = matrix(double(1), npq1, npq1),
                npq1,
-               fdf$w,
-               PACKAGE = "fracdiff")$hess
+               fdf$w)$hess
 
     ## NOTA BENE: The above  hess[.,.]  is further "transformed",
     ##            well, added to  and inverted  in fdcov :
@@ -195,7 +192,7 @@ fracdiff.var <- function(x, fracdiff.out, h)
                  3 * n + (n + 6) * npq + npq %/% 2 + 1,
                  (3 + 2 * npq1) * npq1 + 1)
     ## Initialize
-    .C("fdcom",
+    .C(fdcom,
        n,
        as.integer(M),
        (p),
@@ -204,10 +201,9 @@ fracdiff.var <- function(x, fracdiff.out, h)
        .Machine$double.xmin,
        .Machine$double.xmax,
        .Machine$double.neg.eps,
-       .Machine$double.eps,
-       PACKAGE = "fracdiff")
+       .Machine$double.eps)
     ## Re compute Covariance Matrix:
-    fdc <- .C("fdcov",
+    fdc <- .C(fdcov,
                as.double(x),
                as.double(fracdiff.out$d),
                h = as.double(h),
@@ -220,8 +216,7 @@ fracdiff.var <- function(x, fracdiff.out, h)
                as.double(c(fracdiff.out$ma,
                            fracdiff.out$ar,
                            rep(0, lwork))),
-               info = integer(1),
-               PACKAGE = "fracdiff")
+               info = integer(1))
 ## FIXME: should be *automatically* same messages as inside fracdiff() above!
     fracdiff.out$msg <-
         if(fdc$info) {
@@ -269,7 +264,7 @@ fracdiff.sim <- function(n, ar = NULL, ma = NULL, d, rand.gen = rnorm,
     if(length(innov) < n+q) stop("'innov' must have length >= n + q")
     y <- c(rand.gen(n.start, ...), innov[1:(n+q)])
     stopifnot(is.double(y), length(y) == n + q + n.start)
-    y <- .C("fdsim",
+    y <- .C(fdsim,
             as.integer(n + n.start),
             (p),
             (q),
@@ -282,7 +277,6 @@ fracdiff.sim <- function(n, ar = NULL, ma = NULL, d, rand.gen = rnorm,
             .Machine$double.xmin,
             .Machine$double.xmax,
             .Machine$double.neg.eps,
-            .Machine$double.eps,
-            PACKAGE = "fracdiff")[["s"]][n.start + 1:n]
+            .Machine$double.eps)[["s"]][n.start + 1:n]
     list(series = y, ar = ar, ma = ma, d = d, mu = mu, n.start = n.start)
 }
