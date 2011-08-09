@@ -1,9 +1,9 @@
 /*-*- mode: C; kept-old-versions: 12;  kept-new-versions: 20; -*-
  *
  * fdcore.f -- translated by f2c (version 20031025).
- * and produced by  f2c-clean,v 1.10 2002/03/28 16:37:27 maechler
+ * and produced by f2c-clean,v 1.10 2002/03/28 16:37:27 maechler
  *
- * and manually pretty edited by Martin Maechler, 2004-09-18
+ * and manually pretty edited by Martin Maechler, 2004-09-18, ff.
  */
 
 #include <Rmath.h>
@@ -113,14 +113,9 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
   written by Chris Fraley
   ----------------------------------------------------------------------------*/
 
-#define MIN_FNORM &hood_etc[1]
-#define NS_VAR     hood_etc[2]
-
     /* Local variables */
     double delta;
-    int lfree, lwfree,
-	verbose = inform[0],
-	w_lqp = w_opt.lqp - 1;// '-1' : so we do *not* need 'w--'
+    int lfree, lwfree, verbose = inform[0], w_lqp;
 
     if (*m <= 0) /* default: */
 	*m = 100;
@@ -129,6 +124,7 @@ void fracdf(double *x, int *n, int *m, int *nar, int *nma,
  *     initialize several of the above common blocks: */
     fdcom(n, m, nar, nma, &c_m99, flmin, flmax, epmin, epmax);
 
+    w_lqp = w_opt.lqp - 1;// '-1' : so we do *not* need 'w--'
     lfree = w_opt.lwa4 + *n - Dims.minpq;
 /*	= 1+ ipvt + 5.5*npq + n - minpq
 	= 2+ 6.5*npq + 3*n - 2*minpq + (n-maxpq)*npq
