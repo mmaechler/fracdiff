@@ -1,0 +1,203 @@
+2011-08-09  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.4-0
+
+	* R/fd-methods.R (summary.fracdiff): fix bug that gave wrong 'df'
+
+	* R/fracdiff.R (fracdiff): new 'trace' argument;
+	  further: now return estimated sigma (of white noise).
+	* src/fdcore.c: -> verbose argument for iteration monitoring
+
+	* src/init.c: add (dll symbol) "registration", for implied consistency checking
+	* NAMESPACE: ditto
+
+	* src/*.[ch]: a bit of cleanup; no longer using global  fd_min_fnorm
+
+2011-04-29  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/fdcore.c: remove set but unused variables (R 2.14.0 on CRAN now warns).
+
+2009-06-09  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.3-2, released to CRAN
+
+2009-06-08  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/fracdiff.R (fracdiff): save *both* kind of warnings;
+
+	* R/fd-methods.R (print.fracdiff): print them
+
+2009-05-07  Martin Maechler  <maechler@stat.math.ethz.ch>
+src/
+	* NAMESPACE: add namespace, "just for fun"
+
+	* R/fracdiff.R (fracdiff): first steps in *saving*
+	warning messages (from C calls).
+
+2006-09-08  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Enhances): longmemo
+
+2006-09-08  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* released 1.3-1 to CRAN
+
+	* tests/ex.R: update; use summary()
+	* tests/ex.Rout.save:
+
+	* R/fd-methods.R (summary.fracdiff): logLik + AIC (also in print).
+
+2006-09-07  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/fd-methods.R (summary.fracdiff): also add summary(), print()
+		vcov() and logLik() methods for that.
+
+	* R/fracdiff.R (fracdiff.var):
+
+	* DESCRIPTION (Version): 1.3-1
+
+	* R/fracdiff.R (fracdiff): finally add *class* "fracdiff"
+
+	* src/Makevars: add missing FLIBS
+
+	* R/fd-methods.R (confint.fracdiff): new, based on
+		 Spencer Graves' code (R-help, 23 Jul 2006)
+
+	* R/fd-methods.R: (print.fracdiff), etc; new; just a stub
+	* man/fd-methods.Rd: new.
+
+2006-02-06  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.3-0 released to CRAN
+
+2005-12-27  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/diffseries.R (diffseries): new functions from Valderio Reisen
+	* R/Sperio.R  (Sperio):
+
+2005-07-19  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.2-2
+
+	* R/fracdiff.R (fracdiff): use .C(), no longer .Fortran()
+	* src/fdcore.c (fracdf):   dito
+
+	* Calling: update
+
+	* tests/sim-ex.R: if(FALSE) library(*, lib="..MM..")
+
+2005-07-06  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/fdhess.c (hesspq_): move "inline" declarations to beginning
+	of loop: against warning "ISO C89 forbids mixed declarations and code"
+
+2005-07-02  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.2-1
+
+	* src/fdsim.c (fdsim): finally found "off by 1" indexing bug
+	  {introduced only in 1.1-2, two weeks ago} which accessed s[0]
+	  and hence sometimes gave huge garbage initially.
+
+	* tests/sim-ex.R: new: for fracdiff.sim() bug search
+		now also a speed test.
+
+
+2005-06-30  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/fracdiff.R (fracdiff.sim): add 'n.start', 'rand.gen', etc;
+	  similar as in arima.sim.
+	 NOTA BENE: changes the default fracdiff.sim() result as soon as
+	 ---------  p + q >= 1 !
+
+2005-06-29  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.2-0	{never released}
+
+	* src/fdcore.c: using FD_EXTERNAL and including all the
+	``common block'' declarations:
+
+	* src/mach_comm.h: all these are new, and included by
+	* src/maux_comm.h: the *.c files that need them.
+	* src/tols_comm.h:
+	* src/gamm_comm.h:
+	* src/hess_comm.h:
+
+	* README: added several general notes
+
+	* R/fracdiff.R (fracdiff): .C("fdhpq"): 'x' is not neeeded
+
+	* src/fdcore.c (fdcom): move  fdcom() {Common Block Initialization}
+	* src/fdhess.c (fdcom): from fdhess.c to fdcore.c
+
+2005-06-17  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/Makevars : drop the non-portable "-O3 -Wall" flags
+
+
+2005-06-17  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.1-2
+	* DESCRIPTION (Date): 2004-10-02 --- never released ---> now to CRAN
+
+	* tests/ex-Vinod.R: add the example that failed (memory error)
+
+2004-10-02  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/fracdiff.R (fracdiff): new integer work array passed to C.
+
+	* src/fdcore.c (fracdf_): etc: new  iw[] integer work array.
+
+	* README: explain the "cast" bug in pqopt_()'s call to lmder1_()...
+
+	* src/fracdiff.h: new for common declarations
+
+2004-09-18  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* src/fdcore.c: now translated from fortran
+	* src/fdgam.c:	using f2c, my "f2c-clean"
+	* src/fdhess.c: and lots of manual cleaning.
+	* src/fdmin.c:
+	* src/fdsim.c:
+
+2004-04-29  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/fracdiff.R (fracdiff): make 'lenw' compatible to check in
+	src/fdcore.f; {also make "info = 1" message more informative}
+
+	* src/fdcore.f (fracdf): in the case of too small workspace,
+	return the desired size to R.
+
+2004-01-12  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.1-1
+
+	* tests/ex.R: changed version; less precision - portable?
+	* tests/ex.Rout.save:
+
+2004-01-07  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* man/fracdiff.Rd: explain `h' argument and its default;
+	    now list all components in \value{};  also 'dtol':
+	* R/fracdiff.R: dtol < 0 now does work as the docs have always said.
+
+	* src/Makevars (PKG_LIBS): new;	 use BLAS_LIBS.
+
+2003-12-29  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.1-0 -> released to CRAN
+
+	* tests/ex.R: new - first regression tests
+
+	* R/fracdiff.R (fracdiff): found *the* bug!! : use result$w !
+
+	* src/fdmin.f:	declared all; checked with "implicit none"
+	* src/fdhess.f: <ditto>
+	* src/fdcore.f: <ditto>
+
+	* src/fdgam.f (d9lgmc): fixed typo: s/d9gmlc/d9lgmc/
+				checked all with "implicit none"
+
+	* DESCRIPTION (Maintainer): Martin Maechler (was ORPHANED)
+	* DESCRIPTION (License): GPL
+
