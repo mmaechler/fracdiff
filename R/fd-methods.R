@@ -26,6 +26,7 @@ print.fracdiff <- function(x, digits = getOption("digits"), ...)
     cat("\nCoefficients:\n")
     print(coef(x), digits = digits, ...)
     ## print.default(x, digits = digits, ...)too cheap to be true
+    cat("sigma[eps] =", format(x$sigma), "\n")
     cat("a list with components:\n")
     print(names(x), ...)
     invisible(x)
@@ -62,6 +63,7 @@ print.summary.fracdiff <-
                     names(x$msg)[not.ok], x$msg[not.ok]))
     cat("\nCoefficients:\n")
     printCoefmat(x$coef, digits = digits, signif.stars = signif.stars, ...)
+    cat("sigma[eps] =", format(x$sigma), "\n")
     cat("[d.tol = ", formatC(x$d.tol),", M = ", x$M,", h = ",formatC(x$h),
 	## really not much informative: "length.w = ", x$length.w,
 	"]\n", sep='')
