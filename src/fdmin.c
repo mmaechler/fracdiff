@@ -243,7 +243,7 @@ double lmder1(S_fp fcn, int m, int n,
     int i__, j, l, iter, iflag, nprint;
     double par, sum, temp, temp1, temp2,
 	ratio, enorm_n, xnorm, fnorm1, actred, dirder, prered,
-	T_gnorm, delta;
+	T_gnorm, delta = 0.; /* Wall*/
 
     /* Parameter adjustments */
     --wa4;
