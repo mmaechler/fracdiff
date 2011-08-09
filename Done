@@ -15,6 +15,9 @@
 
   ___ DONE, 2004-10-xx (MM) ___
 
+1. Estimation now produces a class with print(), summary(), coef(),
+   logLik() and vcov() methods
+
 1b. fracdiff.sim() improved, now allowing non-Gaussian innovations.
 
 2. Translate to C,
