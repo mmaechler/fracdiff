@@ -1,4 +1,4 @@
-####-*- mode: R; kept-old-versions: 15;  kept-new-versions: 30; -*-
+####-*- mode: R; kept-old-versions: 15;  kept-new-versions: 30; -*--- $Id$
 
 ### Original file:
 ### copyright 1991 Department of Statistics, Univeristy of Washington
@@ -265,6 +265,9 @@ fracdiff.sim <- function(n, ar = NULL, ma = NULL, d, rand.gen = rnorm,
     if(length(innov) < n+q) stop("'innov' must have length >= n + q")
     y <- c(rand.gen(n.start, ...), innov[1:(n+q)])
     stopifnot(is.double(y), length(y) == n + q + n.start)
+    if(d < -1/2 || d > 1/2)
+	stop("'d' must be in [-1/2, 1/2].  Consider using cumsum(.) or diff(.)
+ for additional integration or differentiation")
     y <- .C(fdsim,
             as.integer(n + n.start),
             (p),
