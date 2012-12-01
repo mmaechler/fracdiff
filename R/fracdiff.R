@@ -259,8 +259,9 @@ fracdiff.sim <- function(n, ar = NULL, ma = NULL, d, rand.gen = rnorm,
         n.start <- p + q + ifelse(p > 0, ceiling(6/log(minroots)), 0)
     if(n.start < p + q && !allow.0.nstart)
         stop("burn-in 'n.start' must be as long as 'ar + ma'")
-    if(backComp) force(innov)
-    if(!missing(start.innov) && length(start.innov) < n.start)
+    if(missing(start.innov)) {
+        if(!backComp) force(start.innov)
+    } else if(length(start.innov) < n.start)
         stop(gettextf("'start.innov' is too short: need %d points",
                       n.start), domain = NA)
     if(length(innov) < n+q) stop("'innov' must have length >= n + q")
@@ -269,6 +270,7 @@ fracdiff.sim <- function(n, ar = NULL, ma = NULL, d, rand.gen = rnorm,
     if(d < -1/2 || d > 1/2)
 	stop("'d' must be in [-1/2, 1/2].  Consider using cumsum(.) or diff(.)
  for additional integration or differentiation")
+    ii <- n.start - (if(backComp) 0L else q) + 1:n
     y <- .C(fdsim,
             as.integer(n + n.start),
             (p),
@@ -282,6 +284,6 @@ fracdiff.sim <- function(n, ar = NULL, ma = NULL, d, rand.gen = rnorm,
             .Machine$double.xmin,
             .Machine$double.xmax,
             .Machine$double.neg.eps,
-            .Machine$double.eps)[["s"]][n.start + 1:n]
+            .Machine$double.eps)[["s"]][ii]
     list(series = y, ar = ar, ma = ma, d = d, mu = mu, n.start = n.start)
 }
