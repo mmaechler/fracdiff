@@ -1,4 +1,4 @@
-\name{fracdiff}-- $Id$
+\name{fracdiff}
 \alias{fracdiff}
 \title{ML Estimates for Fractionally-Differenced ARIMA (p,d,q) models}
 \description{
@@ -18,8 +18,8 @@ fracdiff(x, nar = 0, nma = 0,
   \item{x}{time series (numeric vector) for the ARIMA model}
   \item{nar}{number of autoregressive parameters \eqn{p}.}
   \item{nma}{number of moving average parameters \eqn{q}.}
-  \item{ar}{initial autoregressive parameters}
-  \item{ma}{initial moving average parameters}
+  \item{ar}{initial autoregressive parameters.}
+  \item{ma}{initial moving average parameters.}
   \item{dtol}{interval of uncertainty for \eqn{d}.  If \code{dtol} is
     negative or NULL, the fourth root of machine precision will be used.
     \code{dtol} will be altered if necessary by the program.}
@@ -41,6 +41,28 @@ fracdiff(x, nar = 0, nma = 0,
   \item{trace}{optional integer, specifying a trace level.  If positive,
     currently the \dQuote{outer loop} iterations produce one line of
     diagnostic output.}
+}
+\details{
+  The \pkg{fracdiff} package has --- for historical reason, namely,
+  S-plus \code{arima()} compatibility --- used an unusual
+  parametrization for the MA part, see also the \sQuote{Details} section
+  in \code{\link[stats]{arima}} (in standard \R's \pkg{stats} package).
+  The ARMA (i.e., \eqn{d = 0}) model in \code{fracdiff()} and
+  \code{\link{fracdiff.sim}()} is
+
+  \deqn{X_t - a_1X_{t-1} - \cdots - a_pX_{t-p} = e_t - b_1e_{t-1} - \dots - b_qe_{t-q},}{%
+    X[t] - a[1]X[t-1] - \dots - a[p]X[t-p] = e[t] - b[1]e[t-1] - \dots - b[q]e[t-q],}
+
+  where \eqn{e_i}{e[i]} are mean zero i.i.d., for \code{fracdiff()}'s
+  estimation,  \eqn{e_i \sim \mathcal{N}(0,\sigma^2)}{e[i] ~ N(0, s^2)}.
+  This model indeed has the signs of the MA coefficients \eqn{b_j}{b[j]}
+  \emph{inverted}, compared to other parametrizations, including
+  Wikipedia's
+  \url{http://en.wikipedia.org/wiki/Autoregressive_moving-average_model}
+  and the one of \code{\link[stats]{arima}}.
+
+  Note that \code{NA}'s in the initial values for \code{ar} or \code{ma}
+  are replaced by \eqn{0}'s.
 }
 \value{
   an object of S3 \code{\link{class}} \code{"fracdiff"}, which is
