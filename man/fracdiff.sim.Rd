@@ -1,4 +1,4 @@
-\name{fracdiff.sim}
+\name{fracdiff.sim}-- $Id$
 \alias{fracdiff.sim}
 \title{Simulate fractional ARIMA Time Series}
 \description{
