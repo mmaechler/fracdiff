@@ -1,4 +1,4 @@
-\name{fracdiff}
+\name{fracdiff}-- $Id$
 \alias{fracdiff}
 \title{ML Estimates for Fractionally-Differenced ARIMA (p,d,q) models}
 \description{
