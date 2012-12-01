@@ -1,4 +1,4 @@
-\name{diffseries}
+\name{diffseries}-- $Id$
 \alias{diffseries}
 \title{Fractionally Differenciate Data}
 
@@ -19,7 +19,7 @@ diffseries(x, d)
 }
 
 \references{
-  See those in \code{\link{Sperio}}; additionally
+  See those in \code{\link{fdSperio}}; additionally
 
   Reisen, V. A. and Lopes, S. (1999)
   Some simulations and applications
@@ -31,13 +31,13 @@ diffseries(x, d)
   \emph{Studies in Nonlinear Dynamics and Econometrics} \bold{7}(3), 1--16.
 }
 
-\author{Valderio A. Reisen (valderio@cce.ufes.br) and Artur J. Lemonte}
+\author{Valderio A. Reisen \email{valderio@cce.ufes.br} and Artur J. Lemonte}
 
 \seealso{\code{\link{fracdiff.sim}}}
 
 \examples{
 memory.long <- fracdiff.sim(80, d = 0.3)
-mGPH <- GPH(memory.long$series)
+mGPH <- fdGPH(memory.long$series)
 r <- diffseries(memory.long$series, d = mGPH$d)
 #acf(r) # shouldn't show structure - ideally
 }
