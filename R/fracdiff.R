@@ -1,4 +1,3 @@
-####-*- mode: R; kept-old-versions: 15;  kept-new-versions: 30; -*--- $Id$
 
 ### Original file:
 ### copyright 1991 Department of Statistics, Univeristy of Washington
@@ -6,10 +5,8 @@
 ### Patched by Friedrich.Leisch, for use with R, 22.1.1997
 ### fixed & changed by Martin Maechler, since Dec 2003
 
-## no longer, with useDynLib() in ../NAMESPACE
-## no ".First.lib" <- function(lib, pkg) library.dynam("fracdiff", pkg, lib)
-
-p0 <- function(...) paste(..., sep="")
+if(getRversion() < "2.15")
+paste0 <- function(...) paste(..., sep="")
 
 .fdcov <- function(x, d, h, nar, nma, hess, fdf.work)
 {
@@ -42,8 +39,8 @@ p0 <- function(...) paste(..., sep="")
 	} else "ok"
     se.ok <- fdc$info %in% 0:2
     nam <- "d"
-    if(nar) nam <- c(nam, p0("ar", 1:nar))
-    if(nma) nam <- c(nam, p0("ma", 1:nma))
+    if(nar) nam <- c(nam, paste0("ar", 1:nar))
+    if(nma) nam <- c(nam, paste0("ma", 1:nma))
 
     dimnames(fdc$cov) <- dn <- list(nam, nam)
     if(se.ok) dimnames(fdc$cor) <- dn
@@ -231,8 +228,8 @@ fracdiff.var <- function(x, fracdiff.out, h)
         } else "ok"
     se.ok <- fdc$info != 0 || fdc$info < 3 ## << FIXME -- illogical!!
     nam <- "d"
-    if(p) nam <- c(nam, p0("ar", 1:p))
-    if(q) nam <- c(nam, p0("ma", 1:q))
+    if(p) nam <- c(nam, paste0("ar", 1:p))
+    if(q) nam <- c(nam, paste0("ma", 1:q))
     fracdiff.out$h <- fdc$h
     fracdiff.out$covariance.dpq <- array(fdc$cov, c(npq1,npq1), list(nam,nam))
     fracdiff.out$stderror.dpq    <- if(se.ok) fdc$se # else NULL
@@ -246,8 +243,8 @@ fracdiff.var <- function(x, fracdiff.out, h)
 ##      really, 'mu' is nonsense since can be done separately (or via 'innov').
 fracdiff.sim <- function(n, ar = NULL, ma = NULL, d, rand.gen = rnorm,
                          innov = rand.gen(n+q, ...), n.start = NA,
-                         allow.0.nstart = FALSE, # <- for back-compatibility
-                         ..., mu = 0)
+			 backComp = TRUE, allow.0.nstart = FALSE, # <- for back-compatibility
+                         start.innov = rand.gen(n.start, ...), ..., mu = 0)
 {
     p <- length(ar)
     q <- length(ma)
@@ -262,8 +259,12 @@ fracdiff.sim <- function(n, ar = NULL, ma = NULL, d, rand.gen = rnorm,
         n.start <- p + q + ifelse(p > 0, ceiling(6/log(minroots)), 0)
     if(n.start < p + q && !allow.0.nstart)
         stop("burn-in 'n.start' must be as long as 'ar + ma'")
+    if(backComp) force(innov)
+    if(!missing(start.innov) && length(start.innov) < n.start)
+        stop(gettextf("'start.innov' is too short: need %d points",
+                      n.start), domain = NA)
     if(length(innov) < n+q) stop("'innov' must have length >= n + q")
-    y <- c(rand.gen(n.start, ...), innov[1:(n+q)])
+    y <- c(start.innov[seq_len(n.start)], innov[1:(n+q)])
     stopifnot(is.double(y), length(y) == n + q + n.start)
     if(d < -1/2 || d > 1/2)
 	stop("'d' must be in [-1/2, 1/2].  Consider using cumsum(.) or diff(.)
