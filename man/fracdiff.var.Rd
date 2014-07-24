@@ -1,4 +1,4 @@
-\name{fracdiff.var}
+\name{fracdiff.var}-- $Id$
 \alias{fracdiff.var}
 \title{Recompute Covariance Estimate for fracdiff}
 \usage{
@@ -37,5 +37,11 @@ fd.out <- fracdiff(ts.test$ser, nar= 1, nma = 1)
 ## however these (e.g.) differ :
 vcov(fd.out)
 vcov(fd.o2)
+
+## A case, were the default variance is *clearly* way too small:
+set.seed(1); fdc <- fracdiff(X <- fracdiff.sim(n=100,d=0.25)$series)
+fdc
+# Confidence intervals just based on asymp.normal approx. and std.errors:
+confint(fdc) # ridiculously too narrow
 }
 \keyword{ts}
