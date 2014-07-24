@@ -1,63 +1,41 @@
 \name{confint.fracdiff}
 \alias{confint.fracdiff}
-%- Also NEED an '\alias' for EACH other topic documented here.
-\title{ ~~function to do ... ~~ }
+\title{Confidence Intervals for Fracdiff Model Parameters}
 \description{
-  ~~ A concise (1-5 lines) description of what the function does. ~~
+  Computes (Wald) confidence intervals for one or more parameters in a
+  fitted fracdiff model, see \code{\link{fracdiff}}.
 }
 \usage{
-confint.fracdiff(object, parm, level = 0.95, ...)
+\method{confint}{fracdiff}(object, parm, level = 0.95, \dots)
 }
-%- maybe also 'usage' for other objects documented here.
+\section{warning}{
+  As these confidence intervals use the standard errors returned by
+  \code{\link{fracdiff}()}, they may end up being much too narrow.
+}
 \arguments{
-  \item{object}{ ~~Describe \code{object} here~~ }
-  \item{parm}{ ~~Describe \code{parm} here~~ }
-  \item{level}{ ~~Describe \code{level} here~~ }
-  \item{\dots}{ ~~Describe \code{\dots} here~~ }
-}
-\details{
-  ~~ If necessary, more details than the description above ~~
+  \item{object}{an object of class \code{fracdiff}, typically result of
+    \code{\link{fracdiff}(..)}.}
+  \item{parm}{a specification of which parameters are to be given
+    confidence intervals, either a vector of numbers or a vector of
+    names.  If missing, all parameters are considered.}
+  \item{level}{the confidence level required.}
+  \item{\dots}{additional argument(s) for methods.}
 }
 \value{
-  ~Describe the value returned
-  If it is a LIST, use
-  \item{comp1 }{Description of 'comp1'}
-  \item{comp2 }{Description of 'comp2'}
-  ...
+  A matrix (or vector) with columns giving lower and upper confidence
+  limits for each parameter. These will be labelled as (1-level)/2 and
+  1 - (1-level)/2 in \% (by default 2.5\% and 97.5\%).
 }
-\references{ ~put references to the literature/web site here ~ }
-\author{ ~~who you are~~ }
-\note{ ~~further notes~~ 
-
- ~Make other sections like Warning with \section{Warning }{....} ~
+\author{Spencer Graves posted the initial version to R-help.}
+\seealso{the generic \code{\link{confint}}; \code{\link{fracdiff}} model
+  fitting.
 }
-\seealso{ ~~objects to See Also as \code{\link{help}}, ~~~ }
 \examples{
-##---- Should be DIRECTLY executable !! ----
-##-- ==>  Define data, use random,
-##--	or do  help(data=index)  for the standard data sets.
-
-## The function is currently defined as
-function (object, parm, level = 0.95, ...) 
-{
-    p <- length(cf <- coef(object))
-    stopifnot(p >= 1, length(level) == 1, 0 < level, level < 
-        1)
-    se <- object$stderror.dpq
-    pnames <- names(cf)
-    names(se) <- pnames
-    if (missing(parm)) 
-        parm <- 1:p
-    else if (is.character(parm)) 
-        parm <- match(parm, pnames, nomatch = 0)
-    cf <- cf[parm]
-    se <- se[parm]
-    a <- (1 - level)/2
-    a <- c(a, 1 - a)
-    CI <- cf + outer(se, qnorm(a))
-    dimnames(CI)[[2]] <- paste(format(100 * a), "\%")
-    CI
-  }
+set.seed(101)
+ts2 <- fracdiff.sim(5000, ar = .2, ma = -.4, d = .3)
+mFD <- fracdiff( ts2$series, nar = length(ts2$ar), nma = length(ts2$ma))
+coef(mFD)
+confint(mFD)
 }
-\keyword{ ~kwd1 }% at least one, from doc/KEYWORDS
-\keyword{ ~kwd2 }% __ONLY ONE__ keyword per line
+\keyword{models}
+
