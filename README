@@ -1,37 +1,22 @@
 fracdiff Maximum likelihood estimation of the parameters of a fractionally
-         differenced ARIMA (p,d,q) model. For long-memory dependence in
+         differenced ARIMA (p,d,q) model. For long-memory dependence in 
          time series. (Haslett and Raftery, Applied Statistics 38, 1989, 1-50).
 
 See the help files for details.
 
-The original S/S-plus package by Chris Fraley, Department of Statistics,
-University of Washington, has been converted for usage with R;
-see README.orig, alsofor copyright.
+This package has been converted from the original S/S-plus package by
+the Department of Statistics, Univeristy of Washington for usage with
+R; see README.orig for copyright and original author.
 
 I've converted all single precision floats to double precision (both
 in the R file and the Fortran sources), as R didn't support single
 precision (in 1999).
 
-Fritz Leisch, TU Wien, Austria
+The code seems to work fine for parameter estimation, but I have not
+figured out how to use the variance estimation. I always get
+covariance matrices with entries around 10^{+-20} or so. If you have 
+used the original version under S, could you send me a working
+example?
 
-----
+Fritz Leisch
 
-The package was _orphaned_ in Summer 2003, and after asking Fritz and Chris
-Fraley, I have become the new maintainer in December 2003.
-I've managed to locate and eradicate the bug leading to wrong hessian,
-covariance and correlation matrix estimates.
-
-Martin Maechler, ETH Zurich, Switzerland
-
-
-TODO / Ideas
-------------
-
-1. Estimation should produce a class with print(), summary(), coef(),
-   logLik() and vcov() methods; maybe also residuals() & fitted(); predict()?
-   ==> Maybe use new function names to keep the old back compatibility
-
-2. Translate to C, then call R's gammafn() and minimizers (Brent is there!)
-
-3. For the hessian / covariance:
-   Think about trying several step-sizes and use stable ("optimal"?) one.
