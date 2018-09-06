@@ -1,5 +1,7 @@
-#### by Valderio Reisen  -- Dec.2005-- $Id$
+#### Fractional differentiation -- the inverse of fractional integration
+#### -------------------------- ----------------------------------------
 
+## by Valderio Reisen  -- Dec.2005--
 ## MM:  This is 'not optimal' -- and I may have better in ../filters.R ? <<< FIXME >>>
 diffseries.0 <- diffseries <- function(x, d)
 {
@@ -47,7 +49,8 @@ diffseries.0 <- diffseries <- function(x, d)
 ## library(fracdiff)
 ## memory.long <- fracdiff.sim(8000, d = 0.3)
 ## mGPH <- fdGPH(memory.long$series)
-# Jensen and Nielsen code:
+## Jensen and Nielsen code:
+## (slightly improved by MM)
 diffseries <- function(x, d) {
     stopifnot((iT <- length(x)) >= 2)
     np2 <- nextn (2* iT - 1, 2)
@@ -55,8 +58,8 @@ diffseries <- function(x, d) {
     b <- c(1, cumprod ((k - d - 1)/ k))
     pad <- rep.int(0, np2-iT)
     dx <- fft(fft(c(b, pad)) *
-              fft(c(x, pad)), inverse =TRUE)/ np2
-    return (Re(dx [1: iT]))
+              fft(c(x, pad)), inverse =TRUE)[1:iT]/ np2
+    Re(dx)
 }
 ## microbenchmark(diffseries(memory.long$series, d = mGPH$d),
 ## diffseries2(memory.long$series, d = mGPH$d))
