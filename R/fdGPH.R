@@ -1,6 +1,7 @@
-#### by Valderio Reisen  -- Dec.2005-- $Id$
+#### by Valderio Reisen  -- Dec.2005--
+#### Tweaks by MM
 
-## MM(FIXME): This is "in parallel"  to Sperio() , see ./Sperio.R
+## MM(FIXME): This is "in parallel"  to fdSperio() , see ./fdSperio.R
 
 fdGPH <- function(x, bandw.exp = 0.5)
 {
@@ -27,8 +28,7 @@ fdGPH <- function(x, bandw.exp = 0.5)
     y.reg <- log(periodogram[pos] / (2*pi))
     x.reg <- 2*log(2*sin(w[pos]/2)) ## = log( (2*sin(..)) ^ 2)
     fit <- lm(y.reg ~ x.reg)
-    d.GPH <- coef(fit)[2]
-    names(d.GPH) <- NULL
+    d.GPH <- coef(fit)[[2]]
     x.r2 <- sum((x.reg - mean(x.reg))^2)
     var.d <- pi^2 / (6*x.r2)
     var.reg <- sum(resid(fit)^2) / ((g - 1) * x.r2)
