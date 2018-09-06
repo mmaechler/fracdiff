@@ -4,6 +4,4 @@ tests/windows.*\.log
 tests/ex-Vinod.*Rout
 src/.*\.c\+
 src/00-.*
-src/ftn-struc
-src/done-.*
 src-c
