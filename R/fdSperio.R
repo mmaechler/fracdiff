@@ -1,4 +1,4 @@
-#### by Valderio Reisen  -- Dec.2005
+#### by Valderio Reisen  -- Dec.2005-- $Id$
 
 ## MM(FIXME): This is "in parallel"  to fdGPH() , see ./fdGPH.R
 
@@ -36,8 +36,7 @@ fdSperio <- function(x, bandw.exp = 0.5, beta = 0.9)
     y.reg <- log(periodogram[pos] / (2*pi))
     x.reg <- 2*log(2*sin(w[pos]/2)) ## = log( (2*sin(..)) ^ 2)
     fit <- lm(y.reg ~ x.reg)
-    d.GPH <- coef(fit)[2]
-    names(d.GPH) <- NULL
+    d.GPH <- coef(fit)[[2]]
     x.r2 <- sum((x.reg - mean(x.reg))^2)
     var.d <- (0.539285*M/n)/ x.r2
     var.reg <- sum(resid(fit)^2) / ((g - 1) * x.r2)
