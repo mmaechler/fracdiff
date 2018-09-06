@@ -9,8 +9,8 @@ the Department of Statistics, Univeristy of Washington for usage with
 R; see README.orig for copyright and original author.
 
 I've converted all single precision floats to double precision (both
-in the R file and the Fortran sources), as R didn't support single
-precision (in 1999).
+in the R file and the Fortran sources), as R doesn't support single
+precision.
 
 The code seems to work fine for parameter estimation, but I have not
 figured out how to use the variance estimation. I always get
