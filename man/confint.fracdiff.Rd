@@ -1,4 +1,4 @@
-\name{confint.fracdiff}
+\name{confint.fracdiff}-- $Id$
 \alias{confint.fracdiff}
 \title{Confidence Intervals for Fracdiff Model Parameters}
 \description{
@@ -8,9 +8,11 @@
 \usage{
 \method{confint}{fracdiff}(object, parm, level = 0.95, \dots)
 }
-\section{warning}{
+\section{Warning}{
   As these confidence intervals use the standard errors returned by
-  \code{\link{fracdiff}()}, they may end up being much too narrow.
+  \code{\link{fracdiff}()} (which are based on finite difference
+  approximations to the Hessian) they may end up being much too narrow,
+  see the example in \code{\link{fracdiff.var}}.
 }
 \arguments{
   \item{object}{an object of class \code{fracdiff}, typically result of
@@ -28,7 +30,8 @@
 }
 \author{Spencer Graves posted the initial version to R-help.}
 \seealso{the generic \code{\link{confint}}; \code{\link{fracdiff}} model
-  fitting.
+  fitting, notably \code{\link{fracdiff.var}()} for re-estimating the
+  variance-covariance matrix on which \code{confint()} builds entirely.
 }
 \examples{
 set.seed(101)
