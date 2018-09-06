@@ -6,7 +6,7 @@ See the help files for details.
 
 The original S/S-plus package by Chris Fraley, Department of Statistics,
 University of Washington, has been converted for usage with R;
-see README.orig, also for copyright.
+see README.orig, alsofor copyright.
 
 I've converted all single precision floats to double precision (both
 in the R file and the Fortran sources), as R didn't support single
