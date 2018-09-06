@@ -3,7 +3,7 @@ useDynLib(fracdiff, .registration=TRUE)
 importFrom("stats",
            AIC, as.ts
          , fft, nextn
-         , lm, lm.fit # FIXME(?) drop using 'lm'
+         , lm.fit
          , coef, logLik, resid
          , na.fail
          , printCoefmat
