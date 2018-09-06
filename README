@@ -42,7 +42,6 @@ TODO / Ideas
   fracdf() -> dopt() -> pqopt()
 	   really should pass a double w[]  PLUS an  int iw[]
 
-  ___ DONE, 2004-10-xx (MM) ___
 
 1. Estimation should produce a class with print(), summary(), coef(),
    logLik() and vcov() methods; maybe also residuals() & fitted(); predict()?
@@ -56,21 +55,10 @@ TODO / Ideas
     maybe call the new function
     arfima.sim() and keep the old one as is.
 
-2. Translate to C,  ___ DONE, 2004-09-18 (MM) ___
-   then call R's gammafn() and minimizers (Brent is there!)
+2. Translate to C, then call R's gammafn() and minimizers (Brent is there!)
 
 3. For the hessian / covariance:
    Think about trying several step-sizes and use stable ("optimal"?) one.
-
-4. Consider the diverse filters, e.g.  (0,d,0) --> (p,d,q)
-   Now started implementing and testing in *R* :
-   --> ./filters.R
-       ~~~~~~~~~~~
-
-5. Jan de Leeuw cannot link things on Mac OSX using "flat namespaces"
-   (because the Common Blocks look like having multiple definitions)
-   --> start cleaning up common blocks in general.  2005-06-29
-   __NOT_YET_FINISHED__
 
 ---------
 
