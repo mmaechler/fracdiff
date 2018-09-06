@@ -1,4 +1,4 @@
-#### Methods for "fracdiff"  objects-- $Id$
+#### Methods for "fracdiff"  objects
 #### -------------------------------
 
 coef.fracdiff <- function(object, ...) unlist(object[c("d", "ar", "ma")])
