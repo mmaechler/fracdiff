@@ -1,8 +1,6 @@
-.*\.zip
-.*-manual
 Statlib
 tests/.*linux
-tests/windows.*
+tests/windows.*\.log
 tests/ex-Vinod.*Rout
 src/.*\.c\+
 src/00-.*
