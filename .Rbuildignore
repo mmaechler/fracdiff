@@ -3,6 +3,7 @@ Archive
 .*\.mail
 .*-manual
 simul-compare.*
+Statlib
 tests/.*linux
 tests/windows.*
 tests/ex-Vinod.*Rout
