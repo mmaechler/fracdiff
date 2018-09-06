@@ -1,4 +1,14 @@
-useDynLib(fracdiff)
+useDynLib(fracdiff, .registration=TRUE)
+
+importFrom("stats",
+           AIC, as.ts
+         , fft, nextn
+         , lm, lm.fit # FIXME(?) drop using 'lm'
+         , coef, logLik, resid
+         , na.fail
+         , printCoefmat
+         , pnorm, qnorm, rnorm
+         , symnum)
 
 export("fracdiff", "fracdiff.sim", "fracdiff.var",
        "diffseries",
