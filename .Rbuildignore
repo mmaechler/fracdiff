@@ -1,8 +1,5 @@
-Archive
 .*\.zip
-.*\.mail
 .*-manual
-simul-compare.*
 Statlib
 tests/.*linux
 tests/windows.*
