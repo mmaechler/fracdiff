@@ -31,14 +31,6 @@ TODO / Ideas
    logLik() and vcov() methods; maybe also residuals() & fitted(); predict()?
    ==> Maybe use new function names to keep the old back compatibility
 
-1a. In any case, we want $residuals (as "arima"): ``the fitted innovations''
-
-1b. fracdiff.sim() could be improved;
-    think about making it an *generalization* of  arima.sim,
-    particularly the part allowing non-Gaussian things.
-    maybe call the new function
-    arfima.sim() and keep the old one as is.
-
 2. Translate to C, then call R's gammafn() and minimizers (Brent is there!)
 
 3. For the hessian / covariance:
