@@ -1,4 +1,4 @@
-\name{fracdiff-methods}
+\name{fracdiff-methods}-- $Id$
 \alias{coef.fracdiff}
 \alias{logLik.fracdiff}
 \alias{print.fracdiff}
@@ -8,9 +8,11 @@
 \alias{summary.fracdiff}
 \alias{print.summary.fracdiff}
 %
-\title{Methods for "fracdiff" objects}
+\title{Many Methods for "fracdiff" Objects}
 \description{
-  Many \dQuote{accessor} methods for \code{\link{fracdiff}} objects.
+  Many \dQuote{accessor} methods for \code{\link{fracdiff}} objects,
+  notably \code{\link{summary}}, \code{\link{coef}}, \code{\link{vcov}}, and
+  \code{\link{logLik}}; further \code{\link{print}()} methods were needed.
 }
 \usage{
 \method{coef}{fracdiff}(object, \dots)
@@ -20,7 +22,6 @@
 \method{print}{summary.fracdiff}(x, digits = max(3, getOption("digits") - 3),
         correlation = FALSE, symbolic.cor = x$symbolic.cor,
         signif.stars = getOption("show.signif.stars"), \dots)
-
 % \method{fitted}{fracdiff}(object, \dots)
 % \method{residuals}{fracdiff}(object, \dots)
 \method{vcov}{fracdiff}(object, \dots)
@@ -47,7 +48,7 @@
 %   ...
 % }
 \author{Martin Maechler}
-\seealso{\code{\link{fracdiff}} for build \code{"fracdiff"} objects,
+\seealso{\code{\link{fracdiff}} to get \code{"fracdiff"} objects,
   \code{\link{confint.fracdiff}} for the \code{\link{confint}} method;
   further, \code{\link{fracdiff.var}}.
 }
@@ -56,11 +57,11 @@ set.seed(7)
 ts4 <- fracdiff.sim(10000, ar = c(0.6, -.05, -0.2), ma = -0.4, d = 0.2)
 modFD <- fracdiff( ts4$series, nar = length(ts4$ar), nma = length(ts4$ma))
 ## -> warning (singular Hessian) %% FIXME ???
-coef(modFD)
+coef(modFD) # the estimated parameters
 vcov(modFD)
 smFD <- summary(modFD)
 smFD
-
+coef(smFD) # gives the whole table
 AIC(modFD) # AIC works because of the logLik() method
 }
 \keyword{print}
