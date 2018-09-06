@@ -1,22 +1,31 @@
 fracdiff Maximum likelihood estimation of the parameters of a fractionally
-         differenced ARIMA (p,d,q) model. For long-memory dependence in 
+         differenced ARIMA (p,d,q) model. For long-memory dependence in
          time series. (Haslett and Raftery, Applied Statistics 38, 1989, 1-50).
 
 See the help files for details.
 
-This package has been converted from the original S/S-plus package by
-the Department of Statistics, Univeristy of Washington for usage with
-R; see README.orig for copyright and original author.
+The original S/S-plus package by Chris Fraley, Department of Statistics,
+University of Washington, has been converted for usage with R;
+see README.orig, also for copyright.
 
 I've converted all single precision floats to double precision (both
-in the R file and the Fortran sources), as R doesn't support single
-precision.
+in the R file and the Fortran sources), as R didn't support single
+precision (in 1999).
 
-The code seems to work fine for parameter estimation, but I have not
-figured out how to use the variance estimation. I always get
-covariance matrices with entries around 10^{+-20} or so. If you have 
-used the original version under S, could you send me a working
-example?
+Fritz Leisch, TU Wien, Austria
 
-Fritz Leisch
+------------
 
+The package was _orphaned_ in Summer 2003, and after asking Fritz and Chris
+Fraley, I have become the new maintainer in December 2003.
+I've managed to locate and eradicate the bug leading to wrong hessian,
+covariance and correlation matrix estimates.
+
+Martin Maechler, ETH Zurich, Switzerland
+
+------
+
+See the files ./TODO   and ./Done and ./ChangeLog  on TODOs and ideas
+
+See the file ./Calling  (and then src/ftn-struc) about code organization
+	     ~~~~~~~~~
