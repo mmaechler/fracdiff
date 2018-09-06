@@ -1,0 +1,17 @@
+Archive
+.*,v
+.*\.zip
+.*\.rar
+.*\.tgz
+.*\.mail
+.*-manual
+codes_for_.*
+simul-compare.*
+tests/.*linux
+tests/windows.*
+tests/ex-Vinod.*Rout
+src/.*\.c\+
+src/00-.*
+src/ftn-struc
+src/done-.*
+src-c
