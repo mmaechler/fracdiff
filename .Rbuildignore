@@ -1,10 +1,7 @@
 Archive
 .*\.zip
-.*\.rar
-.*\.tgz
 .*\.mail
 .*-manual
-codes_for_.*
 simul-compare.*
 tests/.*linux
 tests/windows.*
