@@ -14,7 +14,7 @@ precision (in 1999).
 
 Fritz Leisch, TU Wien, Austria
 
-------------
+----
 
 The package was _orphaned_ in Summer 2003, and after asking Fritz and Chris
 Fraley, I have become the new maintainer in December 2003.
@@ -35,8 +35,3 @@ TODO / Ideas
 
 3. For the hessian / covariance:
    Think about trying several step-sizes and use stable ("optimal"?) one.
-
----------
-
-See the file ./Calling  (and then src/ftn-struc) about code organization
-	     ~~~~~~~~~
