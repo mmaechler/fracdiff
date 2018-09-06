@@ -27,22 +27,6 @@ Martin Maechler, ETH Zurich, Switzerland
 TODO / Ideas
 ------------
 
-0. After F2c'ing, and declaring things, I now get the compiler warnings
-
-  fdcore.c: In function `pqopt_':
-  fdcore.c:561: warning: passing arg 18 of `lmder1_' from incompatible pointer type
-  fdcore.c:573: warning: passing arg 18 of `lmder1_' from incompatible pointer type
-  fdcore.c:583: warning: passing arg 18 of `lmder1_' from incompatible pointer type
-
-  and indeed, the argument passed is   &w[woptfd_1.ipvt]
-  but this is internally treated as  *integer*  '*ipvt'
-
-  ===> reason for occasional seg.faults !?
-
-  fracdf() -> dopt() -> pqopt()
-	   really should pass a double w[]  PLUS an  int iw[]
-
-
 1. Estimation should produce a class with print(), summary(), coef(),
    logLik() and vcov() methods; maybe also residuals() & fitted(); predict()?
    ==> Maybe use new function names to keep the old back compatibility
