@@ -1,4 +1,4 @@
-#### Methods for "fracdiff"  objects
+#### Methods for "fracdiff"  objects-- $Id$
 #### -------------------------------
 
 coef.fracdiff <- function(object, ...) unlist(object[c("d", "ar", "ma")])
@@ -74,7 +74,7 @@ print.summary.fracdiff <-
         if (p > 1) {
             cat("\nCorrelation of Coefficients:\n")
             if (is.logical(symbolic.cor) && symbolic.cor) {
-                print(symnum(correl, abbr.col = NULL))
+		print(symnum(correl, abbr.colnames = NULL))
             }
             else {
                 correl <- format(round(correl, 2), nsmall = 2, digits = digits)
