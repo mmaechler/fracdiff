@@ -1,7 +1,6 @@
 /* fdgam.f -- translated by f2c (version 20031025).
-
+ *
  * and produced by
- * $Id: f2c-clean,v 1.10 2002/03/28 16:37:27 maechler Exp $
  *
  * and manually pretty edited by Martin Maechler, 2004-10-01
 */
