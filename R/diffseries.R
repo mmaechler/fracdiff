@@ -3,7 +3,7 @@
 
 ## by Valderio Reisen  -- Dec.2005--
 ## MM:  This is 'not optimal' -- and I may have better in ../filters.R ? <<< FIXME >>>
-diffseries.0 <- diffseries <- function(x, d)
+diffseries0 <- function(x, d)
 {
     x <- as.data.frame(x)
     names(x) <- "series"
@@ -38,8 +38,15 @@ diffseries.0 <- diffseries <- function(x, d)
 ## Dear Martin,
 
 ## Just a quick note, should it be of interest, that a very fast algorithm
-## for diffseries was recently published:
-## qed.econ.queensu.ca/working_papers/papers/qed_wp_1307.pdf‎
+## for diffseries was recently published (1st version, 2013; 2nd: March 2014):
+## http://qed.econ.queensu.ca/working_papers/papers/qed_wp_1307.pdf‎ (ok, but wget fails!)
+
+## MM: This is now published as
+##   Jensen, Andreas Noack and Nielsen, Morten Ørregaard (2014)
+##   A Fast Fractional Difference Algorithm.
+##   \emph{Journal of Time Series Analysis}, \bold{35}(5), 428--436.
+##   \url{https://ssrn.com/abstract=2487580} or \url{http://dx.doi.org/10.1111/jtsa.12074}, i.e.,
+##   \doi{10.1111/jtsa.12074}
 
 ## Page 6 contains the R code and page 7 the benchmark timings.
 
@@ -53,12 +60,13 @@ diffseries.0 <- diffseries <- function(x, d)
 ## (slightly improved by MM)
 diffseries <- function(x, d) {
     stopifnot((iT <- length(x)) >= 2)
-    np2 <- nextn (2* iT - 1, 2)
-    k <- 1:(iT -1)
-    b <- c(1, cumprod ((k - d - 1)/ k))
+    x <- x - mean(x) ## <<-- Missing in J+N(2014)
+    np2 <- nextn(iT+iT - 1L)# changed from J+N: also factors 3 and 5
     pad <- rep.int(0, np2-iT)
-    dx <- fft(fft(c(b, pad)) *
-              fft(c(x, pad)), inverse =TRUE)[1:iT]/ np2
+    k <- seq_len(iT - 1L)
+    b <- c(1, cumprod((k - (d+1))/ k), pad)
+    ## ~= convolve(x, b, type = "filter") :
+    dx <- fft(fft(b) * fft(c(x, pad)), inverse =TRUE)[seq_len(iT)] / np2
     Re(dx)
 }
 ## microbenchmark(diffseries(memory.long$series, d = mGPH$d),
