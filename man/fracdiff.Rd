@@ -34,7 +34,8 @@ fracdiff(x, nar = 0, nma = 0,
 
     This is used to compute a finite difference approximation to the
     Hessian, and hence only influences the cov, cor, and std.error
-    computations; see also \code{\link{fracdiff.var}}.
+    computations; use \code{\link{fracdiff.var}()} to change this
+    \emph{after} the estimation process.
   }
   \item{M}{number of terms in the likelihood approximation (see Haslett
     and Raftery 1989).}
@@ -73,7 +74,8 @@ fracdiff(x, nar = 0, nma = 0,
   \item{ma}{vector of optimal moving average parameters}
   \item{covariance.dpq}{covariance matrix of the parameter estimates
     (order : d, ar, ma).}
-  \item{stderror.dpq}{standard errors of the parameter estimates  c(d, ar, ma).}
+  \item{stderror.dpq}{standard errors of the parameter estimates
+  \code{c(d, ar, ma)}.}
   \item{correlation.dpq}{correlation matrix of the parameter estimates
     (order : d, ar, ma).}
   \item{h}{interval used for numerical derivatives, see \code{h} argument.}
@@ -100,6 +102,10 @@ fracdiff(x, nar = 0, nma = 0,
   minimize white noise variance (uses the MINPACK subroutine \code{lm}DER).
   written by Chris Fraley (March 1991).
 }
+\section{Warning}{
+  The variance-covariance matrix and consequently the standard errors
+  may be quite inaccurate, see the example in \code{\link{fracdiff.var}}.
+}
 \references{
   J. Haslett and A. E. Raftery (1989)
   Space-time Modelling with Long-memory Dependence: Assessing Ireland's
@@ -116,6 +122,8 @@ fracdiff(x, nar = 0, nma = 0,
 \seealso{
   \code{\link{coef.fracdiff}} and other methods for \code{"fracdiff"}
   objects;
+  \code{\link{fracdiff.var}()} for re-estimation of variances or
+  standard errors;
   \code{\link{fracdiff.sim}}
 }
 \examples{

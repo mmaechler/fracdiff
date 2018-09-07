@@ -1,4 +1,4 @@
-\name{fdGPH}-- $Id$
+\name{fdGPH}
 \alias{fdGPH}
 \title{Geweke and Porter-Hudak Estimator for ARFIMA(p,d,q)}
 

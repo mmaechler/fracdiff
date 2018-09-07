@@ -1,4 +1,4 @@
-\name{fracdiff.var}-- $Id$
+\name{fracdiff.var}
 \alias{fracdiff.var}
 \title{Recompute Covariance Estimate for fracdiff}
 \usage{

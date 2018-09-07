@@ -100,6 +100,6 @@ text(Y1[i], Y2.s[i], i, adj = c(0,0)-.1, col=2)
 set.seed(101)
 Y2. <- fracdiff.sim(n = n, ar = AR, ma = - MA, d = 0,
                     n.start = n.st, sd = sd, backComp = FALSE)$series
-stopifnot( all.equal( c(Y1), Y2., tol= 1e-15))
+stopifnot( all.equal( c(Y1), Y2., tolerance= 1e-15))
 }
 \keyword{ts}

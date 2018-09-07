@@ -1,4 +1,4 @@
-\name{confint.fracdiff}-- $Id$
+\name{confint.fracdiff}
 \alias{confint.fracdiff}
 \title{Confidence Intervals for Fracdiff Model Parameters}
 \description{

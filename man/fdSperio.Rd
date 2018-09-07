@@ -1,4 +1,4 @@
-\name{fdSperio}-- $Id$
+\name{fdSperio}
 \alias{fdSperio}
 
 \title{Sperio Estimate for 'd' in ARFIMA(p,d,q)}

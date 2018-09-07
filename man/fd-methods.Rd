@@ -1,4 +1,4 @@
-\name{fracdiff-methods}-- $Id$
+\name{fracdiff-methods}
 \alias{coef.fracdiff}
 \alias{logLik.fracdiff}
 \alias{print.fracdiff}
