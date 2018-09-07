@@ -1,0 +1,185 @@
+
+R version 2.13.1 Patched (2011-08-08 r56671)
+Copyright (C) 2011 The R Foundation for Statistical Computing
+ISBN 3-900051-07-0
+Platform: x86_64-unknown-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ### Very similar to ./ex.R  but using *MORE* precision
+> ###  ===> non-portable but better for consistency checking (Development)
+> library(fracdiff)
+> 
+> .proctime00 <- proc.time()
+> set.seed(107)
+> options(digits = 10)
+> 
+> ## 1)
+> 
+> x1 <-  fracdiff.sim( 5000, ar = .2, ma = -.4, d = .3, n.start=0, allow.0 = TRUE)
+> (fd1 <- fracdiff(x1$series, nar = 1, nma = 1, dtol = 1e-10))
+
+Call:
+  fracdiff(x = x1$series, nar = 1, nma = 1, dtol = 1e-10) 
+
+Coefficients:
+            d            ar            ma 
+ 0.2672118968  0.2782353076 -0.3695102490 
+sigma[eps] = 0.9913837059 
+a list with components:
+ [1] "log.likelihood"  "n"               "msg"             "d"              
+ [5] "ar"              "ma"              "covariance.dpq"  "fnormMin"       
+ [9] "sigma"           "stderror.dpq"    "correlation.dpq" "h"              
+[13] "d.tol"           "M"               "hessian.dpq"     "length.w"       
+[17] "call"           
+> vcov(fd1)
+                   d              ar1              ma1
+d    0.0005966058259 -0.0008052214705 -0.0001897082342
+ar1 -0.0008052214705  0.0016121895340  0.0006639886761
+ma1 -0.0001897082342  0.0006639886761  0.0005484878015
+> logLik(fd1)
+'log Lik.' -7051.502651 (df=4)
+> 
+> fdCOVcomp <-
++     c("h", "covariance.dpq", "stderror.dpq", "correlation.dpq", "hessian.dpq")
+> fd1. <- fracdiff.var(x1$series, fd1, h = fd1$h / 8)
+> fd1.[fdCOVcomp]
+$h
+[1] 9.288773777e-06
+
+$covariance.dpq
+                   d              ar1              ma1
+d    0.0005965839808 -0.0008051919770 -0.0001897012819
+ar1 -0.0008051919770  0.0016121497143  0.0006639792896
+ma1 -0.0001897012819  0.0006639792896  0.0005484855888
+
+$stderror.dpq
+[1] 0.02442506870 0.04015158421 0.02341976919
+
+$correlation.dpq
+              [,1]          [,2]          [,3]
+[1,]  1.0000000000 -0.8210336551 -0.3316285111
+[2,] -0.8210336551  1.0000000000  0.7061049197
+[3,] -0.3316285111  0.7061049197  1.0000000000
+
+$hessian.dpq
+               d          ar1          ma1
+d   -8251.630384 -5875.111194  4258.283796
+ar1 -5875.111194 -5420.120386  4529.438165
+ma1  4258.283796  4529.438165 -5833.610409
+
+> fd1u <- fracdiff.var(x1$series, fd1, h = fd1$h * 8)
+> sapply(fd1u[fdCOVcomp], signif, digits= 8)
+$h
+[1] 0.00059448152
+
+$covariance.dpq
+                 d            ar1            ma1
+d    0.00059660783 -0.00080522480 -0.00018970926
+ar1 -0.00080522480  0.00161219490  0.00066399026
+ma1 -0.00018970926  0.00066399026  0.00054848825
+
+$stderror.dpq
+[1] 0.024425557 0.040152147 0.023419826
+
+$correlation.dpq
+            [,1]        [,2]        [,3]
+[1,]  1.00000000 -0.82103922 -0.33163503
+[2,] -0.82103922  1.00000000  0.70610498
+[3,] -0.33163503  0.70610498  1.00000000
+
+$hessian.dpq
+             d        ar1        ma1
+d   -8251.5702 -5875.1140  4258.2847
+ar1 -5875.1140 -5420.1204  4529.4382
+ma1  4258.2847  4529.4382 -5833.6104
+
+> 
+> ## 2)
+> 
+> x2 <-  fracdiff.sim( 2048, ar = .8, ma = -.4, d = .3, n.start=0, allow.0 = TRUE)# -> NA's and problems
+> fd2 <- fracdiff(x2$series, nar = length(x2$ar), nma = length(x2$ma))
+> summary(fd2)
+
+Call:
+  fracdiff(x = x2$series, nar = length(x2$ar), nma = length(x2$ma)) 
+
+Coefficients:
+      Estimate  Std. Error   z value   Pr(>|z|)    
+d   0.33741729  0.02045204  16.49798 < 2.22e-16 ***
+ar  0.77096644  0.04138631  18.62854 < 2.22e-16 ***
+ma -0.38104778  0.01603964 -23.75663 < 2.22e-16 ***
+---
+Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1 
+sigma[eps] = 1.008768342 
+[d.tol = 0.0001221, M = 100, h = 3.082e-05]
+Log likelihood: -2924.262 ==> AIC = 5856.524183 [4 deg.freedom]
+> 
+> (fd2. <- fracdiff.var(x2$series, fd2, h = fd2$h / 8))[fdCOVcomp]
+$h
+[1] 3.85283057e-06
+
+$covariance.dpq
+                   d              ar1              ma1
+d    2.976947874e-06 -5.037744161e-06 -4.806127328e-07
+ar1 -5.037744161e-06  5.235002972e-04  1.558292850e-04
+ma1 -4.806127328e-07  1.558292850e-04  2.464452848e-04
+
+$stderror.dpq
+[1] 0.001725383399 0.022880128872 0.015698575884
+
+$correlation.dpq
+               [,1]          [,2]           [,3]
+[1,]  1.00000000000 -0.1276121503 -0.01774391305
+[2,] -0.12761215034  1.0000000000  0.43384076287
+[3,] -0.01774391305  0.4338407629  1.00000000000
+
+$hessian.dpq
+                 d          ar1          ma1
+d   -342081.635127 -3810.550345  1742.319991
+ar1   -3810.550345 -2395.564007  1507.302636
+ma1    1742.319991  1507.302636 -5007.377244
+
+> (fd2u <- fracdiff.var(x2$series, fd2, h = fd2$h * 8))[fdCOVcomp]
+$h
+[1] 0.0002465811564
+
+$covariance.dpq
+                   d              ar1             ma1
+d   -3.545343344e-04  5.999613405e-04 5.723775582e-05
+ar1  5.999613405e-04 -5.003104484e-04 5.815527618e-05
+ma1  5.723775582e-05  5.815527618e-05 2.371269493e-04
+
+$stderror.dpq
+[1] 0.00000000000 0.00000000000 0.01539892689
+
+$correlation.dpq
+     [,1] [,2] [,3]
+[1,]    0    0    0
+[2,]    0    0    0
+[3,]    0    0    0
+
+$hessian.dpq
+               d          ar1          ma1
+d   -3346.521619 -3810.551029  1742.320036
+ar1 -3810.551029 -2395.564007  1507.302636
+ma1  1742.320036  1507.302636 -5007.377244
+
+Warning message:
+In fracdiff.var(x2$series, fd2, h = fd2$h * 8) :
+  unable to compute correlation matrix
+> 
+> ## Last Line:
+> cat('Time elapsed: ', proc.time() - .proctime00,'\n')
+Time elapsed:  0.211 0.002 0.213 0 0 
+> 
