@@ -1,3 +1,8 @@
+2018-09-10  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* R/diffseries.R (diffseries): Finally found bug in the fft() based
+	version {"forgotten" centering} and fixed it.
+
 2018-09-06  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 1.5-0 (for new release with proper Imports)

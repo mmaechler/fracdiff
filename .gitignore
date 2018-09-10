@@ -1,3 +1,8 @@
 Archive/
-/tests/*.save_*
-/tests/*.Rout_*
+codes_for_fracdiff/
+src-c/
+src/00-multiple-symbols
+src/done-f2c
+tests/*.save_*
+tests/*.Rout_*
+tests/o-linux.Rout*-1

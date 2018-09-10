@@ -1,7 +1,7 @@
 Package: fracdiff
 Version: 1.5-0
 VersionNote: Released 1.4-2 on 2012-12-01 on CRAN
-Date: 2018-09-06
+Date: 2018-09-10
 Title: Fractionally Differenced ARIMA aka ARFIMA(P,d,q) Models
 Author: S original by Chris Fraley, U.Washington, Seattle.
    R port by Fritz Leisch at TU Wien; since 2003-12: Martin Maechler;
