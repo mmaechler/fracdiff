@@ -40,13 +40,7 @@ diffseries0 <- function(x, d)
 ## Just a quick note, should it be of interest, that a very fast algorithm
 ## for diffseries was recently published (1st version, 2013; 2nd: March 2014):
 ## http://qed.econ.queensu.ca/working_papers/papers/qed_wp_1307.pdf‎ (ok, but wget fails!)
-
-## MM: This is now published as
-##   Jensen, Andreas Noack and Nielsen, Morten Ørregaard (2014)
-##   A Fast Fractional Difference Algorithm.
-##   \emph{Journal of Time Series Analysis}, \bold{35}(5), 428--436.
-##   \url{https://ssrn.com/abstract=2487580} or \url{http://dx.doi.org/10.1111/jtsa.12074}, i.e.,
-##   \doi{10.1111/jtsa.12074}
+## (MM: This is now published  ===> see ../man/diffseries.Rd)
 
 ## Page 6 contains the R code and page 7 the benchmark timings.
 
