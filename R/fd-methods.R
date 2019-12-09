@@ -5,8 +5,11 @@ coef.fracdiff <- function(object, ...) unlist(object[c("d", "ar", "ma")])
 
 vcov.fracdiff      <- function(object, ...) object$covariance.dpq
 
-residuals.fracdiff <- function(object, ...) .NotYetImplemented()
-fitted.fracdiff    <- function(object, ...) .NotYetImplemented()
+## Lines added by RJH. 9 Dec 2019
+residuals.fracdiff <- function(object, ...) object$residuals
+
+fitted.fracdiff    <- function(object, ...) object$fitted
+## End of RJH addition
 
 logLik.fracdiff <- function(object, ...)
 {
@@ -40,7 +43,7 @@ summary.fracdiff <- function(object, symbolic.cor = FALSE, ...)
     cf <- cbind("Estimate" = cf,
                 "Std. Error"= se, "z value" = cf / se,
                 "Pr(>|z|)" = 2 * pnorm(-abs(cf / se)))
-    object$coef <- cf
+    object$coefficients <- cf # 'long name' such that coef(.) works
     logl <- logLik(object)
     object$df <- attr(logl, "df")
     object$aic <- AIC(logl)

@@ -1,15 +1,25 @@
 Package: fracdiff
 Version: 1.5-0
 VersionNote: Released 1.4-2 on 2012-12-01 on CRAN
-Date: 2018-09-10
+Date: 2019-12-09
 Title: Fractionally Differenced ARIMA aka ARFIMA(P,d,q) Models
-Author: S original by Chris Fraley, U.Washington, Seattle.
-   R port by Fritz Leisch at TU Wien; since 2003-12: Martin Maechler;
-   fdGPH(), fdSperio(), etc by Valderio Reisen and Artur Lemonte.
-Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
+Authors@R: c(person("Martin","Maechler", role=c("aut","cre"), email="maechler@stat.math.ethz.ch",
+	   				 comment = c(ORCID = "0000-0002-8685-9910"))
+ , person("Chris", "Fraley", role=c("ctb","cph"), comment = "S original; Fortran code")
+ , person("Friedrich", "Leisch", role = "ctb",
+                            comment = c("R port", ORCID = "0000-0001-7278-1983"))
+ , person("Valderio", "Reisen", role="ctb", comment = "fdGPH() & fdSperio()")
+ , person("Artur",  "Lemonte",  role="ctb", comment = "fdGPH() & fdSperio()")
+ , person("Rob", "Hyndman", email="Rob.Hyndman@monash.edu", role="ctb",
+     	                    comment = c("residuals() & fitted()", ORCID = "0000-0002-2140-5352"))
+ )
 Description: Maximum likelihood estimation of the parameters of a fractionally
-   differenced ARIMA(p,d,q) model (Haslett and Raftery, Appl.Statistics, 1989).
+   differenced ARIMA(p,d,q) model (Haslett and Raftery, Appl.Statistics, 1989);
+   including inference and basic methods.  Some alternative algorithms to estimate "H".
 Imports: stats
-Suggests: longmemo, urca
+Suggests: longmemo, forecast, urca
 License: GPL (>= 2)
+URL: https://github.com/mmaechler/fracdiff
+BugReports: https://github.com/mmaechler/fracdiff/issues
 Encoding: UTF-8
+NeedsCompilation: yes

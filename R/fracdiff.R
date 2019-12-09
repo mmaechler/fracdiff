@@ -94,6 +94,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
     if(is.null(dtol))
         dtol <- .Machine$double.eps^0.25 # ~ 1.22e-4
     ## if dtol < 0: the fortran code will choose defaults
+    tspx <- tsp(x) # Added by RJH. 9 Dec 2019
     x <- as.double(x)
 
     ## this also initializes "common blocks" that are used in .C(.) calls :
@@ -159,8 +160,16 @@ fracdiff <- function(x, nar = 0, nma = 0,
 
     hstat <- fdf[["hood.etc"]]
     var.WN <- hstat[3]
+
+    ## Following lines added by RJH. 9 Dec 2019
+    diffx <- diffseries(x, d = fdf$d)
+    armafit <- arima(diffx, order = c(length(fdf$ar), 0L, length(fdf$ma)),
+                     include.mean = FALSE, fixed = c(fdf$ar, -fdf$ma))
+    res <- armafit$residuals
+    tsp(res) <- tspx
+
     structure(list(log.likelihood = hstat[1],
-                   n = n,
+		   n = n,
 		   msg = c(fracdf = fd.msg, fdcov = fdc$msg),
 		   d = fdf$d, ar = fdf$ar, ma = fdf$ma,
 		   covariance.dpq = fdc$covariance.dpq,
@@ -168,7 +177,9 @@ fracdiff <- function(x, nar = 0, nma = 0,
 		   stderror.dpq	  = if(fdc$se.ok) fdc$stderror.dpq, # else NULL
 		   correlation.dpq= if(fdc$se.ok) fdc$correlation.dpq,
 		   h = fdc$h, d.tol = fdf$dtol, M = M, hessian.dpq = hess,
-		   length.w = lenw, call = cl),
+		   length.w = lenw,
+		   residuals = res, fitted = x - res, ## by RJH
+		   call = cl),
 	      class = "fracdiff")
 }
 

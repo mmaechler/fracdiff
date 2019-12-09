@@ -22,8 +22,8 @@
 \method{print}{summary.fracdiff}(x, digits = max(3, getOption("digits") - 3),
         correlation = FALSE, symbolic.cor = x$symbolic.cor,
         signif.stars = getOption("show.signif.stars"), \dots)
-% \method{fitted}{fracdiff}(object, \dots)
-% \method{residuals}{fracdiff}(object, \dots)
+\method{fitted}{fracdiff}(object, \dots)
+\method{residuals}{fracdiff}(object, \dots)
 \method{vcov}{fracdiff}(object, \dots)
 }
 \arguments{
@@ -37,9 +37,6 @@
   \item{signif.stars}{logical. If \code{TRUE}, \dQuote{significance stars}
     are printed for each coefficient.}
 }
-% \details{
-%   ~~ If necessary, more details than the description above ~~
-% }
 % \value{
 %   ~Describe the value returned
 %   If it is a LIST, use
@@ -47,7 +44,8 @@
 %   \item{comp2 }{Description of 'comp2'}
 %   ...
 % }
-\author{Martin Maechler}
+\author{Martin Maechler; Rob Hyndman contributed the
+  \code{\link{residuals}()} and \code{\link{fitted}()} methods.}
 \seealso{\code{\link{fracdiff}} to get \code{"fracdiff"} objects,
   \code{\link{confint.fracdiff}} for the \code{\link{confint}} method;
   further, \code{\link{fracdiff.var}}.
@@ -63,6 +61,9 @@ smFD <- summary(modFD)
 smFD
 coef(smFD) # gives the whole table
 AIC(modFD) # AIC works because of the logLik() method
+stopifnot(exprs = {
+
+})
 }
 \keyword{print}
 \keyword{models}

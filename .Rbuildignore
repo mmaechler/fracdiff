@@ -6,7 +6,9 @@ Done
 .*\.tgz
 .*\.mail
 .*-manual
+qed.*\.pdf
 codes_for_.*
+^filters\.R
 simul-compare.*
 tests/.*linux
 tests/windows.*

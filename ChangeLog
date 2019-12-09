@@ -1,3 +1,15 @@
+2019-12-09  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Authors@R): using new format; ready for CRAN
+
+	* R/fd-methods.R (summary.fracdiff): renamed '$ coefficients' such
+	that 'coef()' works.
+
+2019-12-09  Rob Hyndman  <rob.hyndman@monash.edu>
+
+	* R/fracdiff.R, fd-methods.R (fracdiff): provide 'residuals()' and
+	'fitted'()' methods.
+
 2018-09-10  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* R/diffseries.R (diffseries): Finally found bug in the fft() based
