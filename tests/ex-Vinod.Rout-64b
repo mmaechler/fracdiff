@@ -1,8 +1,7 @@
 
-R version 2.13.1 Patched (2011-08-08 r56671)
-Copyright (C) 2011 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
-Platform: x86_64-unknown-linux-gnu (64-bit)
+R Under development (unstable) (2020-01-16 r77667) -- "Unsuffered Consequences"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -74,7 +73,7 @@ a list with components:
  [5] "ar"              "ma"              "covariance.dpq"  "fnormMin"       
  [9] "sigma"           "stderror.dpq"    "correlation.dpq" "h"              
 [13] "d.tol"           "M"               "hessian.dpq"     "length.w"       
-[17] "call"           
+[17] "residuals"       "fitted"          "call"           
 > 
 > ## ...
 > 
@@ -97,3 +96,6 @@ sigma[eps] = 0.185019
 [d.tol = 0.0001221, M = 100, h = 2.078e-07]
 Log likelihood: 18.72 ==> AIC = -33.44708 [2 deg.freedom]
 > 
+> proc.time()
+   user  system elapsed 
+  0.099   0.027   0.163 

@@ -1,8 +1,7 @@
 
-R version 2.13.1 Patched (2011-08-08 r56671)
-Copyright (C) 2011 The R Foundation for Statistical Computing
-ISBN 3-900051-07-0
-Platform: x86_64-unknown-linux-gnu (64-bit)
+R Under development (unstable) (2020-01-16 r77667) -- "Unsuffered Consequences"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
 You are welcome to redistribute it under certain conditions.
@@ -41,7 +40,7 @@ a list with components:
  [5] "ar"              "ma"              "covariance.dpq"  "fnormMin"       
  [9] "sigma"           "stderror.dpq"    "correlation.dpq" "h"              
 [13] "d.tol"           "M"               "hessian.dpq"     "length.w"       
-[17] "call"           
+[17] "residuals"       "fitted"          "call"           
 > vcov(fd1)
                    d              ar1              ma1
 d    0.0005966058259 -0.0008052214705 -0.0001897082342
@@ -181,5 +180,8 @@ In fracdiff.var(x2$series, fd2, h = fd2$h * 8) :
 > 
 > ## Last Line:
 > cat('Time elapsed: ', proc.time() - .proctime00,'\n')
-Time elapsed:  0.211 0.002 0.213 0 0 
+Time elapsed:  0.064 0.002 0.066 0 0 
 > 
+> proc.time()
+   user  system elapsed 
+  0.160   0.024   0.227 

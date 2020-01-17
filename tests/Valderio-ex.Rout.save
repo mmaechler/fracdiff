@@ -1,6 +1,6 @@
 
-R version 3.5.1 Patched (2018-08-31 r75243) -- "Feather Spray"
-Copyright (C) 2018 The R Foundation for Statistical Computing
+R Under development (unstable) (2020-01-16 r77667) -- "Unsuffered Consequences"
+Copyright (C) 2020 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -70,8 +70,9 @@ $sd.reg
 [64] -1.031030 -1.378216 -0.226398  0.183380 -0.022056  0.848218  2.268592
 [71]  0.286371 -1.954859  0.551967 -0.638054 -0.878345  0.681981 -0.196609
 [78] -1.287879 -0.267172 -0.392858
-> all.equal(r0, r., tol = 0) # average rel.error
-[1] "Mean relative difference: 3.52852e-16"
+> r <- all.equal(r0, r., tol = 0, countEQ = TRUE) # average rel.error, seen ~ 3.5e-16
+> if(is.character(r) && as.numeric(sub(".*: ", '', r)) > 4e-15)
++     print(r)
 > stopifnot(all.equal(r0, r., tol = 1e-13))
 > print(acf(r0)) #
 
@@ -84,8 +85,8 @@ Autocorrelations of series 'r0', by lag
 > mtext("(shouldn't show structure - ideally)")
 > 
 > cat("Time used: ", proc.time(),"\n") # for ``statistical reasons''
-Time used:  0.225 0.042 0.32 0.002 0.001 
+Time used:  0.153 0.026 0.233 0.002 0.004 
 > 
 > proc.time()
    user  system elapsed 
-  0.227   0.043   0.320 
+  0.155   0.030   0.233 

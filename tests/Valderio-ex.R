@@ -28,7 +28,9 @@ mGPH <- fdGPH(mem.l3$series)
 r0 <- diffserie0(mem.l3$series, d = mGPH$d)
 r. <- diffseries(mem.l3$series, d = mGPH$d)
 print(r0, digits = 4)
-all.equal(r0, r., tol = 0) # average rel.error
+r <- all.equal(r0, r., tol = 0, countEQ = TRUE) # average rel.error, seen ~ 3.5e-16
+if(is.character(r) && as.numeric(sub(".*: ", '', r)) > 4e-15)
+    print(r)
 stopifnot(all.equal(r0, r., tol = 1e-13))
 print(acf(r0)) #
 mtext("(shouldn't show structure - ideally)")
