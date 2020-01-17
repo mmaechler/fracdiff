@@ -1,0 +1,9 @@
+Author: Martin Maechler [aut, cre] (<https://orcid.org/0000-0002-8685-9910>),
+  Chris Fraley [ctb, cph] (S original; Fortran code),
+  Friedrich Leisch [ctb] (R port,
+    <https://orcid.org/0000-0001-7278-1983>),
+  Valderio Reisen [ctb] (fdGPH() & fdSperio()),
+  Artur Lemonte [ctb] (fdGPH() & fdSperio()),
+  Rob Hyndman [ctb] (residuals() & fitted(),
+    <https://orcid.org/0000-0002-2140-5352>)
+Maintainer: Martin Maechler <maechler@stat.math.ethz.ch>
