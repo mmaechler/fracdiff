@@ -1,5 +1,7 @@
 library(fracdiff)
 
+doExtras <- interactive() # for now
+
 .proctime00 <- proc.time()
 
 set.seed(107)
@@ -84,10 +86,10 @@ ss2S <- list(
                             16.49798,  18.62854,  -23.75663),
                           3, 3, dimnames = dimnames(ss2$coefficients)),
     df = 4, aic = 5856.524, symbolic.cor = FALSE)
-
-## for now, collect data:
-          all.equal(ss2S, ss2, tol = 0) # TRUE (64b F30, gcc)
-stopifnot(all.equal(ss2S, ss2, tol = .001))
+##
+if(doExtras)
+    print(all.equal(ss2S, ss2, tol = 0)) # 0.0001273 (32b Win); TRUE (64b F30, gcc)
+stopifnot(all.equal(ss2S, ss2, tol = 4e-4))
 
 fd2. <- fracdiff.var(x2$series, fd2, h = fd2$h / 2)
 sfd2. <-         sapply(fd2.[fdCOVcomp], signif, digits = 4)
@@ -104,7 +106,8 @@ sfd2S <- ## dput(sapply(fd2.[fdCOVcomp], signif, digits = 5))
                                 -3810.6, -2395.6, 1507.3,
                                  1742.3,  1507.3,-5007.4), 3, dimnames=dns))
 ##
-## if(doExtras()) all.equal(sfd2S, sfd2., tol = 1e-6, countEQ=TRUE) # 8.7655e-5
+if(doExtras)
+    print(all.equal(sfd2S, sfd2., tol = 1e-6, countEQ=TRUE)) # 8.7655e-5
 stopifnot(all.equal(sfd2S, sfd2., tol = 2e-4, countEQ=TRUE))
 
 fd2u <- fracdiff.var(x2$series, fd2, h = fd2$h * 8)#-> warning, unable .. corr...
@@ -120,5 +123,7 @@ sd2uS <- list(  ## dput(sapply(sd2u[fdCOVcomp], signif, digits = 5))
                            -3811, -2396, 1507,
                             1742,  1507,-5007), 3, dimnames=dns))
 ##
-          all.equal(sd2uS, sd2u, tol = 1e-8, countEQ=TRUE) # TRUE (64b F30, gcc)
-stopifnot(all.equal(sd2uS, sd2u, tol = .001, countEQ=TRUE))
+if(doExtras)
+    print(all.equal(sd2uS, sd2u, tol = 1e-8, countEQ=TRUE))# 0.000103 (32b Win); T.(64b F30)
+stopifnot(all.equal(sd2uS, sd2u, tol = 4e-4, countEQ=TRUE))
+
