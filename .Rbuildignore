@@ -12,6 +12,7 @@ codes_for_.*
 ^filters\.R
 simul-compare.*
 tests/.*linux
+tests/.*Rout-[36][24]b
 tests/windows.*
 tests/ex-Vinod.*Rout
 src/.*\.c\+
