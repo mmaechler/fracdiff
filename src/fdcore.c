@@ -28,8 +28,6 @@ double pqopt(double *x, double d__, double *w, int *iw, double *min_fnorm);
 
 
 /* These + ajqp_(..)  are passed to LMDER1() to be optimized: */
-typedef void /* Unknown procedure type */ (*U_fp)();
-
 static void
 ajp_(double *p, double *a, double *ajac, int lajac, int op_code, double *y);
 
@@ -520,7 +518,7 @@ double pqopt(double *x, double d__, double *w, int *iw, double *min_fnorm)
 	    REprintf("pqopt() -- nopt < 0 case --- should never happen.  Please report!");
 	    if (Dims.p != 0) {
 		int n_p = Dims.n - Dims.p;
-		lmder1((U_fp)ajp_, n_p, Dims.p,
+		lmder1((S_fp)ajp_, n_p, Dims.p,
 		       &w[w_opt.lqp + Dims.q], &w[w_opt.la], &w[w_opt.lajac], n_p,
 		       TOL.f, TOL.x, TOL.g, OP.maxfun, &w[w_opt.ldiag],
 		       modelm, factlm, &OP.info, &OP.ifun, &OP.igrd,
@@ -530,7 +528,7 @@ double pqopt(double *x, double d__, double *w, int *iw, double *min_fnorm)
 	    }
 	    if (Dims.q != 0) {
 		int n_q = Dims.n - Dims.q;
-		lmder1((U_fp)ajq_, n_q, Dims.q,
+		lmder1((S_fp)ajq_, n_q, Dims.q,
 		       &w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac], n_q,
 		       TOL.f, TOL.x, TOL.g, OP.maxfun, &w[w_opt.ldiag],
 		       modelm, factlm, &OP.info, &OP.ifun, &OP.igrd,
@@ -540,7 +538,7 @@ double pqopt(double *x, double d__, double *w, int *iw, double *min_fnorm)
 	    }
 	}
 	*min_fnorm =
-	    lmder1((U_fp)ajqp_, Dims.nm, Dims.pq,
+	    lmder1((S_fp)ajqp_, Dims.nm, Dims.pq,
 		   &w[w_opt.lqp], &w[w_opt.la], &w[w_opt.lajac], Dims.nm,
 		   TOL.f, TOL.x, TOL.g, OP.maxfun, &w[w_opt.ldiag],
 		   modelm, factlm, &OP.info, &OP.ifun, &OP.igrd,

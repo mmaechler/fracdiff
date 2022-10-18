@@ -36,7 +36,7 @@ void fdcov(double *x, double *d__, double *hh,
 
 // fdmin.c --------------------------------------
 
-typedef /* Subroutine */ void (*S_fp)();
+typedef /* Subroutine */ void (*S_fp)(double *, double *, double *, int, int, double *);
 
 double lmder1(S_fp fcn, int m, int n,
 	      double *x, double *fvec, double *fjac, int ldfjac,

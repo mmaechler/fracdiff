@@ -1,3 +1,8 @@
+2022-10-18  Martin Maechler  <maechler@lynne>
+
+	* DESCRIPTION (Version): 1.5-2:
+	* src/fracdiff.h, src/fdcore.c: (S_fp) pointer *with* argument list [clang15 warnings].
+
 2020-01-17  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 1.5-1; for CRAN 'Additional issues', fiddling w/
