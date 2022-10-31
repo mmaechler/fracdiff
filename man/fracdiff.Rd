@@ -59,7 +59,7 @@ fracdiff(x, nar = 0, nma = 0,
   This model indeed has the signs of the MA coefficients \eqn{b_j}{b[j]}
   \emph{inverted}, compared to other parametrizations, including
   Wikipedia's
-  \url{http://en.wikipedia.org/wiki/Autoregressive_moving-average_model}
+  \url{https://en.wikipedia.org/wiki/Autoregressive_moving-average_model}
   and the one of \code{\link[stats]{arima}}.
 
   Note that \code{NA}'s in the initial values for \code{ar} or \code{ma}
