@@ -1,7 +1,7 @@
 Package: fracdiff
-Version: 1.5-2
-VersionNote: Released 1.5-0 on 2019-12-09, 1.5-1 on 2020-01-20
-Date: 2022-10-31
+Version: 1.5-3
+VersionNote: Released 1.5-0 on 2019-12-09, 1.5-1 on 2020-01-20, 1.5-2 on 2022-10-31
+Date: 2024-02-01
 Title: Fractionally Differenced ARIMA aka ARFIMA(P,d,q) Models
 Authors@R: c(person("Martin","Maechler", role=c("aut","cre"), email="maechler@stat.math.ethz.ch",
 	   				 comment = c(ORCID = "0000-0002-8685-9910"))

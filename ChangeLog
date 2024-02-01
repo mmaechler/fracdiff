@@ -1,4 +1,4 @@
-2022-10-18  Martin Maechler  <maechler@lynne>
+2022-10-18  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 1.5-2:
 	* src/fracdiff.h, src/fdcore.c: (S_fp) pointer *with* argument list [clang15 warnings].
