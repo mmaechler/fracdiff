@@ -1,7 +1,6 @@
 library(fracdiff)
 
-doExtras <- interactive() # for now
-
+doExtras <- fracdiff:::doExtras()
 .proctime00 <- proc.time()
 
 set.seed(107)
@@ -10,10 +9,11 @@ options(digits = 5)
 ## 1)
 
 x1 <- fracdiff.sim(5000, ar = .2, ma = -.4, d = .3, n.start=0, allow.0 = TRUE)
-(fd1 <- fracdiff(x1$series, nar = 1, nma = 1, dtol = 1e-10))
+summary(fd1 <- fracdiff(x1$series, nar = 1, nma = 1, dtol = 1e-10))
 vcov(fd1)
 logLik(fd1)
-
+stopifnot(all.equal(structure(-7051.5027, df = 4L, nall = 5000L, nobs = 5000L, class = "logLik"),
+                    logLik(fd1)))
 fdCOVcomp <-
     c("h", "covariance.dpq", "stderror.dpq", "correlation.dpq", "hessian.dpq")
 fd1. <- fracdiff.var(x1$series, fd1, h = fd1$h / 2)
@@ -52,7 +52,9 @@ fd1uL <- list(
                            -5875, -5420, 4529,
                             4258,  4529, -5834),
                             3L, 3L, dimnames = dns))
-stopifnot( all.equal(fd1u[fdCOVcomp], fd1uL, tolerance = 2e-4) )
+if(doExtras)
+    print(all.equal(fd1u[fdCOVcomp], fd1uL, tolerance = 0))
+stopifnot(all.equal(fd1u[fdCOVcomp], fd1uL, tolerance = 2e-4) )
 
 ## 2)
 
@@ -107,23 +109,25 @@ sfd2S <- ## dput(sapply(fd2.[fdCOVcomp], signif, digits = 5))
                                  1742.3,  1507.3,-5007.4), 3, dimnames=dns))
 ##
 if(doExtras)
-    print(all.equal(sfd2S, sfd2., tol = 1e-6, countEQ=TRUE)) # 8.7655e-5
+    print(all.equal(sfd2S, sfd2., tol =   0 , countEQ=TRUE)) # 8.7655e-5
 stopifnot(all.equal(sfd2S, sfd2., tol = 2e-4, countEQ=TRUE))
 
 fd2u <- fracdiff.var(x2$series, fd2, h = fd2$h * 8)#-> warning, unable .. corr...
-sd2u <- sapply(fd2u[fdCOVcomp], signif, digits = 4)
+##= no se.ok -->
+fdCOV.0 <- setdiff(fdCOVcomp, c("stderror.dpq", "correlation.dpq"))
+sd2u <- sapply(fd2u[fdCOV.0], signif, digits = 4)
 sd2uS <- list(  ## dput(sapply(sd2u[fdCOVcomp], signif, digits = 5))
     h = 0.0002466,
     covariance.dpq = matrix(c(-0.0003545, 6e-04, 5.724e-05,
                               6e-04, -0.0005003, 5.816e-05,
                               5.724e-05, 5.816e-05, 0.0002371), 3, dimnames=dns),
-    stderror.dpq = c(0, 0, 0.0154),
-    correlation.dpq = matrix(0, 3,3),
+    ## stderror.dpq = c(0, 0, 0.0154),
+    ## correlation.dpq = matrix(0, 3,3),
     hessian.dpq = matrix(c(-3347, -3811, 1742,
                            -3811, -2396, 1507,
                             1742,  1507,-5007), 3, dimnames=dns))
 ##
 if(doExtras)
-    print(all.equal(sd2uS, sd2u, tol = 1e-8, countEQ=TRUE))# 0.000103 (32b Win); T.(64b F30)
+    print(all.equal(sd2uS, sd2u, tol =   0 , countEQ=TRUE))# 0.000103 (32b Win); T.(64b F30)
 stopifnot(all.equal(sd2uS, sd2u, tol = 4e-4, countEQ=TRUE))
 

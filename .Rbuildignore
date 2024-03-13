@@ -2,6 +2,8 @@ Archive
 Calling
 DESCRIPTION_
 Done
+M1mac
+00.*winb
 .*\.zip
 .*\.rar
 .*\.tgz
@@ -11,10 +13,11 @@ qed.*\.pdf
 codes_for_.*
 ^filters\.R
 simul-compare.*
-tests/.*linux
 tests/.*Rout-[36][24]b
-tests/windows.*
+tests/.*Rout.*_
 tests/ex-Vinod.*Rout
+tests/.*linux
+tests/windows.*
 src/.*\.c\+
 src/00-.*
 src/ftn-struc

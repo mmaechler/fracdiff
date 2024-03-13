@@ -19,6 +19,7 @@ logLik.fracdiff <- function(object, ...)
     class(r) <- "logLik"
     r
 }
+## ==> AIC(), BIC() do work; the latter as nobs(logLik(.)) works
 
 print.fracdiff <- function(x, digits = getOption("digits"), ...)
 {

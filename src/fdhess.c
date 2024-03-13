@@ -386,7 +386,7 @@ hesdpq(double *x, double d_, double *hh, double *hd, double *w)
     --w;
 
     /* Function Body */
-    if (*hh <= 0.) {
+    if (*hh <= 0.) { // <==> missing(h) [ = default ] in R's .fdcov()
 	*hh = (fabs(filtfd_.cllf) + 1.) * mauxfd_.epspt5;
     }
     if(*hh > 0.1) *hh = 0.1;

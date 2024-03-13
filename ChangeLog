@@ -1,3 +1,9 @@
+2024-03-13  Martin Maechler  <maechler@stat.math.ethz.ch>
+
+	* DESCRIPTION (Version): 1.5-4:
+	* R/fracdiff.var: finally fix 'FIXME': se.ok
+	* tests/sim*: updates, searching for 'h'  in fracdiff.var(.., h = *)
+
 2022-10-18  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* DESCRIPTION (Version): 1.5-2:

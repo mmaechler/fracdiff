@@ -1,6 +1,6 @@
 library(fracdiff)
 if(FALSE) # manual testing
-library(fracdiff, lib="/u/maechler/R/Pkgs/fracdiff.Rcheck")
+library(fracdiff, lib="/u/maechler/R/Pkgs/fracdiff.Rcheck-64b")
 
 .ptime <- proc.time()
 ## Test if the default  'n.start' is ok, i.e., if the
@@ -12,8 +12,8 @@ set.seed(101) ; ok <- TRUE
 for(i in 1:2000) {
     r <- fracdiff.sim(n, ar = -0.9, ma = NULL, d = 0.3)$series
     if(max(abs(r)) > 10) {
-        cat("OOps : indices ",str(ibig <- which(big <- abs(r) > 10)),
-            "\n are > 10\n")
+        cat("OOps!  Indices",
+            capture.output(str(ibig <- which(big <- abs(r) > 10))), "-- are > 10\n")
         if(any(ibig < 200) && (length(ibig) > 5 || abs(r)[big] > 20)) {
             cat("Some have index < 200 --> BREAK\n")
             ok <- FALSE

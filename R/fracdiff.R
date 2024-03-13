@@ -1,14 +1,15 @@
+### Patched by Friedrich.Leisch, for use with R, 22.1.1997;  then
+###
+### Copyright 2003--2024 Martin Maechler; fixed, changed enhanced ..
 
 ### Original file:
-### copyright 1991 Department of Statistics, Univeristy of Washington
-
-### Patched by Friedrich.Leisch, for use with R, 22.1.1997
-### fixed & changed by Martin Maechler, since Dec 2003
+### copyright 1991 Department of Statistics, University of Washington
 
 if(getRversion() < "2.15")
 paste0 <- function(...) paste(..., sep="")
 
-.fdcov <- function(x, d, h, nar, nma, hess, fdf.work)
+.fdcov <- function(x, d, h, # <- missing by default
+                   nar, nma, hess, fdf.work)
 {
     npq <- as.integer(nar + nma)
     npq1 <- npq + 1L # integer, too
@@ -150,10 +151,9 @@ fracdiff <- function(x, nar = 0, nma = 0,
     ## Cov == (-H)^{-1} == solve(-H)
 
     ## Note that the following can be "redone" using fracdiff.var() :
-
-    fdc <- .fdcov(x, fdf$d, h,
+    fdc <- .fdcov(x, fdf$d, h, # <- missing by default
                   nar=nar, nma=nma, hess=hess, fdf.work = fdf$w)
-
+    ##==> "vcov" = fdc $ covariance.dpq
     dimnames(hess) <- dimnames(fdc$covariance.dpq)
     hess[1, ] <- fdc$hd
     hess[row(hess) > col(hess)] <- hess[row(hess) < col(hess)]
@@ -172,7 +172,7 @@ fracdiff <- function(x, nar = 0, nma = 0,
 		   n = n,
 		   msg = c(fracdf = fd.msg, fdcov = fdc$msg),
 		   d = fdf$d, ar = fdf$ar, ma = fdf$ma,
-		   covariance.dpq = fdc$covariance.dpq,
+		   covariance.dpq = fdc$covariance.dpq, # == vcov
 		   fnormMin = hstat[2], sigma = sqrt(var.WN),
 		   stderror.dpq	  = if(fdc$se.ok) fdc$stderror.dpq, # else NULL
 		   correlation.dpq= if(fdc$se.ok) fdc$correlation.dpq,
@@ -226,8 +226,7 @@ fracdiff.var <- function(x, fracdiff.out, h)
                           fracdiff.out$ar,
                           rep(0, lwork))),
               info = integer(1))
-## FIXME: should be *automatically* same messages as inside fracdiff() above!
-    fracdiff.out$msg <-
+    msg <-
         if(fdc$info) {
             msg <-
                 switch(fdc$info,
@@ -237,10 +236,14 @@ fracdiff.var <- function(x, fracdiff.out, h)
                        stop("error in gamma function"))
             warning(msg)
         } else "ok"
-    se.ok <- fdc$info != 0 || fdc$info < 3 ## << FIXME -- illogical!!
-    nam <- "d"
-    if(p) nam <- c(nam, paste0("ar", 1:p))
-    if(q) nam <- c(nam, paste0("ma", 1:q))
+    se.ok <- fdc$info %in% 0:2
+
+    if("fdcov" %in% names(fracdiff.out$msg)) # fracdiff(): msg = c(fracdf = fd.msg, fdcov = fdc$msg)
+         fracdiff.out$msg[["fdcov"]] <- msg
+    else fracdiff.out$msg <- msg
+    nam <- c("d",
+             if(p) paste0("ar", 1:p),
+             if(q) paste0("ma", 1:q))
     fracdiff.out$h <- fdc$h
     fracdiff.out$covariance.dpq <- array(fdc$cov, c(npq1,npq1), list(nam,nam))
     fracdiff.out$stderror.dpq    <- if(se.ok) fdc$se # else NULL
@@ -297,4 +300,10 @@ fracdiff.sim <- function(n, ar = NULL, ma = NULL, d, rand.gen = rnorm,
             .Machine$double.neg.eps,
             .Machine$double.eps)[["s"]][ii]
     list(series = y, ar = ar, ma = ma, d = d, mu = mu, n.start = n.start)
+}
+
+## Not exported; used for faster checking, e.g., on CRAN
+doExtras <- function() {
+    interactive() || nzchar(Sys.getenv("R_fracdiff_check_extra")) ||
+        identical("true", unname(Sys.getenv("R_PKG_CHECKING_doExtras")))
 }
