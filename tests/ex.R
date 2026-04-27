@@ -53,7 +53,9 @@ fd1uL <- list(
                             4258,  4529, -5834),
                             3L, 3L, dimnames = dns))
 if(doExtras)
+## IGNORE_RDIFF_BEGIN
     print(all.equal(fd1u[fdCOVcomp], fd1uL, tolerance = 0))
+## IGNORE_RDIFF_END
 stopifnot(all.equal(fd1u[fdCOVcomp], fd1uL, tolerance = 2e-4) )
 
 ## 2)
@@ -90,7 +92,9 @@ ss2S <- list(
     df = 4, aic = 5856.524, symbolic.cor = FALSE)
 ##
 if(doExtras)
+## IGNORE_RDIFF_BEGIN
     print(all.equal(ss2S, ss2, tol = 0)) # 0.0001273 (32b Win); TRUE (64b F30, gcc)
+## IGNORE_RDIFF_END
 stopifnot(all.equal(ss2S, ss2, tol = 4e-4))
 
 fd2. <- fracdiff.var(x2$series, fd2, h = fd2$h / 2)
@@ -109,7 +113,9 @@ sfd2S <- ## dput(sapply(fd2.[fdCOVcomp], signif, digits = 5))
                                  1742.3,  1507.3,-5007.4), 3, dimnames=dns))
 ##
 if(doExtras)
+## IGNORE_RDIFF_BEGIN
     print(all.equal(sfd2S, sfd2., tol =   0 , countEQ=TRUE)) # 8.7655e-5
+## IGNORE_RDIFF_END
 stopifnot(all.equal(sfd2S, sfd2., tol = 2e-4, countEQ=TRUE))
 
 fd2u <- fracdiff.var(x2$series, fd2, h = fd2$h * 8)#-> warning, unable .. corr...
@@ -128,6 +134,8 @@ sd2uS <- list(  ## dput(sapply(sd2u[fdCOVcomp], signif, digits = 5))
                             1742,  1507,-5007), 3, dimnames=dns))
 ##
 if(doExtras)
+## IGNORE_RDIFF_BEGIN
     print(all.equal(sd2uS, sd2u, tol =   0 , countEQ=TRUE))# 0.000103 (32b Win); T.(64b F30)
+## IGNORE_RDIFF_END
 stopifnot(all.equal(sd2uS, sd2u, tol = 4e-4, countEQ=TRUE))
 

@@ -1,6 +1,6 @@
 
-R Under development (unstable) (2024-03-12 r86109) -- "Unsuffered Consequences"
-Copyright (C) 2024 The R Foundation for Statistical Computing
+R Under development (unstable) (2026-04-26 r89963) -- "Unsuffered Consequences"
+Copyright (C) 2026 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -89,7 +89,14 @@ ma1 -0.00018971  0.00066399  0.00054849
 +                             4258,  4529, -5834),
 +                             3L, 3L, dimnames = dns))
 > if(doExtras)
++ ## IGNORE_RDIFF_BEGIN
 +     print(all.equal(fd1u[fdCOVcomp], fd1uL, tolerance = 0))
+[1] "Component “h”: Mean relative difference: 3.1083e-05"              
+[2] "Component “covariance.dpq”: Mean relative difference: 4.9722e-05" 
+[3] "Component “stderror.dpq”: Mean relative difference: 7.6861e-05"   
+[4] "Component “correlation.dpq”: Mean relative difference: 3.3588e-05"
+[5] "Component “hessian.dpq”: Mean relative difference: 5.3521e-05"    
+> ## IGNORE_RDIFF_END
 > stopifnot(all.equal(fd1u[fdCOVcomp], fd1uL, tolerance = 2e-4) )
 > 
 > ## 2)
@@ -126,7 +133,10 @@ ma1 -0.00018971  0.00066399  0.00054849
 +     df = 4, aic = 5856.524, symbolic.cor = FALSE)
 > ##
 > if(doExtras)
++ ## IGNORE_RDIFF_BEGIN
 +     print(all.equal(ss2S, ss2, tol = 0)) # 0.0001273 (32b Win); TRUE (64b F30, gcc)
+[1] TRUE
+> ## IGNORE_RDIFF_END
 > stopifnot(all.equal(ss2S, ss2, tol = 4e-4))
 > 
 > fd2. <- fracdiff.var(x2$series, fd2, h = fd2$h / 2)
@@ -145,7 +155,14 @@ ma1 -0.00018971  0.00066399  0.00054849
 +                                  1742.3,  1507.3,-5007.4), 3, dimnames=dns))
 > ##
 > if(doExtras)
++ ## IGNORE_RDIFF_BEGIN
 +     print(all.equal(sfd2S, sfd2., tol =   0 , countEQ=TRUE)) # 8.7655e-5
+[1] "Component “h”: Mean relative difference: 6.4889e-05"              
+[2] "Component “covariance.dpq”: Mean relative difference: 3.1424e-05" 
+[3] "Component “stderror.dpq”: Mean relative difference: 8.7655e-05"   
+[4] "Component “correlation.dpq”: Mean relative difference: 1.0313e-05"
+[5] "Component “hessian.dpq”: Mean relative difference: 1.2901e-05"    
+> ## IGNORE_RDIFF_END
 > stopifnot(all.equal(sfd2S, sfd2., tol = 2e-4, countEQ=TRUE))
 > 
 > fd2u <- fracdiff.var(x2$series, fd2, h = fd2$h * 8)#-> warning, unable .. corr...
@@ -167,7 +184,10 @@ In fracdiff.var(x2$series, fd2, h = fd2$h * 8) :
 +                             1742,  1507,-5007), 3, dimnames=dns))
 > ##
 > if(doExtras)
++ ## IGNORE_RDIFF_BEGIN
 +     print(all.equal(sd2uS, sd2u, tol =   0 , countEQ=TRUE))# 0.000103 (32b Win); T.(64b F30)
+[1] TRUE
+> ## IGNORE_RDIFF_END
 > stopifnot(all.equal(sd2uS, sd2u, tol = 4e-4, countEQ=TRUE))
 > 
 > 

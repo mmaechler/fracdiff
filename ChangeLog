@@ -1,6 +1,8 @@
 2026-04-27  Martin Maechler  <maechler@stat.math.ethz.ch>
 
 	* R/fracdiff.R: use if() instead of ifelse()
+	* tests/ex.R: add 'IGNORE_RDIFF_{BEGIN,END}' when if(doExtras)
+	* tests/ex.Rout.save: update correspondingly
 
 2024-03-13  Martin Maechler  <maechler@stat.math.ethz.ch>
 
