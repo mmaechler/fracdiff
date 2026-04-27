@@ -1,6 +1,6 @@
 ### Patched by Friedrich.Leisch, for use with R, 22.1.1997;  then
 ###
-### Copyright 2003--2024 Martin Maechler; fixed, changed enhanced ..
+### Copyright 2003--2026 Martin Maechler; fixed, changed enhanced ..
 
 ### Original file:
 ### copyright 1991 Department of Statistics, University of Washington
@@ -270,7 +270,7 @@ fracdiff.sim <- function(n, ar = NULL, ma = NULL, d, rand.gen = rnorm,
         }
     }
     if(is.na(n.start))
-        n.start <- p + q + ifelse(p > 0, ceiling(6/log(minroots)), 0)
+        n.start <- p + q + if(p > 0) ceiling(6/log(minroots)) else 0
     if(n.start < p + q && !allow.0.nstart)
         stop("burn-in 'n.start' must be as long as 'ar + ma'")
     if(missing(start.innov)) {
