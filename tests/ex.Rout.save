@@ -91,11 +91,6 @@ ma1 -0.00018971  0.00066399  0.00054849
 > if(doExtras)
 + ## IGNORE_RDIFF_BEGIN
 +     print(all.equal(fd1u[fdCOVcomp], fd1uL, tolerance = 0))
-[1] "Component \"h\": Mean relative difference: 3.1083e-05"              
-[2] "Component \"covariance.dpq\": Mean relative difference: 4.9722e-05" 
-[3] "Component \"stderror.dpq\": Mean relative difference: 7.6861e-05"   
-[4] "Component \"correlation.dpq\": Mean relative difference: 3.3588e-05"
-[5] "Component \"hessian.dpq\": Mean relative difference: 5.3521e-05"    
 > ## IGNORE_RDIFF_END
 > stopifnot(all.equal(fd1u[fdCOVcomp], fd1uL, tolerance = 2e-4) )
 > 
@@ -135,7 +130,6 @@ ma1 -0.00018971  0.00066399  0.00054849
 > if(doExtras)
 + ## IGNORE_RDIFF_BEGIN
 +     print(all.equal(ss2S, ss2, tol = 0)) # 0.0001273 (32b Win); TRUE (64b F30, gcc)
-[1] TRUE
 > ## IGNORE_RDIFF_END
 > stopifnot(all.equal(ss2S, ss2, tol = 4e-4))
 > 
@@ -157,11 +151,6 @@ ma1 -0.00018971  0.00066399  0.00054849
 > if(doExtras)
 + ## IGNORE_RDIFF_BEGIN
 +     print(all.equal(sfd2S, sfd2., tol =   0 , countEQ=TRUE)) # 8.7655e-5
-[1] "Component \"h\": Mean relative difference: 6.4889e-05"              
-[2] "Component \"covariance.dpq\": Mean relative difference: 3.1424e-05" 
-[3] "Component \"stderror.dpq\": Mean relative difference: 8.7655e-05"   
-[4] "Component \"correlation.dpq\": Mean relative difference: 1.0313e-05"
-[5] "Component \"hessian.dpq\": Mean relative difference: 1.2901e-05"    
 > ## IGNORE_RDIFF_END
 > stopifnot(all.equal(sfd2S, sfd2., tol = 2e-4, countEQ=TRUE))
 > 
@@ -186,11 +175,10 @@ In fracdiff.var(x2$series, fd2, h = fd2$h * 8) :
 > if(doExtras)
 + ## IGNORE_RDIFF_BEGIN
 +     print(all.equal(sd2uS, sd2u, tol =   0 , countEQ=TRUE))# 0.000103 (32b Win); T.(64b F30)
-[1] TRUE
 > ## IGNORE_RDIFF_END
 > stopifnot(all.equal(sd2uS, sd2u, tol = 4e-4, countEQ=TRUE))
 > 
 > 
 > proc.time()
    user  system elapsed 
-  0.199   0.120   0.331 
+  0.232   0.098   0.343 
